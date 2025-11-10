@@ -11,6 +11,7 @@ dependencies = [
     "scipy",
     "gwpy",
     "lalsuite>=7.21",
+    "dingo-gw<0.9",
     "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git"
 ]
 requires-python = ">=3.7"
