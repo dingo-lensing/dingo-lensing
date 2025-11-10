@@ -17,7 +17,7 @@ requires-python = ">=3.7"
 authors = [
   {name = "Juno Chan", email = "chun.lung.chan@nbi.ku.dk"},
   {name = "Rico Lo", email = "kalok.lo@nbi.ku.dk"},
-  {name = "Jose María Ezquiaga, email = "jose.ezquiaga@nbi.ku.dk"}
+  {name = "Jose María Ezquiaga", email = "jose.ezquiaga@nbi.ku.dk"}
 ]
 readme = "README.md"
 
