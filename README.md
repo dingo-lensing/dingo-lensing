@@ -19,7 +19,7 @@ To install **Dingo-lensing** from source, first clone the **Dingo-lensing** dire
 ```sh
 git clone git@github.com:dingo-lensing/dingo-lensing.git
 ```
-Note that we use v0.8.7 of dingo before correcting the window factor.
+Note that we use version of dingo before correcting the window factor (<0.9).
 
 Create a conda environment for **Dingo-lensing**:
 ```sh
