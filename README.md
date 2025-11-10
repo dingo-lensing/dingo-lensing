@@ -14,13 +14,10 @@ Main functionalities of **Dingo-lensing**:
 
 
 ## Install Dingo-lensing
-To install **Dingo-lensing** from source, first clone the **Dingo**, **Dingo-lensing** and **modwaveforms** directories:
+To install **Dingo-lensing** from source, first clone the **Dingo-lensing** directories:
 
 ```sh
-git clone --branch v0.8.7 --depth 1 https://github.com/dingo-gw/dingo.git
 git clone git@github.com:dingo-lensing/dingo-lensing.git
-git clone https://github.com/ezquiaga/modwaveforms.git
-
 ```
 Note that we use v0.8.7 of dingo before correcting the window factor.
 
@@ -28,12 +25,6 @@ Create a conda environment for **Dingo-lensing**:
 ```sh
 conda env create dingo-lensing
 conda activate dingo-lensing
-```
-Install **Dingo**:
-```sh
-cd dingo
-pip install .
-cd ..
 ```
 
 Install **Dingo-lensing**:
@@ -43,19 +34,12 @@ pip install .
 cd ..
 ```
 
-Install modwaveforms for lens model 
-```sh
-cd modwaveforms
-pip install .
-```
 
 To allow edible version use:
 ```sh
 pip install -e .
 ```
 for the installation
-
-
 
 ## Reference 
 
