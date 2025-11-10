@@ -1,7 +1,7 @@
 # DINGO-lensing
 
 **Dingo-lensing** is a python program building on top of [**Dingo**](https://github.com/dingo-gw/dingo) to discover lensed gravitational waves (GWs) with simulation-based inference. 
-The lens model is built on top of **modwaveforms** and will allow for other lens model codes soon.
+The lens model is built on top of [**modwaveforms**](https://github.com/ezquiaga/modwaveforms) and will allow for other lens model codes soon.
 
 Main functionalities of **Dingo-lensing**:
 
