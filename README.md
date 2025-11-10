@@ -1,3 +1,53 @@
-# dingo-lensing
+# DINGO-lensing
 
-Discover lensed gravitational waves with simulation-based inference. 
+**Dingo-lensing** is a python program building on top of **Dingo** to discover lensed gravitational waves (GWs) with simulation-based inference. 
+The lens model is built on top of **modwaveforms** and will allow for other lens model codes soon.
+
+Main functionalities of **Dingo-lensing**:
+
+* Generate training dataset with lensed waveform
+* Perform fast and accurate inference of lensed GWs
+* Compute the Gaussian distance away from non-lensing hypothesis
+* Compute lensing Bayes factor with lensed and nonlensed network
+* Background estimation for lensing
+ 
+
+
+## Install Dingo-lensing
+To install **Dingo-lensing** from source, first clone the **Dingo-lensing** and **modwaveforms** directories:
+
+```sh
+git clone git@github.com:dingo-lensing/dingo-lensing.git
+git clone https://github.com/ezquiaga/modwaveforms.git
+
+```
+
+
+Create a conda environment for **Dingo-lensing**:
+```sh
+conda env create dingo-lensing
+conda activate dingo-lensing
+```
+
+Install **Dingo-lensing**:
+```sh
+cd dingo-lensing
+pip install .
+cd ..
+```
+
+Install modwaveforms for lens model 
+```sh
+cd modwaveforms
+pip install .
+```
+
+To allow edible version use:
+```sh
+pip install -e .
+```
+for the installation
+
+
+
+## Reference 
