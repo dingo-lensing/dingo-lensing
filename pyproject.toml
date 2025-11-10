@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dingo_lensing"
+description = ""
+version = "0.0.1"
+dependencies = [
+    "numpy",
+    "scipy",
+    "gwpy",
+    "lalsuite>=7.21",
+    "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git"
+]
+requires-python = ">=3.7"
+authors = [
+  {name = "Juno Chan", email = "chun.lung.chan@nbi.ku.dk"},
+  {name = "Rico Lo", email = "kalok.lo@nbi.ku.dk"},
+  {name = "Jose María Ezquiaga, email = "jose.ezquiaga@nbi.ku.dk"}
+]
+readme = "README.md"
+
+[tool.setuptools]
+include-package-data = true
+packages = ["dingo_lensing"]
+
+[tool.setuptools.package-data]
+#TODO: Ship template ini files here
+dingo_lensing = [
+    ""
+]
+
+[project.scripts]
+dingo_lensing_generate_dataset = "dingo_lensing.generate_dataset:main"
+dingo_lensing_pipe = "dingo_lensing.pipe.main:main"
+dingo_lensing_pipe_generation = "dingo_lensing.pipe.data_generation:main"
+dingo_lensing_pipe_sampling = "dingo_lensing.pipe.sampling:main"
+dingo_lensing_pipe_importance_sampling = "dingo_lensing.pipe.importance_sampling:main"
+dingo_lensing_result = "dingo_lensing.pipe.dingo_result:main"
