@@ -58,3 +58,10 @@ for the installation
 
 
 ## Reference 
+
+## Contact 
+
+For any question please contact
+* [Juno Chan](chun.lung.chan@nbi.ku.dk)
+* [Rico Lo](kalok.lo@nbi.ku.dk)
+* [Jose María Ezquiaga](jose.ezquiaga@nbi.ku.dk)
