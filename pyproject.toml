@@ -7,7 +7,6 @@ name = "dingo_lensing"
 description = ""
 version = "0.0.1"
 dependencies = [
-    "dingo<0.9",
     "numpy",
     "scipy",
     "gwpy",
