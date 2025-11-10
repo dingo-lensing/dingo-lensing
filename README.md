@@ -31,7 +31,6 @@ Install **Dingo-lensing**:
 ```sh
 cd dingo-lensing
 pip install .
-cd ..
 ```
 
 
