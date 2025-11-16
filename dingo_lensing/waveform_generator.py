@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple, Callable
 import numpy as np
 import modwaveforms
 from dingo.gw.waveform_generator import WaveformGenerator
@@ -13,7 +13,24 @@ class LensedWaveformGenerator(WaveformGenerator):
         lensing_delta_t = parameters.pop("lensing_delta_t", None)
         mu_rel = parameters.pop("mu_rel", None)
 
-        polarizations = super().generate_hplus_hcross(parameters, catch_waveform_errors=catch_waveform_errors)
+        self.generate_FD_waveform = lambda parameters_lal, target_function: self.generate_lensed_FD_waveform(
+            parameters_lal,
+            target_function,
+            lensing_delta_t,
+            mu_rel,
+        )
+
+        return super().generate_hplus_hcross(parameters, catch_waveform_errors)
+
+    def generate_lensed_FD_waveform(
+        self,
+        parameters_lal: Tuple,
+        target_function: Callable,
+        lensing_delta_t: float,
+        mu_rel: float,
+    ) -> Dict[str, np.ndarray]:
+
+        FD_polarizations = super().generate_FD_waveform(parameters_lal, target_function)
         amp_factor = modwaveforms.geomoptics.two_images_BBH(
             self.domain.sample_frequencies,
             mu_rel,
@@ -21,12 +38,11 @@ class LensedWaveformGenerator(WaveformGenerator):
             0.5*np.pi,
         )
 
-        polarizations["h_plus"] *= amp_factor
-        polarizations["h_cross"] *= amp_factor
+        FD_polarizations["h_plus"] *= amp_factor
+        FD_polarizations["h_cross"] *= amp_factor
 
-        return polarizations
+        return FD_polarizations
 
-   
     def generate_hplus_hcross_m(
         self, parameters: Dict[str, float]
     ) -> Dict[tuple, Dict[str, np.ndarray]]:
