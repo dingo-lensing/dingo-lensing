@@ -50,8 +50,31 @@ for the installation
     eprint = "2511.07186",
     archivePrefix = "arXiv",
     primaryClass = "gr-qc",
-    month = "11",
-    year = "2025"
+    doi = "10.1103/8cz1-kl6n",
+    journal = "Phys. Rev. D",
+    volume = "113",
+    number = "2",
+    pages = "024041",
+    year = "2026"
+}
+
+The models in this paper is publicly available in [Zenodo](https://zenodo.org/records/19478351). If you use the models, please kindly cite the model:
+
+@misc{chan_2026_19478351,
+  author       = {Chan, Juno Chun Lung and
+                  Magaña Zertuche, Lorena and
+                  Ezquiaga, Jose María and
+                  Lo, Ka Lok and
+                  Vujeva, Luka and
+                  Bowman, Joey},
+  title        = {Identification and characterization of distorted
+                   gravitational waves by lensing using deep learning
+                  },
+  month        = apr,
+  year         = 2026,
+  publisher    = {Zenodo},
+  doi          = {10.1103/8cz1-kl6n},
+  url          = {https://doi.org/10.1103/8cz1-kl6n},
 }
 ```
 as well as the [**DINGO** papers](https://dingo-gw.readthedocs.io/en/latest/#references), including at least:
