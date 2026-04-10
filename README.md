@@ -57,9 +57,9 @@ for the installation
     pages = "024041",
     year = "2026"
 }
-
+```
 The models in this paper is publicly available in [Zenodo](https://zenodo.org/records/19478351). If you use the models, please kindly cite the model:
-
+```
 @misc{chan_2026_19478351,
   author       = {Chan, Juno Chun Lung and
                   Magaña Zertuche, Lorena and
