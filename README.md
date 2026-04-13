@@ -77,7 +77,7 @@ The models in this paper is publicly available in [Zenodo](https://zenodo.org/re
   url          = {https://doi.org/10.1103/8cz1-kl6n},
 }
 ```
-as well as the [**DINGO** papers](https://dingo-gw.readthedocs.io/en/latest/#references), including at least:
+Please also cite the [**DINGO** papers](https://dingo-gw.readthedocs.io/en/latest/#references), including at least:
 ```sh
 @article{Dax:2021tsq,
     author = {Dax, Maximilian and Green, Stephen R. and Gair, Jonathan and Macke, Jakob H. and Buonanno, Alessandra and Sch{\"o}lkopf, Bernhard},
