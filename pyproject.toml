@@ -11,10 +11,11 @@ dependencies = [
     "scipy",
     "gwpy",
     "lalsuite>=7.21",
-    "dingo-gw<0.9",
+    "bilby==2.6.0",
+    "dingo-gw==0.9.0",
     "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git"
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 authors = [
   {name = "Juno Chan", email = "chun.lung.chan@nbi.ku.dk"},
   {name = "Rico Lo", email = "kalok.lo@nbi.ku.dk"},
@@ -35,6 +36,7 @@ dingo_lensing = [
 [project.scripts]
 dingo_lensing_generate_dataset = "dingo_lensing.generate_dataset:main"
 dingo_lensing_pipe = "dingo_lensing.pipe.main:main"
+dingo_batch = "dingo_lensing.pipe.batch:main"
 dingo_lensing_pipe_generation = "dingo_lensing.pipe.data_generation:main"
 dingo_lensing_pipe_sampling = "dingo_lensing.pipe.sampling:main"
 dingo_lensing_pipe_importance_sampling = "dingo_lensing.pipe.importance_sampling:main"
