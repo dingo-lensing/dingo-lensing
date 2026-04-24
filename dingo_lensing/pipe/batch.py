@@ -28,7 +28,8 @@ logger.name = "dingo_batch"
 def main():
     parser = create_parser(top_level=True)
     args, unknown_args = parse_args(get_command_line_arguments(), parser)
-    #breakpoint()
+    if getattr(args, "ini", None) is not None:
+        args.ini = str(Path(args.ini).expanduser().resolve())
 
     importance_sampling_updates, model_args = fill_in_arguments_from_model(args)
     has_lensing = ( "lensing_delta_t" in (model_args['prior_dict']) )or ("mu_rel" in (model_args['prior_dict']))
@@ -47,8 +48,6 @@ def main():
 
         write_complete_config_file(parser, args_i, inputs)
 
-    # TODO: Use two sets of inputs! The first must match the network; the second is
-    #  used in importance sampling.
         inputs.outdir = args.outdir
         if has_lensing:
             generate_dag(inputs, model_args)
