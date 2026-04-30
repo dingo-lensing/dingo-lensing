@@ -55,7 +55,8 @@ class LensedWaveformGenerator(WaveformGenerator):
 
         FD_polarizations = super().generate_FD_waveform(parameters_lal, target_function)
         unlensed_polarizations = None
-        if self.dev_mode:
+        dev_mode = getattr(self, "dev_mode", False)
+        if dev_mode:
             unlensed_polarizations = {
                 key: value.copy() for key, value in FD_polarizations.items()
             }
@@ -69,7 +70,7 @@ class LensedWaveformGenerator(WaveformGenerator):
         FD_polarizations["h_plus"] *= amp_factor
         FD_polarizations["h_cross"] *= amp_factor
 
-        if self.dev_mode and unlensed_polarizations is not None:
+        if dev_mode and unlensed_polarizations is not None:
             self._save_dev_plot(unlensed_polarizations, FD_polarizations)
 
         return FD_polarizations

@@ -1,5 +1,6 @@
 *log
 *__pycache__/
 dingo_lensing.egg-info*
-.codex
+.codex/
 AGENTS.md
+prompts/
