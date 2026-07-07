@@ -7,8 +7,23 @@ domain:
 waveform_generator:
   approximant: IMRPhenomXPHM  # SEOBNRv4PHM
   f_ref: 20.0
+  fdsm_function: two_images_BBH
   # f_start: 15.0  # Optional setting useful for EOB waveforms. Overrides f_min when generating waveforms.
   spin_conversion_phase: 0.0
+  # Other fdsm models and their extra required parameters:
+  # one_image_BBH:
+  #   Delta_phase: bilby.core.prior.Uniform(minimum=0.0, maximum=6.283185307179586)
+  # fold_caustic:
+  #   lensing_delta_t: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
+  #   positive_phase: 1.0
+  # cusp_caustic:
+  #   Delta_t_10: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
+  #   Delta_t_20: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
+  #   mu_rel: bilby.gw.prior.Uniform(minimum=0.0, maximum=1.0)
+  #   positive_phase: 1.0
+  # pointlens:
+  #   ML: bilby.core.prior.Uniform(minimum=1000.0, maximum=3000.0)
+  #   y: bilby.core.prior.Uniform(minimum=0.1, maximum=0.2)
 
 # Dataset only samples over intrinsic parameters. Extrinsic parameters are chosen at train time.
 # vision: 
@@ -30,9 +45,8 @@ intrinsic_prior:
   # Reference values for fixed (extrinsic) parameters. These are needed to generate a waveform.
   luminosity_distance: 100.0  # Mpc
   geocent_time: 0.0  # s
-# FIXME add lensing parameter here:
   lensing_delta_t: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
-  mu_rel: bilby.gw.prior.Uniform(minimum=0., maximum=1.) 
+  mu_rel: bilby.gw.prior.Uniform(minimum=0.0, maximum=1.0)
 
 # Dataset size
 dev_mode: true
