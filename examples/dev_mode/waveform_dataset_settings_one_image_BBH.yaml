@@ -1,0 +1,31 @@
+domain:
+  type: FrequencyDomain
+  f_min: 20.0
+  f_max: 1024.0
+  delta_f: 0.125  # Expressions like 1.0/8.0 would require eval and are not supported
+
+waveform_generator:
+  approximant: IMRPhenomXPHM
+  f_ref: 20.0
+  fdsm_function: one_image_BBH
+  dev_plot_dir: dev_plots
+  spin_conversion_phase: 0.0
+
+intrinsic_prior:
+  mass_1: bilby.core.prior.Constraint(minimum=5.0, maximum=150.0)
+  mass_2: bilby.core.prior.Constraint(minimum=5.0, maximum=150.0)
+  chirp_mass: bilby.gw.prior.UniformInComponentsChirpMass(minimum=10.0, maximum=100.0)
+  mass_ratio: bilby.gw.prior.UniformInComponentsMassRatio(minimum=0.125, maximum=1.0)
+  phase: default
+  a_1: bilby.core.prior.Uniform(minimum=0.0, maximum=0.99)
+  a_2: bilby.core.prior.Uniform(minimum=0.0, maximum=0.99)
+  tilt_1: default
+  tilt_2: default
+  phi_12: default
+  phi_jl: default
+  theta_jn: default
+  luminosity_distance: 100.0
+  geocent_time: 0.0
+
+dev_mode: true
+num_samples: 3

@@ -15,6 +15,26 @@ except ImportError:  # pragma: no cover
     plt = None
 
 
+def configure_dev_plot_style() -> None:
+    if plt is None:
+        return
+
+    plt.rcParams.update(
+        {
+            "font.size": 14,
+            "axes.labelsize": 16,
+            "axes.titlesize": 16,
+            "legend.fontsize": 13,
+            "xtick.labelsize": 14,
+            "ytick.labelsize": 14,
+            "figure.dpi": 120,
+            "savefig.dpi": 300,
+            "font.family": "serif",
+            "mathtext.fontset": "cm",
+        }
+    )
+
+
 def normalize_dev_mode_settings(settings: Dict, settings_file: str | None = None) -> Dict:
     settings = dict(settings)
     waveform_generator_settings = dict(settings.get("waveform_generator", {}))
@@ -31,9 +51,9 @@ def normalize_dev_mode_settings(settings: Dict, settings_file: str | None = None
     elif "dev_plot_dir" in waveform_generator_settings:
         dev_plot_dir = Path(waveform_generator_settings["dev_plot_dir"])
     elif settings_file is not None:
-        dev_plot_dir = Path(settings_file).resolve().parent / "dev_plots" / "waveform"
+        dev_plot_dir = Path(settings_file).resolve().parent / "dev_plots"
     else:
-        dev_plot_dir = Path.cwd() / "dev_plots" / "waveform"
+        dev_plot_dir = Path.cwd() / "dev_plots"
 
     waveform_generator_settings["dev_mode"] = dev_mode
     waveform_generator_settings["dev_plot_dir"] = str(dev_plot_dir)
@@ -84,6 +104,7 @@ def plot_waveform_overlay(
 ) -> None:
     if plt is None:
         raise ImportError("matplotlib is required when dev_mode is enabled.")
+    configure_dev_plot_style()
 
     if output_dir is None:
         output_dir = Path.cwd() / "dev_plots" / "waveform"
@@ -92,23 +113,45 @@ def plot_waveform_overlay(
     frequencies = np.asarray(frequencies)
     nonlensed_amplitude = _waveform_amplitude(nonlensed_waveform)
     lensed_amplitude = _waveform_amplitude(lensed_waveform)
-    valid = frequencies > 0
+    valid = (
+        (frequencies > 0)
+        & np.isfinite(nonlensed_amplitude)
+        & np.isfinite(lensed_amplitude)
+        & (nonlensed_amplitude > 0)
+        & (lensed_amplitude > 0)
+    )
+    if not np.any(valid):
+        raise ValueError(
+            "Cannot plot waveform overlay: lensed and nonlensed waveforms have no "
+            "common finite, positive frequency support."
+        )
     frequencies = frequencies[valid]
     nonlensed_amplitude = nonlensed_amplitude[valid]
     lensed_amplitude = lensed_amplitude[valid]
 
-    fig, ax = plt.subplots(figsize=(14, 7))
-    ax.plot(frequencies, nonlensed_amplitude, label="nonlensed", linewidth=1.5)
-    ax.plot(frequencies, lensed_amplitude, label="lensed", linewidth=1.5)
-    ax.set_xscale("log")
-    ax.set_yscale("log")
+    fig, ax = plt.subplots(figsize=(9, 5.5))
+    ax.loglog(
+        frequencies,
+        nonlensed_amplitude,
+        label="Nonlensed",
+        linewidth=1.4,
+    )
+    ax.loglog(
+        frequencies,
+        lensed_amplitude,
+        label="Lensed",
+        linewidth=1.4,
+    )
     if x_min is not None or x_max is not None:
-        ax.set_xlim(left=x_min, right=x_max)
-    ax.set_xlabel("Frequency [Hz]")
-    ax.set_ylabel("Strain amplitude")
+        left = max(x_min if x_min is not None else frequencies[0], frequencies[0])
+        right = min(x_max if x_max is not None else frequencies[-1], frequencies[-1])
+        if left < right:
+            ax.set_xlim(left=left, right=right)
+    ax.set_xlabel(r"Frequency $f$ [Hz]")
+    ax.set_ylabel(r"Strain amplitude $|\tilde{h}(f)|$")
     ax.set_title(f"Waveform comparison for sample {sample_index}")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
+    ax.legend(frameon=False)
+    ax.grid(True, which="both", alpha=0.3)
     parameter_text = _format_parameter_text(
         nonlensed_parameters=nonlensed_parameters,
         lensed_parameters=lensed_parameters,
@@ -120,14 +163,71 @@ def plot_waveform_overlay(
             parameter_text,
             va="center",
             ha="left",
-            fontsize=9,
+            fontsize=10,
             family="monospace",
             bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.9},
         )
-        fig.tight_layout(rect=(0.0, 0.0, 0.7, 1.0))
+        fig.tight_layout(rect=(0.0, 0.0, 0.68, 1.0))
     else:
         fig.tight_layout()
-    fig.savefig(output_dir / f"waveform_sample_{sample_index:06d}.png", dpi=150)
+    fig.savefig(output_dir / f"waveform_sample_{sample_index:06d}.png")
+    plt.close(fig)
+
+
+def plot_amplification_factor(
+    sample_index,
+    frequencies: np.ndarray,
+    amplification_factor: np.ndarray,
+    output_dir: Path | None = None,
+    x_min: float | None = None,
+    x_max: float | None = None,
+) -> None:
+    if plt is None:
+        raise ImportError("matplotlib is required when dev_mode is enabled.")
+    configure_dev_plot_style()
+
+    if output_dir is None:
+        output_dir = Path.cwd() / "dev_plots" / "amplification_factor"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    frequencies = np.asarray(frequencies)
+    amplification_factor = np.asarray(amplification_factor)
+    amplification_magnitude = np.abs(amplification_factor)
+    amplification_phase = np.angle(amplification_factor)
+    valid = (
+        (frequencies > 0)
+        & np.isfinite(amplification_magnitude)
+        & np.isfinite(amplification_phase)
+        & (amplification_magnitude > 0)
+    )
+    if not np.any(valid):
+        raise ValueError(
+            "Cannot plot amplification factor: no finite, positive frequency "
+            "support."
+        )
+    frequencies = frequencies[valid]
+    amplification_magnitude = amplification_magnitude[valid]
+    amplification_phase = np.unwrap(amplification_phase[valid])
+
+    fig, axes = plt.subplots(2, 1, figsize=(7, 6), sharex=True)
+    axes[0].loglog(frequencies, amplification_magnitude, linewidth=1.4)
+    axes[0].set_ylabel(r"$|F(f)|$")
+    axes[0].set_title(f"Lensing amplification factor for sample {sample_index}")
+    axes[0].grid(True, which="both", alpha=0.3)
+
+    axes[1].semilogx(frequencies, amplification_phase, linewidth=1.4)
+    axes[1].set_xlabel(r"Frequency $f$ [Hz]")
+    axes[1].set_ylabel(r"$\arg F(f)$ [rad]")
+    axes[1].grid(True, which="both", alpha=0.3)
+
+    if x_min is not None or x_max is not None:
+        left = max(x_min if x_min is not None else frequencies[0], frequencies[0])
+        right = min(x_max if x_max is not None else frequencies[-1], frequencies[-1])
+        if left < right:
+            axes[1].set_xlim(left=left, right=right)
+
+    fig.tight_layout()
+    fig.savefig(output_dir / f"amplification_sample_{sample_index:06d}.png")
     plt.close(fig)
 
 

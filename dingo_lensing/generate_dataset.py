@@ -55,7 +55,7 @@ def generate_dataset(settings, num_processes):
     settings = copy.deepcopy(settings)
     waveform_settings = settings.setdefault("waveform_generator", {})
     waveform_settings.setdefault("dev_mode", settings.get("dev_mode", False))
-    waveform_settings.setdefault("dev_plot_dir", settings.get("dev_plot_dir", "dev_plots/waveform"))
+    waveform_settings.setdefault("dev_plot_dir", settings.get("dev_plot_dir", "dev_plots"))
     return _original_generate_dataset(settings, num_processes)
 
 

@@ -22,12 +22,18 @@ Behavior:
 - `dev_mode: false` or omitted:
   normal dataset generation only
 - `dev_mode: true`:
-  generates the dataset and also saves waveform comparison plots
+  generates the dataset and also saves waveform comparison and amplification
+  factor plots
 
-Each dev-mode plot overlays:
+Each waveform comparison plot overlays:
 
 - the nonlensed waveform
 - the lensed waveform
+
+Each amplification factor plot shows:
+
+- the amplification magnitude
+- the unwrapped amplification phase
 
 The comparison is generated from the same sample at the point where both versions
 are already available, so dev-mode plotting does not recompute the waveform.
@@ -37,15 +43,17 @@ are already available, so dev-mode plotting does not recompute the waveform.
 When `dev_mode: true`, plots are written to:
 
 ```text
-dev_plots/waveform
+dev_plots/<lens model>/waveform
+dev_plots/<lens model>/amplification_factor
 ```
 
 relative to this settings directory.
 
-Example filename:
+Example filenames:
 
 ```text
-waveform_sample_000000.png
+dev_plots/two_images_BBH/waveform/waveform_sample_000000.png
+dev_plots/two_images_BBH/amplification_factor/amplification_sample_000000.png
 ```
 
 Plot properties:
