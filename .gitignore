@@ -4,3 +4,4 @@ dingo_lensing.egg-info*
 .codex/
 AGENTS.md
 prompts/
+build/
