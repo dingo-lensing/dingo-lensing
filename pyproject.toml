@@ -12,6 +12,7 @@ dependencies = [
     "gwpy",
     "lalsuite>=7.21",
     "bilby==2.6.0",
+    "bilby_pipe==1.8.0",
     "dingo-gw==0.9.8",
     "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git"
 ]
