@@ -21,9 +21,11 @@ git clone git@github.com:dingo-lensing/dingo-lensing.git
 ```
 Note that we use version of DINGO after correcting the window factor (0.9).
 
+Edit the prefix in environment.yml
+
 Create a conda environment for **DINGO-lensing**:
 ```sh
-conda env create dingo-lensing
+conda env create -f environment.yml
 conda activate dingo-lensing
 ```
 
