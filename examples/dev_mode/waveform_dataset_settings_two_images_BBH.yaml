@@ -7,7 +7,8 @@ domain:
 waveform_generator:
   approximant: IMRPhenomXPHM  # SEOBNRv4PHM
   f_ref: 20.0
-  fdsm_function: two_images_BBH
+  lens_model_code: modwaveforms
+  amplification_factor_function: two_images_BBH
   # f_start: 15.0  # Optional setting useful for EOB waveforms. Overrides f_min when generating waveforms.
   spin_conversion_phase: 0.0
   # Other fdsm models and their extra required parameters:
