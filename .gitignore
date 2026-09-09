@@ -5,3 +5,4 @@ dingo_lensing.egg-info*
 AGENTS.md
 prompts/
 build/
+.ipynb_checkpoints/

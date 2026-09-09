@@ -35,6 +35,36 @@ Each amplification factor plot shows:
 - the amplification magnitude
 - the unwrapped amplification phase
 
+## One-image phase shifts
+
+`one_image_BBH` accepts an optional, case-sensitive `Delta_phase` entry in
+`intrinsic_prior`. The phase is expressed in radians. If `Delta_phase` is
+omitted, the Modwaveforms backend retains the backward-compatible default of
+`pi / 2`.
+
+The example settings include three configurations:
+
+- `waveform_dataset_settings_one_image_BBH.yaml`: omit `Delta_phase` and use
+  the default `pi / 2`
+- `waveform_dataset_settings_one_image_BBH_fixed_phase.yaml`: use a fixed
+  phase of `1.0` rad
+- `waveform_dataset_settings_one_image_BBH_sampled_phase.yaml`: sample the
+  phase uniformly from `0` to `2 * pi`
+
+A fixed phase is configured as a number:
+
+```yaml
+intrinsic_prior:
+  Delta_phase: 1.0
+```
+
+An arbitrary sampled phase is configured as a Bilby prior:
+
+```yaml
+intrinsic_prior:
+  Delta_phase: bilby.core.prior.Uniform(minimum=0.0, maximum=6.283185307179586)
+```
+
 The comparison is generated from the same sample at the point where both versions
 are already available, so dev-mode plotting does not recompute the waveform.
 

@@ -210,7 +210,7 @@ class LensedWaveformGenerator(WaveformGenerator):
             raise NotImplementedError(
                 f"Approximant {LS.GetApproximantFromString(self.approximant)} not "
                 f"implemented. When adding this approximant to this method, make sure "
-                f"the the output dict hlm_td contains the TD modes in the *L0 frame*. "
+                f"the output dict hlm_td contains the TD modes in the *L0 frame*. "
                 f"In particular, adding an approximant that is implemented in the same "
                 f"domain and frame as one of the approximants should just be a matter of "
                 f"adding the approximant number (here: {self.approximant}) to the "
