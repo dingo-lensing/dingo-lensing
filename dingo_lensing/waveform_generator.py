@@ -53,19 +53,32 @@ class LensedWaveformGenerator(WaveformGenerator):
     def fdsm_function(self, value: str) -> None:
         self.amplification_factor_function = value
 
+    def _resolve_lensing_parameters(
+        self, parameters: Dict[str, float]
+    ) -> Tuple[float | None, float | None, float | None, float | None]:
+        """Pop and resolve the shared lensing keys from a sample's parameters.
+
+        Used by both `generate_hplus_hcross` and `generate_hplus_hcross_m` so
+        that `ML`/`y` are resolved (falling back to the generator-configured
+        `pointlens_ML`/`pointlens_y`) in exactly one place, and are always
+        stripped from `parameters` before it is passed on to the base class.
+        """
+        lensing_delta_t = parameters.pop("lensing_delta_t", None)
+        mu_rel = parameters.pop("mu_rel", None)
+        ML = parameters.pop("ML", None)
+        if ML is None:
+            ML = self.pointlens_ML
+        y = parameters.pop("y", None)
+        if y is None:
+            y = self.pointlens_y
+        return lensing_delta_t, mu_rel, ML, y
+
     def generate_hplus_hcross(
             self, parameters: Dict[str, float], catch_waveform_errors=True
         ) -> Dict[str, np.ndarray]:
 
         sample_index = parameters.pop("sample_index", None)
-        lensing_delta_t = parameters.pop("lensing_delta_t", None)
-        mu_rel = parameters.pop("mu_rel", None)
-        ML = parameters.pop("ML", None)
-        y = parameters.pop("y", None)
-        if ML is None:
-            ML = self.pointlens_ML
-        if y is None:
-            y = self.pointlens_y
+        lensing_delta_t, mu_rel, ML, y = self._resolve_lensing_parameters(parameters)
         self._current_sample_index = sample_index
         self._current_plot_parameters = {
             "nonlensed": parameters.copy(),
@@ -83,6 +96,8 @@ class LensedWaveformGenerator(WaveformGenerator):
             target_function,
             lensing_delta_t,
             mu_rel,
+            ML,
+            y,
         )
 
         try:
@@ -97,6 +112,8 @@ class LensedWaveformGenerator(WaveformGenerator):
         target_function: Callable,
         lensing_delta_t: float,
         mu_rel: float,
+        ML: float | None = None,
+        y: float | None = None,
     ) -> Dict[str, np.ndarray]:
 
         unlensed_polarizations = super().generate_FD_waveform(
@@ -107,6 +124,8 @@ class LensedWaveformGenerator(WaveformGenerator):
             self._current_plot_parameters["lensed"],
             lensing_delta_t=lensing_delta_t,
             mu_rel=mu_rel,
+            ML=ML,
+            y=y,
         )
         FD_polarizations = {
             polarization: waveform * amplification_factor
@@ -126,8 +145,7 @@ class LensedWaveformGenerator(WaveformGenerator):
         self, parameters: Dict[str, float]
     ) -> Dict[tuple, Dict[str, np.ndarray]]:
 
-        lensing_delta_t = parameters.pop("lensing_delta_t", None)
-        mu_rel = parameters.pop("mu_rel", None)        
+        lensing_delta_t, mu_rel, ML, y = self._resolve_lensing_parameters(parameters)
 
         pol_m = super().generate_hplus_hcross_m(parameters)
         amp_factor = self._get_lensing_amplification_factor(
@@ -135,6 +153,8 @@ class LensedWaveformGenerator(WaveformGenerator):
             parameters,
             lensing_delta_t=lensing_delta_t,
             mu_rel=mu_rel,
+            ML=ML,
+            y=y,
         )
 
         for h in pol_m.values():
@@ -149,19 +169,17 @@ class LensedWaveformGenerator(WaveformGenerator):
         parameters: Dict[str, float],
         lensing_delta_t: float | None = None,
         mu_rel: float | None = None,
+        ML: float | None = None,
+        y: float | None = None,
     ) -> np.ndarray:
-        # FIXME: To integrate another lensing code, add a package-specific
-        # <code>_amplification.py module, register its lens_model_code in
-        # lens_code_loader.py, and set lens_model_code and
-        # amplification_factor_function in the YAML settings.
         return self._amplification_factor(
             self.amplification_factor_function,
             frequency_array,
             parameters,
             lensing_delta_t=lensing_delta_t,
             mu_rel=mu_rel,
-            ML=self.pointlens_ML,
-            y=self.pointlens_y,
+            ML=ML,
+            y=y,
         )
 
     def _save_dev_plot(
@@ -195,7 +213,7 @@ class LensedWaveformGenerator(WaveformGenerator):
         )
 
     def _dev_plot_output_dir(self, plot_type: str) -> Path:
-        return self.dev_plot_dir / self.fdsm_function / plot_type
+        return self.dev_plot_dir / self.lens_model_code / self.fdsm_function / plot_type
 
     def generate_TD_modes_L0(self, parameters):
         # Bless both SEOBNRv4PHM and NRSur7dq4
