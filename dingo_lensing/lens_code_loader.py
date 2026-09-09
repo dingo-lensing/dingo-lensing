@@ -6,6 +6,10 @@ from typing import Callable
 _LENS_CODE_MODULES = {
     "modwaveforms": "dingo_lensing.modwaveforms_amplification",
 }
+# FIXME: To integrate another lensing code, add a package-specific
+# <code>_amplification.py module exposing get_amplification_factor,
+# register its lens_model_code here, and set lens_model_code and
+# amplification_factor_function in the YAML settings.
 
 
 @cache
