@@ -5,7 +5,10 @@ from dingo.gw.waveform_generator import WaveformGenerator
 import lalsimulation as LS
 import dingo.gw.waveform_generator.wfg_utils as wfg_utils
 from dingo_lensing.dev_mode import plot_amplification_factor, plot_waveform_overlay
-from dingo_lensing.lens_code_loader import load_amplification_factor
+from dingo_lensing.lens_code_loader import (
+    load_amplification_factor,
+    load_model_specific_parameter_names,
+)
 
 class LensedWaveformGenerator(WaveformGenerator):
     def __init__(
@@ -16,8 +19,7 @@ class LensedWaveformGenerator(WaveformGenerator):
         fdsm_function: str | None = None,
         lens_model_code: str = "modwaveforms",
         amplification_factor_function: str | None = None,
-        ML: float | None = None,
-        y: float | None = None,
+        lens_model_defaults: Dict[str, float] | None = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -34,14 +36,31 @@ class LensedWaveformGenerator(WaveformGenerator):
             )
         self.lens_model_code = lens_model_code
         self.amplification_factor_function = (
-            amplification_factor_function or fdsm_function or "two_images_BBH"
+            amplification_factor_function or fdsm_function
         )
+        if self.amplification_factor_function is None:
+            raise ValueError(
+                "Must specify amplification_factor_function (or its legacy "
+                "alias fdsm_function); LensedWaveformGenerator has no "
+                "built-in default lens model."
+            )
         self.fdsm_function = self.amplification_factor_function
         self._amplification_factor = load_amplification_factor(
             self.lens_model_code
         )
-        self.pointlens_ML = ML
-        self.pointlens_y = y
+        self._model_specific_parameter_names = load_model_specific_parameter_names(
+            self.lens_model_code
+        )
+        # Generator-level fallback values for whichever sample parameters
+        # the active amplification function needs (e.g. two_images_BBH's
+        # lensing_delta_t/mu_rel, pointlens's ML/y) when not sampled
+        # per-event. Which names are looked up here is entirely up to the
+        # lens model code's own registration (see
+        # lens_code_loader.load_model_specific_parameter_names) -- this
+        # class never hardcodes any lens model's parameter names itself.
+        self.lens_model_defaults = (
+            dict(lens_model_defaults) if lens_model_defaults else {}
+        )
         self._current_sample_index = None
         self._current_plot_parameters = None
 
@@ -55,49 +74,47 @@ class LensedWaveformGenerator(WaveformGenerator):
 
     def _resolve_lensing_parameters(
         self, parameters: Dict[str, float]
-    ) -> Tuple[float | None, float | None, float | None, float | None]:
-        """Pop and resolve the shared lensing keys from a sample's parameters.
+    ) -> Dict[str, float]:
+        """Pop and resolve every lensing parameter the active amplification
+        function needs (as declared by its lens code module's
+        `get_model_specific_parameter_names`) from a sample's parameters.
 
-        Used by both `generate_hplus_hcross` and `generate_hplus_hcross_m` so
-        that `ML`/`y` are resolved (falling back to the generator-configured
-        `pointlens_ML`/`pointlens_y`) in exactly one place, and are always
-        stripped from `parameters` before it is passed on to the base class.
+        Used by both `generate_hplus_hcross` and `generate_hplus_hcross_m`
+        so this resolution happens in exactly one place. Falls back to this
+        generator's `lens_model_defaults` when a parameter isn't present in
+        the sampled parameters, and always strips the resolved keys from
+        `parameters` before it is passed on to the base class -- e.g. for
+        `two_images_BBH` this resolves `lensing_delta_t`/`mu_rel`, for
+        `pointlens` it resolves `ML`/`y`; `LensedWaveformGenerator` itself
+        never names any of these.
         """
-        lensing_delta_t = parameters.pop("lensing_delta_t", None)
-        mu_rel = parameters.pop("mu_rel", None)
-        ML = parameters.pop("ML", None)
-        if ML is None:
-            ML = self.pointlens_ML
-        y = parameters.pop("y", None)
-        if y is None:
-            y = self.pointlens_y
-        return lensing_delta_t, mu_rel, ML, y
+        resolved_parameters = {}
+        parameter_names = self._model_specific_parameter_names(
+            self.amplification_factor_function
+        )
+        for name in parameter_names:
+            value = parameters.pop(name, None)
+            if value is None:
+                value = self.lens_model_defaults.get(name)
+            resolved_parameters[name] = value
+
+        return resolved_parameters
 
     def generate_hplus_hcross(
             self, parameters: Dict[str, float], catch_waveform_errors=True
         ) -> Dict[str, np.ndarray]:
 
         sample_index = parameters.pop("sample_index", None)
-        lensing_delta_t, mu_rel, ML, y = self._resolve_lensing_parameters(parameters)
+        resolved_lensing_parameters = self._resolve_lensing_parameters(parameters)
         self._current_sample_index = sample_index
         self._current_plot_parameters = {
             "nonlensed": parameters.copy(),
-            "lensed": {
-                **parameters,
-                "lensing_delta_t": lensing_delta_t,
-                "mu_rel": mu_rel,
-                "ML": ML,
-                "y": y,
-            },
+            "lensed": {**parameters, **resolved_lensing_parameters},
         }
 
         self.generate_FD_waveform = lambda parameters_lal, target_function: self.generate_lensed_FD_waveform(
             parameters_lal,
             target_function,
-            lensing_delta_t,
-            mu_rel,
-            ML,
-            y,
         )
 
         try:
@@ -110,10 +127,6 @@ class LensedWaveformGenerator(WaveformGenerator):
         self,
         parameters_lal: Tuple,
         target_function: Callable,
-        lensing_delta_t: float,
-        mu_rel: float,
-        ML: float | None = None,
-        y: float | None = None,
     ) -> Dict[str, np.ndarray]:
 
         unlensed_polarizations = super().generate_FD_waveform(
@@ -122,10 +135,6 @@ class LensedWaveformGenerator(WaveformGenerator):
         amplification_factor = self._get_lensing_amplification_factor(
             self.domain.sample_frequencies,
             self._current_plot_parameters["lensed"],
-            lensing_delta_t=lensing_delta_t,
-            mu_rel=mu_rel,
-            ML=ML,
-            y=y,
         )
         FD_polarizations = {
             polarization: waveform * amplification_factor
@@ -145,16 +154,12 @@ class LensedWaveformGenerator(WaveformGenerator):
         self, parameters: Dict[str, float]
     ) -> Dict[tuple, Dict[str, np.ndarray]]:
 
-        lensing_delta_t, mu_rel, ML, y = self._resolve_lensing_parameters(parameters)
+        resolved_lensing_parameters = self._resolve_lensing_parameters(parameters)
 
         pol_m = super().generate_hplus_hcross_m(parameters)
         amp_factor = self._get_lensing_amplification_factor(
             self.domain.sample_frequencies,
-            parameters,
-            lensing_delta_t=lensing_delta_t,
-            mu_rel=mu_rel,
-            ML=ML,
-            y=y,
+            {**parameters, **resolved_lensing_parameters},
         )
 
         for h in pol_m.values():
@@ -167,19 +172,11 @@ class LensedWaveformGenerator(WaveformGenerator):
         self,
         frequency_array: np.ndarray,
         parameters: Dict[str, float],
-        lensing_delta_t: float | None = None,
-        mu_rel: float | None = None,
-        ML: float | None = None,
-        y: float | None = None,
     ) -> np.ndarray:
         return self._amplification_factor(
             self.amplification_factor_function,
             frequency_array,
             parameters,
-            lensing_delta_t=lensing_delta_t,
-            mu_rel=mu_rel,
-            ML=ML,
-            y=y,
         )
 
     def _save_dev_plot(

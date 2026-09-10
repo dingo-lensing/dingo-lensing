@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 import numpy as np
 from scipy.special import loggamma
@@ -13,15 +13,31 @@ SUPPORTED_AMPLIFICATION_FUNCTIONS = (
     "pointlens",
 )
 
+# Per-function sample parameters that this amplification function needs
+# resolved (falling back to a generator-level default when not sampled
+# per-event) and stripped out of a sample's parameters before they reach
+# the base waveform generator. Parameters not listed here (e.g. Delta_phase,
+# positive_phase, Delta_t_10/20) are read directly out of `parameters` by
+# the branch below and simply pass through untouched -- only parameters
+# that need a generator-level fallback belong in this registry.
+MODEL_SPECIFIC_PARAMETERS: Dict[str, Tuple[str, ...]] = {
+    "two_images_BBH": ("lensing_delta_t", "mu_rel"),
+    "fold_caustic": ("lensing_delta_t",),
+    "cusp_caustic": ("lensing_delta_t", "mu_rel"),
+    "pointlens": ("ML", "y"),
+}
+
+
+def get_model_specific_parameter_names(
+    amplification_factor_function: str,
+) -> Tuple[str, ...]:
+    return MODEL_SPECIFIC_PARAMETERS.get(amplification_factor_function, ())
+
 
 def get_amplification_factor(
     amplification_factor_function: str,
     frequency_array: np.ndarray,
     parameters: Dict[str, float],
-    lensing_delta_t: float | None = None,
-    mu_rel: float | None = None,
-    ML: float | None = None,
-    y: float | None = None,
 ) -> np.ndarray:
     if amplification_factor_function == "one_image_BBH":
         return geomoptics.one_image_BBH(
@@ -31,31 +47,32 @@ def get_amplification_factor(
     elif amplification_factor_function == "two_images_BBH":
         return geomoptics.two_images_BBH(
             frequency_array,
-            mu_rel,
-            lensing_delta_t,
+            parameters.get("mu_rel"),
+            parameters.get("lensing_delta_t"),
             parameters.get("Delta_phase", 0.5 * np.pi),
         )
     elif amplification_factor_function == "fold_caustic":
         return geomoptics.fold_caustic(
             frequency_array,
-            lensing_delta_t,
+            parameters.get("lensing_delta_t"),
             parameters.get("positive_phase", 1.0),
         )
     elif amplification_factor_function == "cusp_caustic":
+        lensing_delta_t = parameters.get("lensing_delta_t")
         return geomoptics.cusp_caustic(
             frequency_array,
             parameters.get("Delta_t_10", lensing_delta_t),
             parameters.get("Delta_t_20", lensing_delta_t),
-            mu_rel,
+            parameters.get("mu_rel"),
             parameters.get("positive_phase", 1.0),
         )
     elif amplification_factor_function == "pointlens":
-        pointlens_ML = parameters.get("ML", ML)
-        pointlens_y = parameters.get("y", y)
+        pointlens_ML = parameters.get("ML")
+        pointlens_y = parameters.get("y")
         if pointlens_ML is None or pointlens_y is None:
             raise ValueError(
                 "pointlens requires ML and y either in the sampled parameters "
-                "or in waveform_generator settings."
+                "or in waveform_generator's lens_model_defaults setting."
             )
         return _pointlens_amplification_factor(
             frequency_array, pointlens_ML, pointlens_y
