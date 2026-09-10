@@ -1,5 +1,6 @@
 from functools import cache
 from importlib import import_module
+from types import ModuleType
 from typing import Callable
 
 
@@ -12,8 +13,7 @@ _LENS_CODE_MODULES = {
 # amplification_factor_function in the YAML settings.
 
 
-@cache
-def load_amplification_factor(lens_model_code: str) -> Callable:
+def _import_lens_code_module(lens_model_code: str) -> ModuleType:
     try:
         module_name = _LENS_CODE_MODULES[lens_model_code]
     except KeyError:
@@ -24,13 +24,17 @@ def load_amplification_factor(lens_model_code: str) -> Callable:
         ) from None
 
     try:
-        module = import_module(module_name)
+        return import_module(module_name)
     except ImportError as exc:
         raise ImportError(
             f"Could not load lens model code '{lens_model_code}' from "
             f"'{module_name}'. Install its required dependencies."
         ) from exc
 
+
+@cache
+def load_amplification_factor(lens_model_code: str) -> Callable:
+    module = _import_lens_code_module(lens_model_code)
     amplification_factor = getattr(module, "get_amplification_factor", None)
     if not callable(amplification_factor):
         raise TypeError(
@@ -38,3 +42,19 @@ def load_amplification_factor(lens_model_code: str) -> Callable:
             "get_amplification_factor."
         )
     return amplification_factor
+
+
+@cache
+def load_model_specific_parameter_names(lens_model_code: str) -> Callable:
+    """Load the given lens model code's model-specific-parameter-name lookup.
+
+    A lens code module is not required to define
+    `get_model_specific_parameter_names`; if it doesn't, every
+    amplification function it provides is assumed to need no extra,
+    model-specific sample parameters beyond the shared lensing_delta_t/
+    mu_rel.
+    """
+    module = _import_lens_code_module(lens_model_code)
+    return getattr(
+        module, "get_model_specific_parameter_names", lambda function: ()
+    )

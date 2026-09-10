@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple
 
 import numpy as np
 from scipy.special import loggamma
@@ -13,6 +13,22 @@ SUPPORTED_AMPLIFICATION_FUNCTIONS = (
     "pointlens",
 )
 
+# Per-function sample parameters that are specific to this lens model code
+# (as opposed to lensing_delta_t/mu_rel, which are shared across several
+# amplification functions). LensedWaveformGenerator uses this registry to
+# know which extra keys to pop out of a sample's parameters before they
+# reach the base waveform generator, and which keys a `lens_model_defaults`
+# setting may provide a generator-level fallback for.
+MODEL_SPECIFIC_PARAMETERS: Dict[str, Tuple[str, ...]] = {
+    "pointlens": ("ML", "y"),
+}
+
+
+def get_model_specific_parameter_names(
+    amplification_factor_function: str,
+) -> Tuple[str, ...]:
+    return MODEL_SPECIFIC_PARAMETERS.get(amplification_factor_function, ())
+
 
 def get_amplification_factor(
     amplification_factor_function: str,
@@ -20,8 +36,6 @@ def get_amplification_factor(
     parameters: Dict[str, float],
     lensing_delta_t: float | None = None,
     mu_rel: float | None = None,
-    ML: float | None = None,
-    y: float | None = None,
 ) -> np.ndarray:
     if amplification_factor_function == "one_image_BBH":
         return geomoptics.one_image_BBH(
@@ -50,12 +64,12 @@ def get_amplification_factor(
             parameters.get("positive_phase", 1.0),
         )
     elif amplification_factor_function == "pointlens":
-        pointlens_ML = parameters.get("ML", ML)
-        pointlens_y = parameters.get("y", y)
+        pointlens_ML = parameters.get("ML")
+        pointlens_y = parameters.get("y")
         if pointlens_ML is None or pointlens_y is None:
             raise ValueError(
                 "pointlens requires ML and y either in the sampled parameters "
-                "or in waveform_generator settings."
+                "or in waveform_generator's lens_model_defaults setting."
             )
         return _pointlens_amplification_factor(
             frequency_array, pointlens_ML, pointlens_y
