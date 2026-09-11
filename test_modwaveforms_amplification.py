@@ -93,13 +93,62 @@ def test_model_specific_parameter_names_registry():
         "mu_rel",
     )
     assert get_model_specific_parameter_names("fold_caustic") == ("lensing_delta_t",)
+    # cusp_caustic's wrapper also exposes Delta_t_10/Delta_t_20 with a None
+    # default (they fall back to lensing_delta_t internally when absent), so
+    # deriving the registry from the real signature now surfaces them too,
+    # not just lensing_delta_t/mu_rel as when this was a hand-written dict.
     assert get_model_specific_parameter_names("cusp_caustic") == (
         "lensing_delta_t",
         "mu_rel",
+        "Delta_t_10",
+        "Delta_t_20",
     )
     assert get_model_specific_parameter_names("pointlens") == ("ML", "y")
     assert get_model_specific_parameter_names("one_image_BBH") == ()
     assert get_model_specific_parameter_names("unknown_function") == ()
+
+
+def test_registering_a_new_function_needs_no_separate_registry_entry(monkeypatch):
+    # get_model_specific_parameter_names and get_amplification_factor are
+    # both derived directly from _AMPLIFICATION_FUNCTIONS at call time;
+    # adding a function there is the only registration step needed, there's
+    # no separate dict that could fall out of sync with it. (This doesn't
+    # cover SUPPORTED_AMPLIFICATION_FUNCTIONS, which is a tuple snapshotted
+    # once at import time for the error message, not a live view.)
+    import dingo_lensing.modwaveforms_amplification as modwaveforms_amplification
+
+    def _new_function(frequency_array, some_new_param=None, fixed_param=1.0):
+        return frequency_array
+
+    monkeypatch.setitem(
+        modwaveforms_amplification._AMPLIFICATION_FUNCTIONS,
+        "new_function",
+        _new_function,
+    )
+
+    assert get_model_specific_parameter_names("new_function") == ("some_new_param",)
+
+    actual = get_amplification_factor(
+        "new_function", FREQUENCIES, {"some_new_param": 1.0}
+    )
+    np.testing.assert_array_equal(actual, FREQUENCIES)
+
+
+def test_model_specific_parameter_names_excludes_var_args(monkeypatch):
+    import dingo_lensing.modwaveforms_amplification as modwaveforms_amplification
+
+    def _variadic_function(frequency_array, needs_resolution=None, *args, **kwargs):
+        return frequency_array
+
+    monkeypatch.setitem(
+        modwaveforms_amplification._AMPLIFICATION_FUNCTIONS,
+        "variadic_function",
+        _variadic_function,
+    )
+
+    assert get_model_specific_parameter_names("variadic_function") == (
+        "needs_resolution",
+    )
 
 
 def test_loader_rejects_unknown_lens_model_code():
