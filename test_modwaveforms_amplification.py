@@ -11,10 +11,12 @@ from modwaveforms import geomoptics
 
 import dingo_lensing.lens_code_loader as lens_code_loader
 from dingo_lensing.modwaveforms_amplification import (
+    AmplificationModel,
     CuspCaustic,
     FoldCaustic,
     OneImageBBH,
     PointLens,
+    SUPPORTED_AMPLIFICATION_FUNCTIONS,
     TwoImagesBBH,
     get_model,
 )
@@ -22,6 +24,19 @@ from dingo_lensing.waveform_generator import LensedWaveformGenerator
 
 
 FREQUENCIES = np.array([0.0, 20.0, 64.0, 512.0, 1024.0], dtype=np.float64)
+
+
+# --------------------------------------------------------------------------
+# Base class contract
+# --------------------------------------------------------------------------
+
+
+def test_amplification_model_base_class_is_abstract():
+    model = AmplificationModel()
+    with pytest.raises(NotImplementedError):
+        model.resolve({}, {})
+    with pytest.raises(NotImplementedError):
+        model.compute(FREQUENCIES, {})
 
 
 # --------------------------------------------------------------------------
@@ -75,12 +90,42 @@ def test_two_images_bbh_prefers_sampled_over_lens_model_defaults():
     assert resolved["mu_rel"] == 0.3
 
 
+def test_two_images_bbh_mixed_fallback_is_per_parameter_not_all_or_nothing():
+    # Mirror of the test above: here mu_rel is the sampled one and
+    # lensing_delta_t is the one falling back, proving the two keys are
+    # resolved independently rather than "any key missing -> use defaults
+    # for everything".
+    model = TwoImagesBBH()
+    resolved = model.resolve(
+        {"mu_rel": 0.9}, {"lensing_delta_t": 0.02, "mu_rel": 0.3}
+    )
+    assert resolved["mu_rel"] == 0.9
+    assert resolved["lensing_delta_t"] == 0.02
+
+
 def test_fold_caustic_matches_vendor():
     model = FoldCaustic()
     resolved = model.resolve({"lensing_delta_t": 0.037}, {})
     np.testing.assert_array_equal(
         model.compute(FREQUENCIES, resolved),
         geomoptics.fold_caustic(FREQUENCIES, 0.037, 1.0),
+    )
+
+
+def test_fold_caustic_falls_back_to_lens_model_defaults():
+    model = FoldCaustic()
+    resolved = model.resolve({}, {"lensing_delta_t": 0.02})
+    assert resolved["lensing_delta_t"] == 0.02
+    assert resolved["positive_phase"] == 1.0
+
+
+def test_fold_caustic_positive_phase_can_be_overridden():
+    model = FoldCaustic()
+    resolved = model.resolve({"lensing_delta_t": 0.01, "positive_phase": -1.0}, {})
+    assert resolved["positive_phase"] == -1.0
+    np.testing.assert_array_equal(
+        model.compute(FREQUENCIES, resolved),
+        geomoptics.fold_caustic(FREQUENCIES, 0.01, -1.0),
     )
 
 
@@ -104,6 +149,34 @@ def test_cusp_caustic_falls_back_to_lensing_delta_t_for_image_delays():
         model.compute(FREQUENCIES, resolved),
         geomoptics.cusp_caustic(FREQUENCIES, 0.037, 0.037, 0.42, 1.0),
     )
+
+
+def test_cusp_caustic_partial_image_delay_fallback_is_independent_per_key():
+    # Only Delta_t_10 is sampled; Delta_t_20 must fall back on its own,
+    # rather than both falling back just because one of them was missing.
+    model = CuspCaustic()
+    resolved = model.resolve(
+        {"Delta_t_10": 0.005, "lensing_delta_t": 0.02, "mu_rel": 0.4}, {}
+    )
+    assert resolved["Delta_t_10"] == 0.005
+    assert resolved["Delta_t_20"] == 0.02
+
+
+def test_cusp_caustic_mu_rel_falls_back_to_lens_model_defaults():
+    model = CuspCaustic()
+    resolved = model.resolve(
+        {"Delta_t_10": 0.01, "Delta_t_20": 0.02}, {"mu_rel": 0.6}
+    )
+    assert resolved["mu_rel"] == 0.6
+
+
+def test_cusp_caustic_positive_phase_can_be_overridden():
+    model = CuspCaustic()
+    resolved = model.resolve(
+        {"Delta_t_10": 0.01, "Delta_t_20": 0.02, "mu_rel": 0.4, "positive_phase": -1.0},
+        {},
+    )
+    assert resolved["positive_phase"] == -1.0
 
 
 def test_cusp_caustic_real_config_shape_never_needs_lensing_delta_t():
@@ -146,10 +219,45 @@ def test_pointlens_falls_back_to_lens_model_defaults():
     assert resolved == {"ML": 1700.0, "y": 0.15}
 
 
+def test_pointlens_partial_fallback_ml_sampled_y_from_default():
+    model = PointLens()
+    resolved = model.resolve({"ML": 2000.0}, {"y": 0.1})
+    assert resolved == {"ML": 2000.0, "y": 0.1}
+
+
+def test_pointlens_partial_fallback_y_sampled_ml_from_default():
+    model = PointLens()
+    resolved = model.resolve({"y": 0.2}, {"ML": 1500.0})
+    assert resolved == {"ML": 1500.0, "y": 0.2}
+
+
 def test_pointlens_requires_ml_and_y():
     model = PointLens()
     with pytest.raises(ValueError, match="pointlens requires ML and y"):
         model.resolve({}, {})
+
+
+def test_pointlens_requires_ml_and_y_even_when_only_one_is_available():
+    model = PointLens()
+    with pytest.raises(ValueError, match="pointlens requires ML and y"):
+        model.resolve({"ML": 1700.0}, {})
+    with pytest.raises(ValueError, match="pointlens requires ML and y"):
+        model.resolve({"y": 0.15}, {})
+
+
+# --------------------------------------------------------------------------
+# get_model / registration
+# --------------------------------------------------------------------------
+
+
+def test_supported_amplification_functions_lists_all_five_real_models():
+    assert set(SUPPORTED_AMPLIFICATION_FUNCTIONS) == {
+        "one_image_BBH",
+        "two_images_BBH",
+        "fold_caustic",
+        "cusp_caustic",
+        "pointlens",
+    }
 
 
 def test_get_model_rejects_unknown_function():
@@ -157,9 +265,25 @@ def test_get_model_rejects_unknown_function():
         get_model("other")
 
 
+def test_get_model_error_message_lists_every_supported_function():
+    with pytest.raises(ValueError) as exc_info:
+        get_model("other")
+    message = str(exc_info.value)
+    for name in SUPPORTED_AMPLIFICATION_FUNCTIONS:
+        assert name in message
+
+
 def test_get_model_returns_the_same_kind_of_model_each_time():
     assert isinstance(get_model("two_images_BBH"), TwoImagesBBH)
     assert isinstance(get_model("pointlens"), PointLens)
+
+
+def test_get_model_rejects_unexpected_settings_for_models_that_take_none():
+    # None of the five real models take constructor arguments; passing a
+    # settings key they don't recognise should fail loudly (a plain
+    # TypeError from the constructor call), not be silently swallowed.
+    with pytest.raises(TypeError):
+        get_model("two_images_BBH", bogus_setting=1)
 
 
 def test_get_model_forwards_construction_time_settings_to_the_model_class():
@@ -327,6 +451,57 @@ def test_loader_reports_import_and_interface_errors(monkeypatch):
     lens_code_loader._import_lens_code_module.cache_clear()
 
 
+def test_loader_real_modwaveforms_integration_returns_correct_model():
+    # Unlike the tests above (which fake out import_module entirely), this
+    # exercises the real registered "modwaveforms" entry end to end: the
+    # actual module gets imported and its actual get_model() is called.
+    lens_code_loader._import_lens_code_module.cache_clear()
+    try:
+        model = lens_code_loader.load_amplification_model("modwaveforms", "pointlens")
+    finally:
+        lens_code_loader._import_lens_code_module.cache_clear()
+    assert isinstance(model, PointLens)
+
+
+def test_loader_real_modwaveforms_forwards_settings_end_to_end():
+    # Same real (non-mocked) path as above, but proving lens_model_settings
+    # reaches a model's constructor through the *real* module, not a fake
+    # one -- this is the exact mechanism a new lens code (e.g. Gravelamps'
+    # lookup-table-backed models, see REFACTORING_GUIDE.md) would rely on.
+    import dingo_lensing.modwaveforms_amplification as modwaveforms_amplification
+
+    captured = {}
+
+    class LookupTableModel(modwaveforms_amplification.AmplificationModel):
+        def __init__(self, lookup_table_path=None):
+            captured["lookup_table_path"] = lookup_table_path
+
+        def resolve(self, parameters, lens_model_defaults):
+            return {}
+
+        def compute(self, frequency_array, resolved):
+            return frequency_array
+
+    original = dict(modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES)
+    modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES["lookup_table_model"] = (
+        LookupTableModel
+    )
+    lens_code_loader._import_lens_code_module.cache_clear()
+    try:
+        model = lens_code_loader.load_amplification_model(
+            "modwaveforms",
+            "lookup_table_model",
+            lens_model_settings={"lookup_table_path": "/data/table.h5"},
+        )
+    finally:
+        modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES.clear()
+        modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES.update(original)
+        lens_code_loader._import_lens_code_module.cache_clear()
+
+    assert isinstance(model, LookupTableModel)
+    assert captured["lookup_table_path"] == "/data/table.h5"
+
+
 def test_importing_waveform_generator_does_not_import_modwaveforms():
     script = """
 import sys
@@ -383,6 +558,16 @@ def test_generator_resolves_new_and_legacy_selectors(monkeypatch):
             fdsm_function="fold_caustic",
             amplification_factor_function="cusp_caustic",
         )
+
+
+def test_fdsm_function_property_setter_updates_amplification_factor_function():
+    generator = object.__new__(LensedWaveformGenerator)
+    generator.amplification_factor_function = "pointlens"
+
+    generator.fdsm_function = "cusp_caustic"
+
+    assert generator.amplification_factor_function == "cusp_caustic"
+    assert generator.fdsm_function == "cusp_caustic"
 
 
 def test_constructor_stores_lens_model_defaults(monkeypatch):
@@ -449,6 +634,72 @@ def test_get_lensing_amplification_factor_delegates_to_the_model():
     assert result == "computed"
     assert received["frequency_array"] is FREQUENCIES
     assert received["resolved"] == {"mu_rel": 0.5}
+
+
+def test_generate_hplus_hcross_manages_sample_index_and_plot_state(monkeypatch):
+    # Exercises generate_hplus_hcross itself (not generate_lensed_FD_waveform
+    # or generate_hplus_hcross_m): sample_index is popped out of parameters
+    # before it reaches the base class, _current_sample_index and
+    # _current_plot_parameters are populated for the duration of the call
+    # (for dev-mode plotting), and both are reset to None afterwards.
+    generator = _make_bare_generator(TwoImagesBBH())
+    generator.domain = SimpleNamespace(sample_frequencies=FREQUENCIES)
+    captured = {}
+
+    def fake_super_generate_hplus_hcross(self, parameters, catch_waveform_errors=True):
+        captured["sample_index"] = self._current_sample_index
+        captured["plot_parameters"] = {
+            key: dict(value) for key, value in self._current_plot_parameters.items()
+        }
+        captured["parameters_passed"] = dict(parameters)
+        return {
+            "h_plus": np.zeros(len(FREQUENCIES)),
+            "h_cross": np.zeros(len(FREQUENCIES)),
+        }
+
+    monkeypatch.setattr(
+        WaveformGenerator, "generate_hplus_hcross", fake_super_generate_hplus_hcross
+    )
+
+    parameters = {
+        "sample_index": 7,
+        "chirp_mass": 30.0,
+        "lensing_delta_t": 0.037,
+        "mu_rel": 0.42,
+    }
+
+    generator.generate_hplus_hcross(parameters)
+
+    assert captured["sample_index"] == 7
+    assert captured["parameters_passed"] == {"chirp_mass": 30.0}
+    assert captured["plot_parameters"]["nonlensed"] == {"chirp_mass": 30.0}
+    assert captured["plot_parameters"]["lensed"] == {
+        "chirp_mass": 30.0,
+        "lensing_delta_t": 0.037,
+        "mu_rel": 0.42,
+        "Delta_phase": 0.5 * np.pi,
+    }
+    # State is scoped to the call: gone once generate_hplus_hcross returns.
+    assert generator._current_sample_index is None
+    assert generator._current_plot_parameters is None
+
+
+def test_generate_hplus_hcross_resets_state_even_if_generation_fails(monkeypatch):
+    generator = _make_bare_generator(PointLens())
+    generator.domain = SimpleNamespace(sample_frequencies=FREQUENCIES)
+
+    def failing_super_generate_hplus_hcross(self, parameters, catch_waveform_errors=True):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(
+        WaveformGenerator, "generate_hplus_hcross", failing_super_generate_hplus_hcross
+    )
+
+    with pytest.raises(RuntimeError, match="boom"):
+        generator.generate_hplus_hcross({"ML": 1700.0, "y": 0.15})
+
+    assert generator._current_sample_index is None
+    assert generator._current_plot_parameters is None
 
 
 def test_full_waveform_generation_only_applies_amplification(monkeypatch):
@@ -553,6 +804,94 @@ def test_mode_generation_strips_pointlens_parameters_before_delegating(monkeypat
     assert received["parameters"] == {"chirp_mass": 30.0}
     assert received["resolved"]["ML"] == 1700.0
     assert received["resolved"]["y"] == 0.15
+
+
+def test_save_dev_plot_skips_when_sample_index_is_none():
+    # Guard clause: with no active sample (e.g. called outside a
+    # generate_hplus_hcross scope), _save_dev_plot must return immediately
+    # rather than touching any dev-plot state, which isn't set up here.
+    generator = object.__new__(LensedWaveformGenerator)
+    generator._current_sample_index = None
+
+    generator._save_dev_plot({}, {}, np.array([1.0]))  # must not raise
+
+
+def test_generate_lensed_fd_waveform_triggers_dev_plot_when_dev_mode_enabled(monkeypatch):
+    generator = _make_bare_generator(PointLens())
+    generator.domain = SimpleNamespace(
+        sample_frequencies=FREQUENCIES, f_min=20.0, f_max=1024.0
+    )
+    generator.dev_mode = True
+    generator.dev_plot_dir = Path("dev_plots")
+    generator.lens_model_code = "modwaveforms"
+    generator.amplification_factor_function = "pointlens"
+    generator.fdsm_function = "pointlens"
+    generator._current_sample_index = 3
+    generator._current_plot_parameters = {
+        "nonlensed": {"chirp_mass": 30.0},
+        "lensed": {"chirp_mass": 30.0, "ML": 1700.0, "y": 0.15},
+    }
+
+    unlensed = {"h_plus": np.ones(len(FREQUENCIES), dtype=np.complex128)}
+    monkeypatch.setattr(
+        WaveformGenerator, "generate_FD_waveform", lambda self, p, t: unlensed
+    )
+    monkeypatch.setattr(
+        generator,
+        "_get_lensing_amplification_factor",
+        lambda f, r: np.full(len(FREQUENCIES), 2.0),
+    )
+
+    calls = {}
+    monkeypatch.setattr(
+        "dingo_lensing.waveform_generator.plot_waveform_overlay",
+        lambda **kwargs: calls.setdefault("waveform", kwargs),
+    )
+    monkeypatch.setattr(
+        "dingo_lensing.waveform_generator.plot_amplification_factor",
+        lambda **kwargs: calls.setdefault("amplification_factor", kwargs),
+    )
+
+    generator.generate_lensed_FD_waveform((), lambda: None)
+
+    assert calls["waveform"]["sample_index"] == 3
+    assert calls["waveform"]["output_dir"] == (
+        Path("dev_plots") / "modwaveforms" / "pointlens" / "waveform"
+    )
+    assert calls["amplification_factor"]["output_dir"] == (
+        Path("dev_plots") / "modwaveforms" / "pointlens" / "amplification_factor"
+    )
+
+
+def test_generate_lensed_fd_waveform_skips_dev_plot_when_disabled(monkeypatch):
+    generator = _make_bare_generator(PointLens())
+    generator.domain = SimpleNamespace(sample_frequencies=FREQUENCIES)
+    generator.dev_mode = False
+    generator._current_plot_parameters = {"lensed": {"ML": 1700.0, "y": 0.15}}
+
+    unlensed = {"h_plus": np.ones(len(FREQUENCIES), dtype=np.complex128)}
+    monkeypatch.setattr(
+        WaveformGenerator, "generate_FD_waveform", lambda self, p, t: unlensed
+    )
+    monkeypatch.setattr(
+        generator,
+        "_get_lensing_amplification_factor",
+        lambda f, r: np.full(len(FREQUENCIES), 2.0),
+    )
+
+    called = {"any": False}
+    monkeypatch.setattr(
+        "dingo_lensing.waveform_generator.plot_waveform_overlay",
+        lambda **kwargs: called.__setitem__("any", True),
+    )
+    monkeypatch.setattr(
+        "dingo_lensing.waveform_generator.plot_amplification_factor",
+        lambda **kwargs: called.__setitem__("any", True),
+    )
+
+    generator.generate_lensed_FD_waveform((), lambda: None)
+
+    assert called["any"] is False
 
 
 def test_dev_plot_output_dir_includes_lens_model_code():
