@@ -162,6 +162,39 @@ def test_get_model_returns_the_same_kind_of_model_each_time():
     assert isinstance(get_model("pointlens"), PointLens)
 
 
+def test_get_model_forwards_construction_time_settings_to_the_model_class():
+    # None of the five real models here take constructor arguments, but
+    # get_model must still forward whatever it's given straight through to
+    # the model class -- e.g. a future lookup-table-backed model taking a
+    # file path to load once, rather than on every sample.
+    import dingo_lensing.modwaveforms_amplification as modwaveforms_amplification
+
+    captured = {}
+
+    class LookupTableModel(modwaveforms_amplification.AmplificationModel):
+        def __init__(self, lookup_table_path=None):
+            captured["lookup_table_path"] = lookup_table_path
+
+        def resolve(self, parameters, lens_model_defaults):
+            return {}
+
+        def compute(self, frequency_array, resolved):
+            return frequency_array
+
+    original = dict(modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES)
+    modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES["lookup_table_model"] = (
+        LookupTableModel
+    )
+    try:
+        model = get_model("lookup_table_model", lookup_table_path="/data/table.h5")
+    finally:
+        modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES.clear()
+        modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES.update(original)
+
+    assert isinstance(model, LookupTableModel)
+    assert captured["lookup_table_path"] == "/data/table.h5"
+
+
 # --------------------------------------------------------------------------
 # Loader
 # --------------------------------------------------------------------------
@@ -172,8 +205,8 @@ def test_loader_rejects_unknown_lens_model_code():
         lens_code_loader.load_amplification_model("other", "two_images_BBH")
 
 
-def test_loader_imports_and_caches(monkeypatch):
-    lens_code_loader.load_amplification_model.cache_clear()
+def test_loader_imports_the_module_only_once(monkeypatch):
+    lens_code_loader._import_lens_code_module.cache_clear()
     expected_model = object()
     imported_modules = []
 
@@ -192,11 +225,80 @@ def test_loader_imports_and_caches(monkeypatch):
         first = lens_code_loader.load_amplification_model("test_code", "anything")
         second = lens_code_loader.load_amplification_model("test_code", "anything")
     finally:
-        lens_code_loader.load_amplification_model.cache_clear()
+        lens_code_loader._import_lens_code_module.cache_clear()
 
     assert first is expected_model
     assert second is expected_model
+    # the module is only imported once, even though load_amplification_model
+    # itself isn't cached (a model may need fresh construction-time settings
+    # on each call)
     assert imported_modules == ["test_package.amplification"]
+
+
+def test_loader_forwards_lens_model_settings_to_the_model_constructor(monkeypatch):
+    lens_code_loader._import_lens_code_module.cache_clear()
+    received = {}
+
+    class FakeModel:
+        def __init__(self, **settings):
+            received["settings"] = settings
+
+    monkeypatch.setitem(
+        lens_code_loader._LENS_CODE_MODULES,
+        "test_code",
+        "test_package.amplification",
+    )
+    monkeypatch.setattr(
+        lens_code_loader,
+        "import_module",
+        lambda module_name: SimpleNamespace(get_model=lambda function, **s: FakeModel(**s)),
+    )
+
+    try:
+        lens_code_loader.load_amplification_model(
+            "test_code", "anything", lens_model_settings={"lookup_table_path": "/tmp/table.h5"}
+        )
+    finally:
+        lens_code_loader._import_lens_code_module.cache_clear()
+
+    assert received["settings"] == {"lookup_table_path": "/tmp/table.h5"}
+
+
+def test_loader_two_generators_do_not_share_a_model_instance(monkeypatch):
+    # Regression guard for load_amplification_model deliberately not being
+    # cached: two generators using the same function with different
+    # construction-time settings (e.g. different lookup table files) must
+    # not end up sharing one model instance.
+    lens_code_loader._import_lens_code_module.cache_clear()
+
+    class FakeModel:
+        def __init__(self, **settings):
+            self.settings = settings
+
+    monkeypatch.setitem(
+        lens_code_loader._LENS_CODE_MODULES,
+        "test_code",
+        "test_package.amplification",
+    )
+    monkeypatch.setattr(
+        lens_code_loader,
+        "import_module",
+        lambda module_name: SimpleNamespace(get_model=lambda function, **s: FakeModel(**s)),
+    )
+
+    try:
+        first = lens_code_loader.load_amplification_model(
+            "test_code", "anything", lens_model_settings={"path": "a.h5"}
+        )
+        second = lens_code_loader.load_amplification_model(
+            "test_code", "anything", lens_model_settings={"path": "b.h5"}
+        )
+    finally:
+        lens_code_loader._import_lens_code_module.cache_clear()
+
+    assert first is not second
+    assert first.settings == {"path": "a.h5"}
+    assert second.settings == {"path": "b.h5"}
 
 
 def test_loader_reports_import_and_interface_errors(monkeypatch):
@@ -209,12 +311,12 @@ def test_loader_reports_import_and_interface_errors(monkeypatch):
     def fail_import(module_name):
         raise ModuleNotFoundError(module_name)
 
-    lens_code_loader.load_amplification_model.cache_clear()
+    lens_code_loader._import_lens_code_module.cache_clear()
     monkeypatch.setattr(lens_code_loader, "import_module", fail_import)
     with pytest.raises(ImportError, match="Install its required dependencies"):
         lens_code_loader.load_amplification_model("missing_code", "anything")
 
-    lens_code_loader.load_amplification_model.cache_clear()
+    lens_code_loader._import_lens_code_module.cache_clear()
     monkeypatch.setattr(
         lens_code_loader,
         "import_module",
@@ -222,7 +324,7 @@ def test_loader_reports_import_and_interface_errors(monkeypatch):
     )
     with pytest.raises(TypeError, match="must provide a callable get_model"):
         lens_code_loader.load_amplification_model("missing_code", "anything")
-    lens_code_loader.load_amplification_model.cache_clear()
+    lens_code_loader._import_lens_code_module.cache_clear()
 
 
 def test_importing_waveform_generator_does_not_import_modwaveforms():
@@ -292,6 +394,27 @@ def test_constructor_stores_lens_model_defaults(monkeypatch):
     )
 
     assert generator.lens_model_defaults == {"ML": 1700.0, "y": 0.15}
+
+
+def test_constructor_forwards_lens_model_settings_to_the_loader(monkeypatch):
+    monkeypatch.setattr(WaveformGenerator, "__init__", lambda self, *args, **kwargs: None)
+    received = {}
+
+    def fake_load_amplification_model(lens_model_code, amplification_factor_function, lens_model_settings):
+        received["lens_model_settings"] = lens_model_settings
+        return PointLens()
+
+    monkeypatch.setattr(
+        "dingo_lensing.waveform_generator.load_amplification_model",
+        fake_load_amplification_model,
+    )
+
+    LensedWaveformGenerator(
+        amplification_factor_function="pointlens",
+        lens_model_settings={"lookup_table_path": "/data/table.h5"},
+    )
+
+    assert received["lens_model_settings"] == {"lookup_table_path": "/data/table.h5"}
 
 
 def _make_bare_generator(model, lens_model_defaults=None):
