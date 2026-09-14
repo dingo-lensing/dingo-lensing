@@ -1,16 +1,19 @@
 from functools import cache
 from importlib import import_module
 from types import ModuleType
-from typing import Callable
+from typing import Any
 
 
 _LENS_CODE_MODULES = {
     "modwaveforms": "dingo_lensing.modwaveforms_amplification",
 }
 # FIXME: To integrate another lensing code, add a package-specific
-# <code>_amplification.py module exposing get_amplification_factor,
-# register its lens_model_code here, and set lens_model_code and
-# amplification_factor_function in the YAML settings.
+# <code>_amplification.py module exposing get_model(amplification_factor_function),
+# returning an object with resolve(parameters, lens_model_defaults) and
+# compute(frequency_array, resolved) methods (see AmplificationModel in
+# modwaveforms_amplification.py). Register its lens_model_code here, and
+# set lens_model_code and amplification_factor_function in the YAML
+# settings.
 
 
 def _import_lens_code_module(lens_model_code: str) -> ModuleType:
@@ -33,28 +36,13 @@ def _import_lens_code_module(lens_model_code: str) -> ModuleType:
 
 
 @cache
-def load_amplification_factor(lens_model_code: str) -> Callable:
+def load_amplification_model(
+    lens_model_code: str, amplification_factor_function: str
+) -> Any:
     module = _import_lens_code_module(lens_model_code)
-    amplification_factor = getattr(module, "get_amplification_factor", None)
-    if not callable(amplification_factor):
+    get_model = getattr(module, "get_model", None)
+    if not callable(get_model):
         raise TypeError(
-            f"Lens model code '{lens_model_code}' must provide a callable "
-            "get_amplification_factor."
+            f"Lens model code '{lens_model_code}' must provide a callable get_model."
         )
-    return amplification_factor
-
-
-@cache
-def load_model_specific_parameter_names(lens_model_code: str) -> Callable:
-    """Load the given lens model code's model-specific-parameter-name lookup.
-
-    A lens code module is not required to define
-    `get_model_specific_parameter_names`; if it doesn't, every
-    amplification function it provides is assumed to need no extra,
-    model-specific sample parameters beyond the shared lensing_delta_t/
-    mu_rel.
-    """
-    module = _import_lens_code_module(lens_model_code)
-    return getattr(
-        module, "get_model_specific_parameter_names", lambda function: ()
-    )
+    return get_model(amplification_factor_function)

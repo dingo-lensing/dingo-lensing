@@ -1,4 +1,3 @@
-import inspect
 from typing import Dict, Tuple
 
 import numpy as np
@@ -6,122 +5,153 @@ from scipy.special import loggamma
 from modwaveforms import geomoptics, waveoptics
 
 
-def _one_image_BBH(
-    frequency_array: np.ndarray,
-    Delta_phase: float = 0.5 * np.pi,
-) -> np.ndarray:
-    return geomoptics.one_image_BBH(frequency_array, Delta_phase)
+class AmplificationModel:
+    """Base class for a single lens model's amplification factor.
+
+    A model owns its own parameter resolution completely: resolve() pops
+    and consumes whatever it needs from a sample's parameters (falling
+    back to lens_model_defaults, and applying any model-specific fallback
+    logic, e.g. cusp_caustic borrowing lensing_delta_t), and compute()
+    turns the already-resolved values into the actual amplification
+    factor. There is no shared table or signature-inspection machinery:
+    adding a new model means implementing these two methods and nothing
+    else, and a mistake in one model's resolve()/compute() cannot affect
+    any other model's behaviour.
+    """
+
+    def resolve(
+        self, parameters: Dict[str, float], lens_model_defaults: Dict[str, float]
+    ) -> Dict[str, float]:
+        raise NotImplementedError
+
+    def compute(
+        self, frequency_array: np.ndarray, resolved: Dict[str, float]
+    ) -> np.ndarray:
+        raise NotImplementedError
 
 
-def _two_images_BBH(
-    frequency_array: np.ndarray,
-    lensing_delta_t: float | None = None,
-    mu_rel: float | None = None,
-    Delta_phase: float = 0.5 * np.pi,
-) -> np.ndarray:
-    # The vendor geomoptics.two_images_BBH names its time-delay argument
-    # Delta_t; we call it lensing_delta_t everywhere else in this package
-    # (matching the sampled/YAML parameter name), so the rename happens
-    # here at the call site.
-    return geomoptics.two_images_BBH(
-        frequency_array, mu_rel, lensing_delta_t, Delta_phase
-    )
+def _resolve_with_default(name, parameters, lens_model_defaults):
+    value = parameters.pop(name, None)
+    if value is None:
+        value = lens_model_defaults.get(name)
+    return value
 
 
-def _fold_caustic(
-    frequency_array: np.ndarray,
-    lensing_delta_t: float | None = None,
-    positive_phase: float = 1.0,
-) -> np.ndarray:
-    return geomoptics.fold_caustic(frequency_array, lensing_delta_t, positive_phase)
+class OneImageBBH(AmplificationModel):
+    def resolve(self, parameters, lens_model_defaults):
+        return {"Delta_phase": parameters.pop("Delta_phase", 0.5 * np.pi)}
+
+    def compute(self, frequency_array, resolved):
+        return geomoptics.one_image_BBH(frequency_array, resolved["Delta_phase"])
 
 
-def _cusp_caustic(
-    frequency_array: np.ndarray,
-    lensing_delta_t: float | None = None,
-    mu_rel: float | None = None,
-    Delta_t_10: float | None = None,
-    Delta_t_20: float | None = None,
-    positive_phase: float = 1.0,
-) -> np.ndarray:
-    if Delta_t_10 is None:
-        Delta_t_10 = lensing_delta_t
-    if Delta_t_20 is None:
-        Delta_t_20 = lensing_delta_t
-    return geomoptics.cusp_caustic(
-        frequency_array, Delta_t_10, Delta_t_20, mu_rel, positive_phase
-    )
+class TwoImagesBBH(AmplificationModel):
+    def resolve(self, parameters, lens_model_defaults):
+        return {
+            "lensing_delta_t": _resolve_with_default(
+                "lensing_delta_t", parameters, lens_model_defaults
+            ),
+            "mu_rel": _resolve_with_default("mu_rel", parameters, lens_model_defaults),
+            "Delta_phase": parameters.pop("Delta_phase", 0.5 * np.pi),
+        }
 
-
-def _pointlens(
-    frequency_array: np.ndarray,
-    ML: float | None = None,
-    y: float | None = None,
-) -> np.ndarray:
-    if ML is None or y is None:
-        raise ValueError(
-            "pointlens requires ML and y either in the sampled parameters "
-            "or in waveform_generator's lens_model_defaults setting."
+    def compute(self, frequency_array, resolved):
+        # The vendor geomoptics.two_images_BBH names its time-delay argument
+        # Delta_t; we call it lensing_delta_t everywhere else in this
+        # package (matching the sampled/YAML parameter name), so the
+        # rename happens here, at the one place that calls the vendor code.
+        return geomoptics.two_images_BBH(
+            frequency_array,
+            resolved["mu_rel"],
+            resolved["lensing_delta_t"],
+            resolved["Delta_phase"],
         )
-    return _pointlens_amplification_factor(frequency_array, ML, y)
 
 
-# Registering a new amplification function here (and nowhere else) is
-# enough to make it available: SUPPORTED_AMPLIFICATION_FUNCTIONS,
-# get_amplification_factor and get_model_specific_parameter_names are all
-# derived from this dict, not maintained separately. A parameter defaulting
-# to None is treated as needing a value, resolved either from the sampled
-# parameters or from a generator-level lens_model_defaults fallback; a
-# parameter with any other default (e.g. Delta_phase) is a local default
-# that never needs generator-level resolution.
-_AMPLIFICATION_FUNCTIONS = {
-    "one_image_BBH": _one_image_BBH,
-    "two_images_BBH": _two_images_BBH,
-    "fold_caustic": _fold_caustic,
-    "cusp_caustic": _cusp_caustic,
-    "pointlens": _pointlens,
+class FoldCaustic(AmplificationModel):
+    def resolve(self, parameters, lens_model_defaults):
+        return {
+            "lensing_delta_t": _resolve_with_default(
+                "lensing_delta_t", parameters, lens_model_defaults
+            ),
+            "positive_phase": parameters.pop("positive_phase", 1.0),
+        }
+
+    def compute(self, frequency_array, resolved):
+        return geomoptics.fold_caustic(
+            frequency_array, resolved["lensing_delta_t"], resolved["positive_phase"]
+        )
+
+
+class CuspCaustic(AmplificationModel):
+    def resolve(self, parameters, lens_model_defaults):
+        lensing_delta_t = _resolve_with_default(
+            "lensing_delta_t", parameters, lens_model_defaults
+        )
+        Delta_t_10 = parameters.pop("Delta_t_10", None)
+        if Delta_t_10 is None:
+            Delta_t_10 = lensing_delta_t
+        Delta_t_20 = parameters.pop("Delta_t_20", None)
+        if Delta_t_20 is None:
+            Delta_t_20 = lensing_delta_t
+        return {
+            "Delta_t_10": Delta_t_10,
+            "Delta_t_20": Delta_t_20,
+            "mu_rel": _resolve_with_default("mu_rel", parameters, lens_model_defaults),
+            "positive_phase": parameters.pop("positive_phase", 1.0),
+        }
+
+    def compute(self, frequency_array, resolved):
+        return geomoptics.cusp_caustic(
+            frequency_array,
+            resolved["Delta_t_10"],
+            resolved["Delta_t_20"],
+            resolved["mu_rel"],
+            resolved["positive_phase"],
+        )
+
+
+class PointLens(AmplificationModel):
+    def resolve(self, parameters, lens_model_defaults):
+        ML = _resolve_with_default("ML", parameters, lens_model_defaults)
+        y = _resolve_with_default("y", parameters, lens_model_defaults)
+        if ML is None or y is None:
+            raise ValueError(
+                "pointlens requires ML and y either in the sampled parameters "
+                "or in waveform_generator's lens_model_defaults setting."
+            )
+        return {"ML": ML, "y": y}
+
+    def compute(self, frequency_array, resolved):
+        return _pointlens_amplification_factor(
+            frequency_array, resolved["ML"], resolved["y"]
+        )
+
+
+# Registering a new amplification function means adding one entry here,
+# nothing else. Each model's resolve()/compute() pair is fully
+# self-contained, there is no shared table or introspection step that a
+# new model needs to interact with correctly.
+_AMPLIFICATION_MODELS: Dict[str, AmplificationModel] = {
+    "one_image_BBH": OneImageBBH(),
+    "two_images_BBH": TwoImagesBBH(),
+    "fold_caustic": FoldCaustic(),
+    "cusp_caustic": CuspCaustic(),
+    "pointlens": PointLens(),
 }
 
-SUPPORTED_AMPLIFICATION_FUNCTIONS: Tuple[str, ...] = tuple(_AMPLIFICATION_FUNCTIONS)
+SUPPORTED_AMPLIFICATION_FUNCTIONS: Tuple[str, ...] = tuple(_AMPLIFICATION_MODELS)
 
 
-def get_model_specific_parameter_names(
-    amplification_factor_function: str,
-) -> Tuple[str, ...]:
-    func = _AMPLIFICATION_FUNCTIONS.get(amplification_factor_function)
-    if func is None:
-        return ()
-
-    return tuple(
-        name
-        for name, param in inspect.signature(func).parameters.items()
-        if name != "frequency_array"
-        and param.kind
-        not in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
-        and param.default is None
-    )
-
-
-def get_amplification_factor(
-    amplification_factor_function: str,
-    frequency_array: np.ndarray,
-    parameters: Dict[str, float],
-) -> np.ndarray:
+def get_model(amplification_factor_function: str) -> AmplificationModel:
     try:
-        func = _AMPLIFICATION_FUNCTIONS[amplification_factor_function]
+        return _AMPLIFICATION_MODELS[amplification_factor_function]
     except KeyError:
         raise ValueError(
             f"Unsupported lensing amplification function "
             f"'{amplification_factor_function}'. Available functions are: "
             f"{', '.join(SUPPORTED_AMPLIFICATION_FUNCTIONS)}."
         ) from None
-
-    kwargs = {
-        name: parameters[name]
-        for name in inspect.signature(func).parameters
-        if name != "frequency_array" and name in parameters
-    }
-    return func(frequency_array, **kwargs)
 
 
 def _pointlens_amplification_factor(
