@@ -17,6 +17,7 @@ class LensedWaveformGenerator(WaveformGenerator):
         lens_model_code: str = "modwaveforms",
         amplification_factor_function: str | None = None,
         lens_model_defaults: Dict[str, float] | None = None,
+        lens_model_settings: Dict[str, object] | None = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -46,8 +47,14 @@ class LensedWaveformGenerator(WaveformGenerator):
         # AmplificationModel in modwaveforms_amplification.py) -- this
         # class never hardcodes any lens model's parameter names itself,
         # it just calls model.resolve() and model.compute().
+        # lens_model_settings carries fixed, construction-time configuration
+        # a model may need beyond a per-sample resolvable value (e.g. a
+        # lookup table file path to load once), as opposed to
+        # lens_model_defaults below, which is per-sample fallback values.
         self._model = load_amplification_model(
-            self.lens_model_code, self.amplification_factor_function
+            self.lens_model_code,
+            self.amplification_factor_function,
+            lens_model_settings,
         )
         # Generator-level fallback values for whichever sample parameters
         # the active model needs (e.g. two_images_BBH's lensing_delta_t/

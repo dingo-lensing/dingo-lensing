@@ -17,6 +17,14 @@ class AmplificationModel:
     adding a new model means implementing these two methods and nothing
     else, and a mistake in one model's resolve()/compute() cannot affect
     any other model's behaviour.
+
+    A model that needs fixed, generator-construction-time configuration
+    beyond a per-sample resolvable value -- e.g. a lookup table or
+    interpolator loaded once from a file, rather than on every sample --
+    just declares it as an ordinary __init__ parameter. get_model() below
+    forwards a generator's lens_model_settings straight through to the
+    constructor, so this needs no special support from resolve()/compute()
+    at all.
     """
 
     def resolve(
@@ -132,26 +140,37 @@ class PointLens(AmplificationModel):
 # nothing else. Each model's resolve()/compute() pair is fully
 # self-contained, there is no shared table or introspection step that a
 # new model needs to interact with correctly.
-_AMPLIFICATION_MODELS: Dict[str, AmplificationModel] = {
-    "one_image_BBH": OneImageBBH(),
-    "two_images_BBH": TwoImagesBBH(),
-    "fold_caustic": FoldCaustic(),
-    "cusp_caustic": CuspCaustic(),
-    "pointlens": PointLens(),
+_AMPLIFICATION_MODEL_CLASSES: Dict[str, type] = {
+    "one_image_BBH": OneImageBBH,
+    "two_images_BBH": TwoImagesBBH,
+    "fold_caustic": FoldCaustic,
+    "cusp_caustic": CuspCaustic,
+    "pointlens": PointLens,
 }
 
-SUPPORTED_AMPLIFICATION_FUNCTIONS: Tuple[str, ...] = tuple(_AMPLIFICATION_MODELS)
+SUPPORTED_AMPLIFICATION_FUNCTIONS: Tuple[str, ...] = tuple(_AMPLIFICATION_MODEL_CLASSES)
 
 
-def get_model(amplification_factor_function: str) -> AmplificationModel:
+def get_model(
+    amplification_factor_function: str, **lens_model_settings
+) -> AmplificationModel:
+    """Construct the model for one amplification function.
+
+    `**lens_model_settings` is forwarded straight to the model class's
+    constructor, so a model needing fixed, construction-time configuration
+    (e.g. a lookup table file path to load once) can just declare it as a
+    normal __init__ parameter. None of the models here need any, so their
+    constructors take no arguments and this is a no-op for them.
+    """
     try:
-        return _AMPLIFICATION_MODELS[amplification_factor_function]
+        model_class = _AMPLIFICATION_MODEL_CLASSES[amplification_factor_function]
     except KeyError:
         raise ValueError(
             f"Unsupported lensing amplification function "
             f"'{amplification_factor_function}'. Available functions are: "
             f"{', '.join(SUPPORTED_AMPLIFICATION_FUNCTIONS)}."
         ) from None
+    return model_class(**lens_model_settings)
 
 
 def _pointlens_amplification_factor(
