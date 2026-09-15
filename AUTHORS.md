@@ -11,3 +11,4 @@ This file lists all authors who contributed to the code.
 * Lorena Magana Zertuche
 * Luka Vujeva
 * Joey Bowman
+* Kailib Ryan Doney
