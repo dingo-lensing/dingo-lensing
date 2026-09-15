@@ -33,6 +33,81 @@ it does pop is gone. Getting this right for a new model is entirely that
 model's own responsibility, and a mistake in it cannot leak into any other
 model's behaviour.
 
+Subclasses also declare `PARAMETER_NAMES` and get fallback visibility for
+free (both covered below), but neither of those changes the two-method
+contract itself.
+
+### Declaring which sample name a model expects: `PARAMETER_NAMES`
+
+Every model declares `PARAMETER_NAMES`, a dict mapping every name it uses
+internally to the DINGO-Lensing standard parameter name it should actually
+look up in a sample:
+
+```python
+class TwoImagesBBH(AmplificationModel):
+    PARAMETER_NAMES = {
+        "lensing_delta_t": "lensing_delta_t",
+        "mu_rel": "mu_rel",
+        "Delta_phase": "Delta_phase",
+    }
+
+    def resolve(self, parameters, lens_model_defaults):
+        names = self.PARAMETER_NAMES
+        return {
+            "lensing_delta_t": _resolve_with_default(
+                names["lensing_delta_t"], parameters, lens_model_defaults
+            ),
+            ...
+        }
+```
+
+For a model built alongside the rest of this package, that's an identity
+mapping, its internal names already are the standard ones. It starts to
+matter once a model wraps outside vendor code with its own established
+naming: the mapping is the one place that states, explicitly and
+inspectably, exactly which standard name a model expects for each value it
+needs, rather than that assumption living as a string literal typed
+directly into `resolve()`'s body, indistinguishable from any other string in
+the method. A reviewer can check this one dict against the actual sample
+convention; they'd have to read every line of `resolve()` to check a bare
+literal.
+
+This is checked, not just conventional: `lens_code_loader.load_amplification_model()`
+rejects any model, from any lens code, that doesn't declare `PARAMETER_NAMES`
+as a dict (an explicit empty dict is fine, it just means "this model reads
+nothing from a sample"; a missing attribute is not). Integrating a new model
+without declaring this fails immediately at load time, not later with some
+confusing error once `resolve()` is actually called.
+
+This does not, by itself, guarantee the standard name chosen is the *right*
+one. If a model's `PARAMETER_NAMES` says its `mu_rel` should be read from a
+sample as `mu_rel`, but the sample actually calls that value `t_delay`, this
+mapping is simply wrong, `resolve()` will not find it, and (per the next
+section) will fall back to a default instead of raising, because it has no
+way to tell "not present because the name's wrong" apart from "not present
+because the run intended this value to come from a default." Declaring the
+mapping in one visible place makes that mistake easy to check for, it
+doesn't make it impossible to make.
+
+### Fallback visibility
+
+Every place `resolve()` reaches for a fallback, `lens_model_defaults` or a
+model's own built-in default, logs it, at `logging.DEBUG`, through the
+standard library `logging` module. This is silent by default (nothing is
+printed during a normal run), and can be turned on with:
+
+```python
+import logging
+logging.getLogger("dingo_lensing.modwaveforms_amplification").setLevel(logging.DEBUG)
+```
+
+This serves two purposes at once: it's how a `PARAMETER_NAMES` mistake like
+the one above actually becomes visible (turn logging on, and every sample
+will show that quantity quietly falling back to a default instead of being
+read from the sample), and it's also how to confirm a model is using a
+fallback on purpose, when that's what's intended, for a run where a value is
+deliberately fixed for every sample rather than sampled per-event.
+
 `get_model(amplification_factor_function, **lens_model_settings)` in each
 lens-code module is a small factory: look up the class for the requested
 function name, construct it, return it. `lens_code_loader.py` is the one
@@ -97,11 +172,16 @@ it should happen once, not on every sample.
 **Step 1: add `dingo_lensing/gravelamps_amplification.py`**
 
 ```python
+import logging
+
 from gravelamps.models import microlensing_o3
 from gravelamps.core.conversion import (
     lens_mass_source_to_lens_mass,
     solar_mass_to_natural_mass,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 def _resolve_with_default(name, parameters, lens_model_defaults):
@@ -111,10 +191,25 @@ def _resolve_with_default(name, parameters, lens_model_defaults):
     value = parameters.pop(name, None)
     if value is None:
         value = lens_model_defaults.get(name)
+        logger.debug(
+            "Parameter '%s' not found in sample parameters; falling back to "
+            "lens_model_defaults value %r.", name, value,
+        )
     return value
 
 
 class MicrolensingO3:
+    # Standard name -> standard name for the three values this model reads
+    # from a sample. If the team later decides source_position is the same
+    # physical quantity as PointLens's own "y" and wants one shared standard
+    # name for it, this is the only line that would change, to
+    # {"source_position": "y"}; nothing else in this class would need to.
+    PARAMETER_NAMES = {
+        "lens_mass": "lens_mass",
+        "lens_fractional_distance": "lens_fractional_distance",
+        "source_position": "source_position",
+    }
+
     def __init__(self, lookup_table_path=None):
         self._lookup_table = (
             microlensing_o3.LookUpTable(lookup_table_path)
@@ -123,22 +218,22 @@ class MicrolensingO3:
         )
 
     def resolve(self, parameters, lens_model_defaults):
+        names = self.PARAMETER_NAMES
         return {
             "lens_mass": _resolve_with_default(
-                "lens_mass", parameters, lens_model_defaults
+                names["lens_mass"], parameters, lens_model_defaults
             ),
             "lens_fractional_distance": _resolve_with_default(
-                "lens_fractional_distance", parameters, lens_model_defaults
+                names["lens_fractional_distance"], parameters, lens_model_defaults
             ),
             "source_position": _resolve_with_default(
-                "source_position", parameters, lens_model_defaults
+                names["source_position"], parameters, lens_model_defaults
             ),
             # luminosity_distance is a source parameter the *base* (unlensed)
             # waveform model also needs, so unlike the three keys above, it
             # must be read here, not popped, or the base generator loses it.
-            # This is exactly the kind of mistake the original ML/y leak bug
-            # was: get this line wrong for a new model and only *this*
-            # model's samples break, nothing else's.
+            # Getting a line like this wrong for a new model only breaks
+            # that model's own samples, nothing else's.
             "luminosity_distance": parameters["luminosity_distance"],
         }
 
@@ -220,3 +315,6 @@ it if `lens_fractional_distance` is always sampled per-event instead.
   strips exactly what it consumes, and dingo-gw's own parameter conversion
   does targeted key lookups rather than blindly unpacking the whole dict, so
   leftover unrelated keys in `parameters` are harmless.
+- `PARAMETER_NAMES` and fallback logging come along automatically too, they
+  aren't extra work for a new lens code beyond declaring the one dict shown
+  above.

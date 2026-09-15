@@ -10,7 +10,9 @@ _LENS_CODE_MODULES = {
 # FIXME: To integrate another lensing code, add a package-specific
 # <code>_amplification.py module exposing get_model(amplification_factor_function,
 # **lens_model_settings), returning an object with resolve(parameters,
-# lens_model_defaults) and compute(frequency_array, resolved) methods (see
+# lens_model_defaults) and compute(frequency_array, resolved) methods, and a
+# PARAMETER_NAMES dict mapping every name it uses internally to the
+# DINGO-Lensing standard parameter name it should read from a sample (see
 # AmplificationModel in modwaveforms_amplification.py). Register its
 # lens_model_code here, and set lens_model_code and
 # amplification_factor_function in the YAML settings.
@@ -60,4 +62,17 @@ def load_amplification_model(
         raise TypeError(
             f"Lens model code '{lens_model_code}' must provide a callable get_model."
         )
-    return get_model(amplification_factor_function, **(lens_model_settings or {}))
+    model = get_model(amplification_factor_function, **(lens_model_settings or {}))
+
+    parameter_names = getattr(model, "PARAMETER_NAMES", None)
+    if not isinstance(parameter_names, dict):
+        raise TypeError(
+            f"Model for amplification function '{amplification_factor_function}' "
+            f"(lens model code '{lens_model_code}') must declare a "
+            f"PARAMETER_NAMES dict mapping every name it uses internally to "
+            f"the DINGO-Lensing standard parameter name it should read from a "
+            f"sample. This is what lets resolve() ask a sample for the "
+            f"correct name instead of silently falling back to a default."
+        )
+
+    return model

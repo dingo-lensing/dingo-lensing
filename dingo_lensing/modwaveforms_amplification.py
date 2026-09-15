@@ -1,8 +1,12 @@
+import logging
 from typing import Dict, Tuple
 
 import numpy as np
 from scipy.special import loggamma
 from modwaveforms import geomoptics, waveoptics
+
+
+logger = logging.getLogger(__name__)
 
 
 class AmplificationModel:
@@ -25,7 +29,23 @@ class AmplificationModel:
     forwards a generator's lens_model_settings straight through to the
     constructor, so this needs no special support from resolve()/compute()
     at all.
+
+    Subclasses must also declare PARAMETER_NAMES: a dict mapping every
+    name this model's own resolve()/compute() use internally to the
+    DINGO-Lensing standard parameter name it should actually look up in a
+    sample. For a model built alongside the rest of this package, that's
+    an identity mapping (its internal names already are the standard
+    ones). For a model wrapping outside vendor code with its own
+    established naming (e.g. Gravelamps), this is the one place that
+    states, explicitly and inspectably, exactly which standard name this
+    model expects to receive for each value it needs -- rather than that
+    assumption living as an easy-to-typo string literal buried inside
+    resolve()'s body. lens_code_loader.load_amplification_model() checks
+    this is present for every model, from every lens code, so a new
+    integration cannot skip declaring it.
     """
+
+    PARAMETER_NAMES: Dict[str, str]
 
     def resolve(
         self, parameters: Dict[str, float], lens_model_defaults: Dict[str, float]
@@ -42,25 +62,61 @@ def _resolve_with_default(name, parameters, lens_model_defaults):
     value = parameters.pop(name, None)
     if value is None:
         value = lens_model_defaults.get(name)
+        logger.debug(
+            "Parameter '%s' not found in sample parameters; falling back to "
+            "lens_model_defaults value %r.",
+            name,
+            value,
+        )
     return value
 
 
+def _pop_with_builtin_default(name, parameters, default):
+    if name in parameters:
+        return parameters.pop(name)
+    logger.debug(
+        "Parameter '%s' not found in sample parameters; falling back to "
+        "this model's built-in default value %r.",
+        name,
+        default,
+    )
+    return default
+
+
 class OneImageBBH(AmplificationModel):
+    PARAMETER_NAMES = {"Delta_phase": "Delta_phase"}
+
     def resolve(self, parameters, lens_model_defaults):
-        return {"Delta_phase": parameters.pop("Delta_phase", 0.5 * np.pi)}
+        names = self.PARAMETER_NAMES
+        return {
+            "Delta_phase": _pop_with_builtin_default(
+                names["Delta_phase"], parameters, 0.5 * np.pi
+            )
+        }
 
     def compute(self, frequency_array, resolved):
         return geomoptics.one_image_BBH(frequency_array, resolved["Delta_phase"])
 
 
 class TwoImagesBBH(AmplificationModel):
+    PARAMETER_NAMES = {
+        "lensing_delta_t": "lensing_delta_t",
+        "mu_rel": "mu_rel",
+        "Delta_phase": "Delta_phase",
+    }
+
     def resolve(self, parameters, lens_model_defaults):
+        names = self.PARAMETER_NAMES
         return {
             "lensing_delta_t": _resolve_with_default(
-                "lensing_delta_t", parameters, lens_model_defaults
+                names["lensing_delta_t"], parameters, lens_model_defaults
             ),
-            "mu_rel": _resolve_with_default("mu_rel", parameters, lens_model_defaults),
-            "Delta_phase": parameters.pop("Delta_phase", 0.5 * np.pi),
+            "mu_rel": _resolve_with_default(
+                names["mu_rel"], parameters, lens_model_defaults
+            ),
+            "Delta_phase": _pop_with_builtin_default(
+                names["Delta_phase"], parameters, 0.5 * np.pi
+            ),
         }
 
     def compute(self, frequency_array, resolved):
@@ -77,12 +133,20 @@ class TwoImagesBBH(AmplificationModel):
 
 
 class FoldCaustic(AmplificationModel):
+    PARAMETER_NAMES = {
+        "lensing_delta_t": "lensing_delta_t",
+        "positive_phase": "positive_phase",
+    }
+
     def resolve(self, parameters, lens_model_defaults):
+        names = self.PARAMETER_NAMES
         return {
             "lensing_delta_t": _resolve_with_default(
-                "lensing_delta_t", parameters, lens_model_defaults
+                names["lensing_delta_t"], parameters, lens_model_defaults
             ),
-            "positive_phase": parameters.pop("positive_phase", 1.0),
+            "positive_phase": _pop_with_builtin_default(
+                names["positive_phase"], parameters, 1.0
+            ),
         }
 
     def compute(self, frequency_array, resolved):
@@ -92,21 +156,46 @@ class FoldCaustic(AmplificationModel):
 
 
 class CuspCaustic(AmplificationModel):
+    PARAMETER_NAMES = {
+        "lensing_delta_t": "lensing_delta_t",
+        "Delta_t_10": "Delta_t_10",
+        "Delta_t_20": "Delta_t_20",
+        "mu_rel": "mu_rel",
+        "positive_phase": "positive_phase",
+    }
+
     def resolve(self, parameters, lens_model_defaults):
+        names = self.PARAMETER_NAMES
         lensing_delta_t = _resolve_with_default(
-            "lensing_delta_t", parameters, lens_model_defaults
+            names["lensing_delta_t"], parameters, lens_model_defaults
         )
-        Delta_t_10 = parameters.pop("Delta_t_10", None)
+        Delta_t_10 = parameters.pop(names["Delta_t_10"], None)
         if Delta_t_10 is None:
+            logger.debug(
+                "Parameter '%s' not found in sample parameters; falling "
+                "back to lensing_delta_t value %r.",
+                names["Delta_t_10"],
+                lensing_delta_t,
+            )
             Delta_t_10 = lensing_delta_t
-        Delta_t_20 = parameters.pop("Delta_t_20", None)
+        Delta_t_20 = parameters.pop(names["Delta_t_20"], None)
         if Delta_t_20 is None:
+            logger.debug(
+                "Parameter '%s' not found in sample parameters; falling "
+                "back to lensing_delta_t value %r.",
+                names["Delta_t_20"],
+                lensing_delta_t,
+            )
             Delta_t_20 = lensing_delta_t
         return {
             "Delta_t_10": Delta_t_10,
             "Delta_t_20": Delta_t_20,
-            "mu_rel": _resolve_with_default("mu_rel", parameters, lens_model_defaults),
-            "positive_phase": parameters.pop("positive_phase", 1.0),
+            "mu_rel": _resolve_with_default(
+                names["mu_rel"], parameters, lens_model_defaults
+            ),
+            "positive_phase": _pop_with_builtin_default(
+                names["positive_phase"], parameters, 1.0
+            ),
         }
 
     def compute(self, frequency_array, resolved):
@@ -120,9 +209,12 @@ class CuspCaustic(AmplificationModel):
 
 
 class PointLens(AmplificationModel):
+    PARAMETER_NAMES = {"ML": "ML", "y": "y"}
+
     def resolve(self, parameters, lens_model_defaults):
-        ML = _resolve_with_default("ML", parameters, lens_model_defaults)
-        y = _resolve_with_default("y", parameters, lens_model_defaults)
+        names = self.PARAMETER_NAMES
+        ML = _resolve_with_default(names["ML"], parameters, lens_model_defaults)
+        y = _resolve_with_default(names["y"], parameters, lens_model_defaults)
         if ML is None or y is None:
             raise ValueError(
                 "pointlens requires ML and y either in the sampled parameters "
