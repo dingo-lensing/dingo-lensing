@@ -1,4 +1,5 @@
 import hashlib
+import logging
 from pathlib import Path
 import subprocess
 import sys
@@ -10,6 +11,7 @@ from dingo.gw.waveform_generator import WaveformGenerator
 from modwaveforms import geomoptics
 
 import dingo_lensing.lens_code_loader as lens_code_loader
+import dingo_lensing.modwaveforms_amplification as modwaveforms_amplification
 from dingo_lensing.modwaveforms_amplification import (
     AmplificationModel,
     CuspCaustic,
@@ -37,6 +39,97 @@ def test_amplification_model_base_class_is_abstract():
         model.resolve({}, {})
     with pytest.raises(NotImplementedError):
         model.compute(FREQUENCIES, {})
+
+
+def test_every_registered_model_declares_parameter_names():
+    # Enforced structurally by lens_code_loader for anything loaded through
+    # it (see the loader tests below); this just confirms the five real
+    # models actually hold up their end of that contract.
+    for model_class in modwaveforms_amplification._AMPLIFICATION_MODEL_CLASSES.values():
+        assert isinstance(model_class().PARAMETER_NAMES, dict)
+
+
+# --------------------------------------------------------------------------
+# Fallback visibility: resolve() never silently makes up a value without a
+# trace. Every place a model reaches for lens_model_defaults or a built-in
+# default logs it (at DEBUG, so it's silent unless someone turns it on),
+# which is what would surface a parameter name that doesn't actually match
+# what a sample calls it -- the model looks for the name it was told to
+# look for, doesn't find it, and this is where that becomes visible.
+# --------------------------------------------------------------------------
+
+
+def test_resolve_with_default_logs_when_falling_back(caplog):
+    with caplog.at_level(logging.DEBUG, logger=modwaveforms_amplification.__name__):
+        value = modwaveforms_amplification._resolve_with_default(
+            "mu_rel", {}, {"mu_rel": 0.5}
+        )
+
+    assert value == 0.5
+    assert any("mu_rel" in record.message for record in caplog.records)
+
+
+def test_resolve_with_default_does_not_log_when_value_is_present(caplog):
+    with caplog.at_level(logging.DEBUG, logger=modwaveforms_amplification.__name__):
+        value = modwaveforms_amplification._resolve_with_default(
+            "mu_rel", {"mu_rel": 0.9}, {"mu_rel": 0.5}
+        )
+
+    assert value == 0.9
+    assert caplog.records == []
+
+
+def test_pop_with_builtin_default_logs_when_falling_back(caplog):
+    with caplog.at_level(logging.DEBUG, logger=modwaveforms_amplification.__name__):
+        value = modwaveforms_amplification._pop_with_builtin_default(
+            "Delta_phase", {}, 0.5 * np.pi
+        )
+
+    assert value == 0.5 * np.pi
+    assert any("Delta_phase" in record.message for record in caplog.records)
+
+
+def test_pop_with_builtin_default_does_not_log_when_value_is_present(caplog):
+    with caplog.at_level(logging.DEBUG, logger=modwaveforms_amplification.__name__):
+        value = modwaveforms_amplification._pop_with_builtin_default(
+            "Delta_phase", {"Delta_phase": 1.0}, 0.5 * np.pi
+        )
+
+    assert value == 1.0
+    assert caplog.records == []
+
+
+def test_cusp_caustic_logs_when_borrowing_lensing_delta_t(caplog):
+    # The bespoke Delta_t_10/Delta_t_20 fallback isn't routed through
+    # _resolve_with_default, so it needs its own coverage here.
+    model = CuspCaustic()
+    with caplog.at_level(logging.DEBUG, logger=modwaveforms_amplification.__name__):
+        model.resolve({"lensing_delta_t": 0.037, "mu_rel": 0.42}, {})
+
+    messages = [record.message for record in caplog.records]
+    assert any("Delta_t_10" in message for message in messages)
+    assert any("Delta_t_20" in message for message in messages)
+
+
+# --------------------------------------------------------------------------
+# PARAMETER_NAMES translation layer: proves the declared mapping actually
+# drives which key resolve() looks up in a sample, rather than being
+# documentation sitting next to a separately hardcoded string literal.
+# --------------------------------------------------------------------------
+
+
+def test_parameter_names_mapping_actually_drives_the_lookup_key(monkeypatch):
+    model = TwoImagesBBH()
+    # Point this model's internal "mu_rel" at a differently-named standard
+    # parameter, as if the team had agreed on a different sample-facing
+    # name for the same quantity.
+    monkeypatch.setitem(model.PARAMETER_NAMES, "mu_rel", "relative_magnification")
+
+    resolved = model.resolve(
+        {"lensing_delta_t": 0.02, "relative_magnification": 0.77}, {}
+    )
+
+    assert resolved["mu_rel"] == 0.77
 
 
 # --------------------------------------------------------------------------
@@ -291,11 +384,11 @@ def test_get_model_forwards_construction_time_settings_to_the_model_class():
     # get_model must still forward whatever it's given straight through to
     # the model class -- e.g. a future lookup-table-backed model taking a
     # file path to load once, rather than on every sample.
-    import dingo_lensing.modwaveforms_amplification as modwaveforms_amplification
-
     captured = {}
 
     class LookupTableModel(modwaveforms_amplification.AmplificationModel):
+        PARAMETER_NAMES = {}
+
         def __init__(self, lookup_table_path=None):
             captured["lookup_table_path"] = lookup_table_path
 
@@ -331,7 +424,7 @@ def test_loader_rejects_unknown_lens_model_code():
 
 def test_loader_imports_the_module_only_once(monkeypatch):
     lens_code_loader._import_lens_code_module.cache_clear()
-    expected_model = object()
+    expected_model = SimpleNamespace(PARAMETER_NAMES={})
     imported_modules = []
 
     def fake_import_module(module_name):
@@ -364,6 +457,8 @@ def test_loader_forwards_lens_model_settings_to_the_model_constructor(monkeypatc
     received = {}
 
     class FakeModel:
+        PARAMETER_NAMES = {}
+
         def __init__(self, **settings):
             received["settings"] = settings
 
@@ -396,6 +491,8 @@ def test_loader_two_generators_do_not_share_a_model_instance(monkeypatch):
     lens_code_loader._import_lens_code_module.cache_clear()
 
     class FakeModel:
+        PARAMETER_NAMES = {}
+
         def __init__(self, **settings):
             self.settings = settings
 
@@ -451,6 +548,65 @@ def test_loader_reports_import_and_interface_errors(monkeypatch):
     lens_code_loader._import_lens_code_module.cache_clear()
 
 
+def test_loader_rejects_a_model_missing_parameter_names(monkeypatch):
+    # Enforcement point for the PARAMETER_NAMES contract: a model with no
+    # declared mapping fails at load time, not with a confusing failure
+    # somewhere downstream once resolve() is actually called.
+    lens_code_loader._import_lens_code_module.cache_clear()
+
+    class ModelWithoutParameterNames:
+        pass
+
+    monkeypatch.setitem(
+        lens_code_loader._LENS_CODE_MODULES,
+        "test_code",
+        "test_package.amplification",
+    )
+    monkeypatch.setattr(
+        lens_code_loader,
+        "import_module",
+        lambda module_name: SimpleNamespace(
+            get_model=lambda function: ModelWithoutParameterNames()
+        ),
+    )
+
+    try:
+        with pytest.raises(TypeError, match="must declare a PARAMETER_NAMES"):
+            lens_code_loader.load_amplification_model("test_code", "anything")
+    finally:
+        lens_code_loader._import_lens_code_module.cache_clear()
+
+
+def test_loader_accepts_a_model_with_an_explicitly_empty_parameter_names(monkeypatch):
+    # An explicit empty dict means "this model reads nothing from a
+    # sample", a deliberate declaration, not a missing one, so it must be
+    # accepted rather than rejected alongside the case above.
+    lens_code_loader._import_lens_code_module.cache_clear()
+
+    class ModelWithNoSampleParameters:
+        PARAMETER_NAMES = {}
+
+    monkeypatch.setitem(
+        lens_code_loader._LENS_CODE_MODULES,
+        "test_code",
+        "test_package.amplification",
+    )
+    monkeypatch.setattr(
+        lens_code_loader,
+        "import_module",
+        lambda module_name: SimpleNamespace(
+            get_model=lambda function: ModelWithNoSampleParameters()
+        ),
+    )
+
+    try:
+        model = lens_code_loader.load_amplification_model("test_code", "anything")
+    finally:
+        lens_code_loader._import_lens_code_module.cache_clear()
+
+    assert isinstance(model, ModelWithNoSampleParameters)
+
+
 def test_loader_real_modwaveforms_integration_returns_correct_model():
     # Unlike the tests above (which fake out import_module entirely), this
     # exercises the real registered "modwaveforms" entry end to end: the
@@ -468,11 +624,12 @@ def test_loader_real_modwaveforms_forwards_settings_end_to_end():
     # reaches a model's constructor through the *real* module, not a fake
     # one -- this is the exact mechanism a new lens code (e.g. Gravelamps'
     # lookup-table-backed models, see REFACTORING_GUIDE.md) would rely on.
-    import dingo_lensing.modwaveforms_amplification as modwaveforms_amplification
-
     captured = {}
 
     class LookupTableModel(modwaveforms_amplification.AmplificationModel):
+        PARAMETER_NAMES = {}  # reads nothing from a sample; lookup_table_path
+        # is a construction-time setting, not a per-sample value.
+
         def __init__(self, lookup_table_path=None):
             captured["lookup_table_path"] = lookup_table_path
 
