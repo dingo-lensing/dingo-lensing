@@ -5,25 +5,6 @@ parameters and computes the amplification factor for a given lens model, and
 how to add a new lens model (or a whole new lens code, e.g. Gravelamps) under
 it.
 
-## Why this changed
-
-The original generator hardcoded per-model parameter handling directly
-inside `waveform_generator.py`: it knew that `pointlens` needs `ML`/`y`, that
-`two_images_BBH` needs `lensing_delta_t`/`mu_rel`, and so on, all in one
-function. That's how the original `ML`/`y` leak bug happened: a code path
-that stripped lensing parameters for one model didn't know it also had to
-strip them for another.
-
-The team's shared goal for the rewrite: adding a new lens model should not
-require touching any file used by existing models, and a mistake in one
-model's parameter handling should not be able to affect any other model. That
-ruled out a shared dispatch table (aliases/fallbacks/defaults declared in one
-place for every model) and signature-inspection-based dispatch (deriving
-what a model needs by introspecting its function signature), since both
-still route every model through one shared piece of logic. Instead, each
-model owns its own parameter resolution and computation completely, through
-two methods.
-
 ## The contract
 
 A lens model is any object with two methods:
@@ -38,9 +19,7 @@ def compute(self, frequency_array, resolved: dict):
     """Turn the resolved values into the amplification factor array."""
 ```
 
-That's it. There is no shared table anywhere that lists which models need
-which parameters, and nothing in the dispatch path does an `isinstance`
-check. `AmplificationModel` in `modwaveforms_amplification.py` is a base
+That's it. `AmplificationModel` in `modwaveforms_amplification.py` is a base
 class that raises `NotImplementedError` for both methods, but subclassing it
 is optional documentation, not a requirement; a lens-code module elsewhere
 can define a plain class with `resolve`/`compute` methods and nothing else
