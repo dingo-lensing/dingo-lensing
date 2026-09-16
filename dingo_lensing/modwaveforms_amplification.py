@@ -23,8 +23,8 @@ class AmplificationModel:
     any other model's behaviour.
 
     A model that needs fixed, generator-construction-time configuration
-    beyond a per-sample resolvable value -- e.g. a lookup table or
-    interpolator loaded once from a file, rather than on every sample --
+    beyond a per-sample resolvable value (e.g. a lookup table or
+    interpolator loaded once from a file, rather than on every sample)
     just declares it as an ordinary __init__ parameter. get_model() below
     forwards a generator's lens_model_settings straight through to the
     constructor, so this needs no special support from resolve()/compute()
@@ -38,7 +38,7 @@ class AmplificationModel:
     ones). For a model wrapping outside vendor code with its own
     established naming (e.g. Gravelamps), this is the one place that
     states, explicitly and inspectably, exactly which standard name this
-    model expects to receive for each value it needs -- rather than that
+    model expects to receive for each value it needs, rather than that
     assumption living as an easy-to-typo string literal buried inside
     resolve()'s body. lens_code_loader.load_amplification_model() checks
     this is present for every model, from every lens code, so a new

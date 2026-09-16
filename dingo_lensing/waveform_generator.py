@@ -44,7 +44,7 @@ class LensedWaveformGenerator(WaveformGenerator):
             )
         self.fdsm_function = self.amplification_factor_function
         # The model owns its own parameter resolution entirely (see
-        # AmplificationModel in modwaveforms_amplification.py) -- this
+        # AmplificationModel in modwaveforms_amplification.py). This
         # class never hardcodes any lens model's parameter names itself,
         # it just calls model.resolve() and model.compute().
         # lens_model_settings carries fixed, construction-time configuration
@@ -83,7 +83,7 @@ class LensedWaveformGenerator(WaveformGenerator):
         model's own `resolve()`, which pops whatever it needs out of
         `parameters` (falling back to `lens_model_defaults`, and applying
         any model-specific fallback logic itself, e.g. cusp_caustic
-        borrowing lensing_delta_t) -- `LensedWaveformGenerator` never names
+        borrowing lensing_delta_t). `LensedWaveformGenerator` never names
         any lens model's parameters itself.
         """
         return self._model.resolve(parameters, self.lens_model_defaults)
