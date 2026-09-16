@@ -106,6 +106,18 @@ either, it's converted via Gravelamps' own generic
 converted from the sampled, detector-frame solar-mass value via
 `lens_mass_source_to_lens_mass` and `solar_mass_to_natural_mass`.
 
+Calling `amplification()` directly recomputes it from scratch for every
+sample, fine here, expensive for some lens models. For those, Gravelamps
+precomputes a grid of values once (with its own standalone
+`gravelamps_generate_lens` tool, outside DINGO-Lensing entirely) and
+interpolates over it instead, via `gravelamps.interpolator.interpolator`:
+`read_and_validate_interpolator_files` loads the four grid/data files, and
+`generate_complex_interpolator` turns them into a callable. This is exactly
+a `lens_model_settings` case too: the file paths and the interpolator built
+from them are fixed for the whole run, not resolved per sample, so they're
+built once in `__init__`, and `compute()` uses the interpolator instead of
+calling `amplification()` directly whenever one was given.
+
 **Step 1: write the model class, in `dingo_lensing/gravelamps_amplification.py`**
 
 ```python
@@ -116,6 +128,10 @@ from gravelamps.core.conversion import (
     frequency_to_dimensionless_frequency,
     lens_mass_source_to_lens_mass,
     solar_mass_to_natural_mass,
+)
+from gravelamps.interpolator.interpolator import (
+    generate_complex_interpolator,
+    read_and_validate_interpolator_files,
 )
 
 
@@ -148,11 +164,25 @@ class IsolatedPoint:
         "source_position": "source_position",
     }
 
-    def __init__(self, geo_switch=1000, precision=1000):
-        # Fixed for the whole run rather than sampled, so these arrive as
-        # lens_model_settings and are stored once, at construction.
+    def __init__(self, geo_switch=1000, precision=1000, interpolator_files=None):
+        # All three are fixed for the whole run rather than sampled, so
+        # they arrive as lens_model_settings. interpolator_files, when
+        # given, is a dict of the four grid/data file paths Gravelamps'
+        # own precomputation tooling produces (see read_and_validate_
+        # interpolator_files' docstring for the exact keys); the
+        # interpolator built from them is stored once, here, not rebuilt
+        # per sample.
         self._geo_switch = geo_switch
         self._precision = precision
+        self._interpolator = None
+        if interpolator_files is not None:
+            grids = read_and_validate_interpolator_files(interpolator_files)
+            self._interpolator = generate_complex_interpolator(
+                grids["dimensionless_frequency"],
+                grids["source_position"],
+                grids["amplification_factor_real"],
+                grids["amplification_factor_imag"],
+            )
 
     def resolve(self, parameters, lens_model_defaults):
         names = self.PARAMETER_NAMES
@@ -183,6 +213,10 @@ class IsolatedPoint:
         dimensionless_frequency = frequency_to_dimensionless_frequency(
             frequency_array, lens_mass
         )
+        if self._interpolator is not None:
+            return self._interpolator(
+                dimensionless_frequency, resolved["source_position"]
+            )
         return isolated_point.amplification(
             dimensionless_frequency,
             resolved["source_position"],
@@ -218,6 +252,8 @@ _LENS_CODE_MODULES = {
 
 **Step 3: use it from a dataset settings YAML**
 
+Computing directly, every sample:
+
 ```yaml
 lens_model_code: gravelamps
 amplification_factor_function: isolated_point
@@ -228,7 +264,24 @@ lens_model_defaults:
   lens_fractional_distance: 0.5
 ```
 
-`lens_model_settings` reaches `IsolatedPoint.__init__` (fixing `geo_switch`
-and `precision` once for the whole run). `lens_model_defaults` is a
-per-sample fallback exactly like the modwaveforms models already have; drop
-it if `lens_fractional_distance` is always sampled per-event instead.
+Or, using a grid Gravelamps already precomputed instead:
+
+```yaml
+lens_model_code: gravelamps
+amplification_factor_function: isolated_point
+lens_model_settings:
+  interpolator_files:
+    dimensionless_frequency: /path/to/dimensionless_frequency.dat
+    source_position: /path/to/source_position.dat
+    amplification_factor_real: /path/to/amplification_factor_real.dat
+    amplification_factor_imag: /path/to/amplification_factor_imag.dat
+lens_model_defaults:
+  lens_fractional_distance: 0.5
+```
+
+Either way, `lens_model_settings` is the entry point: it reaches
+`IsolatedPoint.__init__` directly, so whatever the model needs built once,
+a couple of tuning knobs or a whole interpolator loaded from files, is
+built there and only there. `lens_model_defaults` is a per-sample fallback
+exactly like the modwaveforms models already have; drop it if
+`lens_fractional_distance` is always sampled per-event instead.
