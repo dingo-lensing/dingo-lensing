@@ -81,34 +81,39 @@ that one registration line.
 Gravelamps is a real sibling package with its own amplification functions
 and its own established parameter names (`lens_mass`,
 `lens_fractional_distance`, `source_position`). Here's what integrating its
-O3 point-mass microlensing model (`gravelamps.models.microlensing_o3`) looks
-like, step by step.
+isolated point mass lensing model (`gravelamps.models.isolated_point`, one of
+its actively maintained, currently-used models) looks like, step by step.
 
-Reading `gravelamps/models/microlensing_o3.py`, the function to call is:
+Reading `gravelamps/models/isolated_point`'s Python bindings, the function to
+call is:
 
 ```python
-def amplification(dimensionless_frequency, source_position, lookup_table=None):
+def amplification(dimensionless_frequency, source_position, geo_switch=1000, precision=1000):
     ...
 ```
 
-`dimensionless_frequency` isn't the waveform's frequency array directly,
-Gravelamps needs it converted first via
-`microlensing_o3.frequency_to_dimensionless_frequency(frequency_array,
-redshifted_lens_mass)`. And `lookup_table` is a `microlensing_o3.LookUpTable`
-object, built once from an HDF5 file path, covering the wave-optics regime
-below a frequency cutoff (above it, `amplification()` falls back to
-geometric optics on its own and needs no table). That table is exactly a
-`lens_model_settings` case: it doesn't come from a sample, it's identical
-for the whole run, and building it means opening a file, so it should
-happen once, not on every sample.
+`geo_switch` is the dimensionless frequency above which the calculation
+switches from wave optics to the much cheaper geometric optics
+approximation, and `precision` is the numeric precision, in bits, used for
+the wave-optics calculation. Both have sensible defaults, but are fixed for
+a whole run rather than sampled, so they're a `lens_model_settings` case,
+not a per-sample one.
+
+`dimensionless_frequency` isn't the waveform's frequency array directly
+either, it's converted via Gravelamps' own generic
+`frequency_to_dimensionless_frequency(frequency_array, lens_mass)` (from
+`gravelamps.core.conversion`), given the lens mass in natural units, itself
+converted from the sampled, detector-frame solar-mass value via
+`lens_mass_source_to_lens_mass` and `solar_mass_to_natural_mass`.
 
 **Step 1: write the model class, in `dingo_lensing/gravelamps_amplification.py`**
 
 ```python
 import logging
 
-from gravelamps.models import microlensing_o3
+from gravelamps.models import isolated_point
 from gravelamps.core.conversion import (
+    frequency_to_dimensionless_frequency,
     lens_mass_source_to_lens_mass,
     solar_mass_to_natural_mass,
 )
@@ -131,7 +136,7 @@ def _resolve_with_default(name, parameters, lens_model_defaults):
     return value
 
 
-class MicrolensingO3:
+class IsolatedPoint:
     # Standard name -> standard name for the three values this model reads
     # from a sample. If the team later decides source_position is the same
     # physical quantity as PointLens's own "y" and wants one shared standard
@@ -143,12 +148,11 @@ class MicrolensingO3:
         "source_position": "source_position",
     }
 
-    def __init__(self, lookup_table_path=None):
-        self._lookup_table = (
-            microlensing_o3.LookUpTable(lookup_table_path)
-            if lookup_table_path is not None
-            else None
-        )
+    def __init__(self, geo_switch=1000, precision=1000):
+        # Fixed for the whole run rather than sampled, so these arrive as
+        # lens_model_settings and are stored once, at construction.
+        self._geo_switch = geo_switch
+        self._precision = precision
 
     def resolve(self, parameters, lens_model_defaults):
         names = self.PARAMETER_NAMES
@@ -169,24 +173,25 @@ class MicrolensingO3:
         }
 
     def compute(self, frequency_array, resolved):
-        redshifted_lens_mass = solar_mass_to_natural_mass(
+        lens_mass = solar_mass_to_natural_mass(
             lens_mass_source_to_lens_mass(
                 resolved["lens_mass"],
                 resolved["lens_fractional_distance"],
                 resolved["luminosity_distance"],
             )
         )
-        dimensionless_frequency = microlensing_o3.frequency_to_dimensionless_frequency(
-            frequency_array, redshifted_lens_mass
+        dimensionless_frequency = frequency_to_dimensionless_frequency(
+            frequency_array, lens_mass
         )
-        return microlensing_o3.amplification(
+        return isolated_point.amplification(
             dimensionless_frequency,
             resolved["source_position"],
-            lookup_table=self._lookup_table,
+            geo_switch=self._geo_switch,
+            precision=self._precision,
         )
 
 
-_AMPLIFICATION_MODEL_CLASSES = {"microlensing_o3": MicrolensingO3}
+_AMPLIFICATION_MODEL_CLASSES = {"isolated_point": IsolatedPoint}
 SUPPORTED_AMPLIFICATION_FUNCTIONS = tuple(_AMPLIFICATION_MODEL_CLASSES)
 
 
@@ -215,14 +220,15 @@ _LENS_CODE_MODULES = {
 
 ```yaml
 lens_model_code: gravelamps
-amplification_factor_function: microlensing_o3
+amplification_factor_function: isolated_point
 lens_model_settings:
-  lookup_table_path: /path/to/lookuptable.h5
+  geo_switch: 500
+  precision: 2000
 lens_model_defaults:
   lens_fractional_distance: 0.5
 ```
 
-`lens_model_settings` reaches `MicrolensingO3.__init__` (which builds the
-`LookUpTable` once, at generator construction). `lens_model_defaults` is a
+`lens_model_settings` reaches `IsolatedPoint.__init__` (fixing `geo_switch`
+and `precision` once for the whole run). `lens_model_defaults` is a
 per-sample fallback exactly like the modwaveforms models already have; drop
 it if `lens_fractional_distance` is always sampled per-event instead.
