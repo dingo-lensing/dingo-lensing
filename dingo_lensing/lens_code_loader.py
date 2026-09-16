@@ -51,7 +51,7 @@ def load_amplification_model(
     rather than on every sample. Most models need none of this and accept
     no constructor arguments at all.
 
-    Deliberately not cached: unlike a plain function lookup, two
+    Deliberately not cached: Unlike a plain function lookup, two
     generators using the same amplification function with different
     settings (e.g. different lookup table files) must not end up sharing
     one model instance.

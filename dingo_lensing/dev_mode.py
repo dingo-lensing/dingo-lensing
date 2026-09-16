@@ -122,7 +122,7 @@ def plot_waveform_overlay(
     )
     if not np.any(valid):
         raise ValueError(
-            "Cannot plot waveform overlay: lensed and nonlensed waveforms have no "
+            "Cannot plot waveform overlay: Lensed and nonlensed waveforms have no "
             "common finite, positive frequency support."
         )
     frequencies = frequencies[valid]
@@ -202,7 +202,7 @@ def plot_amplification_factor(
     )
     if not np.any(valid):
         raise ValueError(
-            "Cannot plot amplification factor: no finite, positive frequency "
+            "Cannot plot amplification factor: No finite, positive frequency "
             "support."
         )
     frequencies = frequencies[valid]

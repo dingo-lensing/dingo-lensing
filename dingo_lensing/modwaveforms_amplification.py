@@ -18,7 +18,7 @@ class AmplificationModel:
     logic, e.g. cusp_caustic borrowing lensing_delta_t), and compute()
     turns the already-resolved values into the actual amplification
     factor. There is no shared table or signature-inspection machinery:
-    adding a new model means implementing these two methods and nothing
+    Adding a new model means implementing these two methods and nothing
     else, and a mistake in one model's resolve()/compute() cannot affect
     any other model's behaviour.
 
@@ -30,7 +30,7 @@ class AmplificationModel:
     constructor, so this needs no special support from resolve()/compute()
     at all.
 
-    Subclasses must also declare PARAMETER_NAMES: a dict mapping every
+    Subclasses must also declare PARAMETER_NAMES: A dict mapping every
     name this model's own resolve()/compute() use internally to the
     DINGO-Lensing standard parameter name it should actually look up in a
     sample. For a model built alongside the rest of this package, that's

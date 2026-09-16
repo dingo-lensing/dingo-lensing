@@ -1,6 +1,6 @@
 # Refactoring Guide: Integrating a New Lens Model
 
-This is a guide for adding a new lens model to DINGO-Lensing: either a new
+This is a guide for adding a new lens model to DINGO-Lensing: Either a new
 amplification function for a lens code we already support (`modwaveforms`),
 or an entirely new lens code (e.g. Gravelamps). It covers the general logic
 just enough to work with it, then walks through exactly what to do, using
@@ -27,13 +27,13 @@ amplification factor.
 
 Two pieces of bookkeeping every model does, on top of those two methods:
 
-- **`PARAMETER_NAMES`**: a dict mapping every value this model reads to the
+- **`PARAMETER_NAMES`**: A dict mapping every value this model reads to the
   DINGO-Lensing standard name it should be found under in a sample. This is
   required, and checked automatically when a model is loaded. Get a name
   wrong here and `resolve()` will look for something that isn't there and
   quietly fall back to a default instead. That's the main thing to get
   right when integrating a new model.
-- **Fallback logging**: every time `resolve()` falls back to a default
+- **Fallback logging**: Every time `resolve()` falls back to a default
   (either `lens_model_defaults` or a model's own built-in one) it logs it at
   `logging.DEBUG`, silent unless you turn it on. Worth doing once while
   testing a new model, to confirm it's actually reading real values and not
@@ -44,10 +44,10 @@ Two pieces of bookkeeping every model does, on top of those two methods:
 
 And two separate places a value can come from beyond the sample itself:
 
-- **`lens_model_defaults`**: per-sample fallback values, set once when the
+- **`lens_model_defaults`**: Per-sample fallback values, set once when the
   generator is configured, used whenever a sample doesn't include that
   value.
-- **`lens_model_settings`**: fixed configuration built once at generator
+- **`lens_model_settings`**: Fixed configuration built once at generator
   construction, forwarded straight to your model class's `__init__`. Use
   this for anything that isn't a per-sample value at all, like a lookup
   table loaded from a file.
@@ -68,11 +68,11 @@ And two separate places a value can come from beyond the sample itself:
    module.)
 3. **Register the lens code** by adding one entry to `_LENS_CODE_MODULES` in
    `lens_code_loader.py`.
-4. **Point a dataset settings YAML at it**: set `lens_model_code`,
+4. **Point a dataset settings YAML at it**: Set `lens_model_code`,
    `amplification_factor_function`, and, if you need them,
    `lens_model_settings` and/or `lens_model_defaults`.
 
-That's it. Nothing else in the package needs to change: not
+That's it. Nothing else in the package needs to change: Not
 `waveform_generator.py`, not any other model's file, not the loader beyond
 that one registration line.
 
@@ -113,12 +113,12 @@ precomputes a grid of values once (with its own standalone
 interpolates over it instead, via `gravelamps.interpolator.interpolator`:
 `read_and_validate_interpolator_files` loads the four grid/data files, and
 `generate_complex_interpolator` turns them into a callable. This is exactly
-a `lens_model_settings` case too: the file paths and the interpolator built
+a `lens_model_settings` case too: The file paths and the interpolator built
 from them are fixed for the whole run, not resolved per sample, so they're
 built once in `__init__`, and `compute()` uses the interpolator instead of
 calling `amplification()` directly whenever one was given.
 
-**Step 1: write the model class, in `dingo_lensing/gravelamps_amplification.py`**
+**Step 1: Write the model class, in `dingo_lensing/gravelamps_amplification.py`**
 
 ```python
 import logging
@@ -140,7 +140,7 @@ logger = logging.getLogger(__name__)
 
 def _resolve_with_default(name, parameters, lens_model_defaults):
     # Deliberately duplicated from modwaveforms_amplification.py rather than
-    # imported: this module has zero import-time coupling to any other lens
+    # imported: This module has zero import-time coupling to any other lens
     # code's module, by design.
     value = parameters.pop(name, None)
     if value is None:
@@ -241,7 +241,7 @@ def get_model(amplification_factor_function, **lens_model_settings):
     return model_class(**lens_model_settings)
 ```
 
-**Step 2: register the lens code, in `lens_code_loader.py`**
+**Step 2: Register the lens code, in `lens_code_loader.py`**
 
 ```python
 _LENS_CODE_MODULES = {
@@ -250,7 +250,7 @@ _LENS_CODE_MODULES = {
 }
 ```
 
-**Step 3: use it from a dataset settings YAML**
+**Step 3: Use it from a dataset settings YAML**
 
 Computing directly, every sample:
 
@@ -279,7 +279,7 @@ lens_model_defaults:
   lens_fractional_distance: 0.5
 ```
 
-Either way, `lens_model_settings` is the entry point: it reaches
+Either way, `lens_model_settings` is the entry point: It reaches
 `IsolatedPoint.__init__` directly, so whatever the model needs built once,
 a couple of tuning knobs or a whole interpolator loaded from files, is
 built there and only there. `lens_model_defaults` is a per-sample fallback
