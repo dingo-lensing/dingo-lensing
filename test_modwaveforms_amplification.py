@@ -54,7 +54,7 @@ def test_every_registered_model_declares_parameter_names():
 # trace. Every place a model reaches for lens_model_defaults or a built-in
 # default logs it (at DEBUG, so it's silent unless someone turns it on),
 # which is what would surface a parameter name that doesn't actually match
-# what a sample calls it -- the model looks for the name it was told to
+# what a sample calls it. The model looks for the name it was told to
 # look for, doesn't find it, and this is where that becomes visible.
 # --------------------------------------------------------------------------
 
@@ -382,8 +382,8 @@ def test_get_model_rejects_unexpected_settings_for_models_that_take_none():
 def test_get_model_forwards_construction_time_settings_to_the_model_class():
     # None of the five real models here take constructor arguments, but
     # get_model must still forward whatever it's given straight through to
-    # the model class -- e.g. a future lookup-table-backed model taking a
-    # file path to load once, rather than on every sample.
+    # the model class (e.g. a future lookup-table-backed model taking a
+    # file path to load once, rather than on every sample).
     captured = {}
 
     class LookupTableModel(modwaveforms_amplification.AmplificationModel):
@@ -622,7 +622,7 @@ def test_loader_real_modwaveforms_integration_returns_correct_model():
 def test_loader_real_modwaveforms_forwards_settings_end_to_end():
     # Same real (non-mocked) path as above, but proving lens_model_settings
     # reaches a model's constructor through the *real* module, not a fake
-    # one -- this is the exact mechanism a new lens code (e.g. Gravelamps'
+    # one. This is the exact mechanism a new lens code (e.g. Gravelamps'
     # lookup-table-backed models, see REFACTORING_GUIDE.md) would rely on.
     captured = {}
 
