@@ -42,3 +42,6 @@ dingo_lensing_pipe_generation = "dingo_lensing.pipe.data_generation:main"
 dingo_lensing_pipe_sampling = "dingo_lensing.pipe.sampling:main"
 dingo_lensing_pipe_importance_sampling = "dingo_lensing.pipe.importance_sampling:main"
 dingo_lensing_result = "dingo_lensing.pipe.dingo_result:main"
+
+[project.entry-points."asimov.pipelines"]
+dingo_lensing = "dingo_lensing.asimov.asimov:DingoLensing"
