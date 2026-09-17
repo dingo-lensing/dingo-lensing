@@ -1,12 +1,11 @@
 from typing import Dict, Tuple, Callable
 from pathlib import Path
 import numpy as np
-from scipy.special import loggamma
 from dingo.gw.waveform_generator import WaveformGenerator
 import lalsimulation as LS
 import dingo.gw.waveform_generator.wfg_utils as wfg_utils
-from modwaveforms import geomoptics, waveoptics
 from dingo_lensing.dev_mode import plot_amplification_factor, plot_waveform_overlay
+from dingo_lensing.lens_code_loader import load_amplification_model
 
 class LensedWaveformGenerator(WaveformGenerator):
     def __init__(
@@ -14,50 +13,96 @@ class LensedWaveformGenerator(WaveformGenerator):
         *args,
         dev_mode: bool = False,
         dev_plot_dir: str = "dev_plots",
-        fdsm_function: str = "two_images_BBH",
-        ML: float | None = None,
-        y: float | None = None,
+        fdsm_function: str | None = None,
+        lens_model_code: str = "modwaveforms",
+        amplification_factor_function: str | None = None,
+        lens_model_defaults: Dict[str, float] | None = None,
+        lens_model_settings: Dict[str, object] | None = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.dev_mode = dev_mode
         self.dev_plot_dir = Path(dev_plot_dir)
-        self.fdsm_function = fdsm_function
-        self.pointlens_ML = ML
-        self.pointlens_y = y
+        if (
+            fdsm_function is not None
+            and amplification_factor_function is not None
+            and fdsm_function != amplification_factor_function
+        ):
+            raise ValueError(
+                "fdsm_function and amplification_factor_function must match when "
+                "both are specified."
+            )
+        self.lens_model_code = lens_model_code
+        self.amplification_factor_function = (
+            amplification_factor_function or fdsm_function
+        )
+        if self.amplification_factor_function is None:
+            raise ValueError(
+                "Must specify amplification_factor_function (or its legacy "
+                "alias fdsm_function); LensedWaveformGenerator has no "
+                "built-in default lens model."
+            )
+        self.fdsm_function = self.amplification_factor_function
+        # The model owns its own parameter resolution entirely (see
+        # AmplificationModel in modwaveforms_amplification.py). This
+        # class never hardcodes any lens model's parameter names itself,
+        # it just calls model.resolve() and model.compute().
+        # lens_model_settings carries fixed, construction-time configuration
+        # a model may need beyond a per-sample resolvable value (e.g. a
+        # lookup table file path to load once), as opposed to
+        # lens_model_defaults below, which is per-sample fallback values.
+        self._model = load_amplification_model(
+            self.lens_model_code,
+            self.amplification_factor_function,
+            lens_model_settings,
+        )
+        # Generator-level fallback values for whichever sample parameters
+        # the active model needs (e.g. two_images_BBH's lensing_delta_t/
+        # mu_rel, pointlens's ML/y) when not sampled per-event.
+        self.lens_model_defaults = (
+            dict(lens_model_defaults) if lens_model_defaults else {}
+        )
         self._current_sample_index = None
         self._current_plot_parameters = None
+
+    @property
+    def fdsm_function(self) -> str:
+        return self.amplification_factor_function
+
+    @fdsm_function.setter
+    def fdsm_function(self, value: str) -> None:
+        self.amplification_factor_function = value
+
+    def _resolve_lensing_parameters(
+        self, parameters: Dict[str, float]
+    ) -> Dict[str, float]:
+        """Resolve the active model's lensing parameters from a sample.
+
+        Used by both `generate_hplus_hcross` and `generate_hplus_hcross_m`
+        so this happens in exactly one place. Delegates entirely to the
+        model's own `resolve()`, which pops whatever it needs out of
+        `parameters` (falling back to `lens_model_defaults`, and applying
+        any model-specific fallback logic itself, e.g. cusp_caustic
+        borrowing lensing_delta_t). `LensedWaveformGenerator` never names
+        any lens model's parameters itself.
+        """
+        return self._model.resolve(parameters, self.lens_model_defaults)
 
     def generate_hplus_hcross(
             self, parameters: Dict[str, float], catch_waveform_errors=True
         ) -> Dict[str, np.ndarray]:
 
         sample_index = parameters.pop("sample_index", None)
-        lensing_delta_t = parameters.pop("lensing_delta_t", None)
-        mu_rel = parameters.pop("mu_rel", None)
-        ML = parameters.pop("ML", None)
-        y = parameters.pop("y", None)
-        if ML is None:
-            ML = self.pointlens_ML
-        if y is None:
-            y = self.pointlens_y
+        resolved_lensing_parameters = self._resolve_lensing_parameters(parameters)
         self._current_sample_index = sample_index
         self._current_plot_parameters = {
             "nonlensed": parameters.copy(),
-            "lensed": {
-                **parameters,
-                "lensing_delta_t": lensing_delta_t,
-                "mu_rel": mu_rel,
-                "ML": ML,
-                "y": y,
-            },
+            "lensed": {**parameters, **resolved_lensing_parameters},
         }
 
         self.generate_FD_waveform = lambda parameters_lal, target_function: self.generate_lensed_FD_waveform(
             parameters_lal,
             target_function,
-            lensing_delta_t,
-            mu_rel,
         )
 
         try:
@@ -70,8 +115,6 @@ class LensedWaveformGenerator(WaveformGenerator):
         self,
         parameters_lal: Tuple,
         target_function: Callable,
-        lensing_delta_t: float,
-        mu_rel: float,
     ) -> Dict[str, np.ndarray]:
 
         unlensed_polarizations = super().generate_FD_waveform(
@@ -80,8 +123,6 @@ class LensedWaveformGenerator(WaveformGenerator):
         amplification_factor = self._get_lensing_amplification_factor(
             self.domain.sample_frequencies,
             self._current_plot_parameters["lensed"],
-            lensing_delta_t=lensing_delta_t,
-            mu_rel=mu_rel,
         )
         FD_polarizations = {
             polarization: waveform * amplification_factor
@@ -101,15 +142,12 @@ class LensedWaveformGenerator(WaveformGenerator):
         self, parameters: Dict[str, float]
     ) -> Dict[tuple, Dict[str, np.ndarray]]:
 
-        lensing_delta_t = parameters.pop("lensing_delta_t", None)
-        mu_rel = parameters.pop("mu_rel", None)        
+        resolved_lensing_parameters = self._resolve_lensing_parameters(parameters)
 
         pol_m = super().generate_hplus_hcross_m(parameters)
         amp_factor = self._get_lensing_amplification_factor(
             self.domain.sample_frequencies,
-            parameters,
-            lensing_delta_t=lensing_delta_t,
-            mu_rel=mu_rel,
+            {**parameters, **resolved_lensing_parameters},
         )
 
         for h in pol_m.values():
@@ -121,107 +159,9 @@ class LensedWaveformGenerator(WaveformGenerator):
     def _get_lensing_amplification_factor(
         self,
         frequency_array: np.ndarray,
-        parameters: Dict[str, float],
-        lensing_delta_t: float | None = None,
-        mu_rel: float | None = None,
+        resolved_parameters: Dict[str, float],
     ) -> np.ndarray:
-        if self.fdsm_function == "one_image_BBH":
-            return geomoptics.one_image_BBH(
-                frequency_array,
-                parameters.get("Delta_phase", 0.5 * np.pi),
-            )
-        elif self.fdsm_function == "two_images_BBH":
-            return geomoptics.two_images_BBH(
-                frequency_array,
-                mu_rel,
-                lensing_delta_t,
-                parameters.get("Delta_phase", 0.5 * np.pi),
-            )
-        elif self.fdsm_function == "fold_caustic":
-            return geomoptics.fold_caustic(
-                frequency_array,
-                lensing_delta_t,
-                parameters.get("positive_phase", 1.0),
-            )
-        elif self.fdsm_function == "cusp_caustic":
-            return geomoptics.cusp_caustic(
-                frequency_array,
-                parameters.get("Delta_t_10", lensing_delta_t),
-                parameters.get("Delta_t_20", lensing_delta_t),
-                mu_rel,
-                parameters.get("positive_phase", 1.0),
-            )
-        elif self.fdsm_function == "pointlens":
-            ML = parameters.get("ML", self.pointlens_ML)
-            y = parameters.get("y", self.pointlens_y)
-            if ML is None or y is None:
-                raise ValueError(
-                    "pointlens requires ML and y either in the sampled parameters "
-                    "or in waveform_generator settings."
-                )
-            return self._pointlens_amplification_factor(frequency_array, ML, y)
-
-        raise ValueError(
-            f"Unsupported lensing amplification function '{self.fdsm_function}'. "
-            "Available functions are: one_image_BBH, two_images_BBH, "
-            "fold_caustic, cusp_caustic, pointlens."
-        )
-
-    @staticmethod
-    def _pointlens_amplification_factor(
-        frequency_array: np.ndarray,
-        ML: float,
-        y: float,
-    ) -> np.ndarray:
-        frequency_array = np.asarray(frequency_array)
-        w = 2.0 * np.pi * (4.0 * waveoptics.TSUN * ML) * frequency_array
-        amplification = LensedWaveformGenerator._pointlens_geometric_factor(
-            frequency_array, ML, y
-        )
-
-        nonzero = w != 0.0
-        exact = np.ones_like(amplification, dtype=complex)
-        with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-            laguerre = np.array(
-                waveoptics.vlaguerre(
-                    -0.5j * w[nonzero], 0, 0.5j * w[nonzero] * y**2
-                ),
-                dtype=complex,
-            )
-            log_amplification = (
-                (1.0 + 0.5j * w[nonzero]) * np.log(-0.5j)
-                + (1.0 + 0.5j * w[nonzero]) * np.log(w[nonzero])
-                + loggamma(-0.5j * w[nonzero])
-                + np.log(laguerre)
-            )
-            exact[nonzero] = np.exp(log_amplification)
-            exact[nonzero] *= np.exp(
-                -1j
-                * waveoptics.pm.t_delay_geom_plus(y)
-                * waveoptics.pm.t_ref(ML)
-                * 2.0
-                * np.pi
-                * frequency_array[nonzero]
-            )
-            exact = np.conjugate(exact)
-
-        finite = np.isfinite(exact.real) & np.isfinite(exact.imag)
-        amplification[finite] = exact[finite]
-        return amplification
-
-    @staticmethod
-    def _pointlens_geometric_factor(
-        frequency_array: np.ndarray,
-        ML: float,
-        y: float,
-    ) -> np.ndarray:
-        delta_t = waveoptics.pm.Delta_t(ML, y)
-        mu_plus = waveoptics.pm.mu_plus(y)
-        mu_minus = abs(waveoptics.pm.mu_minus(y))
-        amplification = np.sqrt(mu_plus) - 1j * np.sqrt(mu_minus) * np.exp(
-            2j * np.pi * frequency_array * delta_t
-        )
-        return np.conjugate(amplification)
+        return self._model.compute(frequency_array, resolved_parameters)
 
     def _save_dev_plot(
         self,
@@ -254,7 +194,7 @@ class LensedWaveformGenerator(WaveformGenerator):
         )
 
     def _dev_plot_output_dir(self, plot_type: str) -> Path:
-        return self.dev_plot_dir / self.fdsm_function / plot_type
+        return self.dev_plot_dir / self.lens_model_code / self.fdsm_function / plot_type
 
     def generate_TD_modes_L0(self, parameters):
         # Bless both SEOBNRv4PHM and NRSur7dq4
@@ -269,7 +209,7 @@ class LensedWaveformGenerator(WaveformGenerator):
             raise NotImplementedError(
                 f"Approximant {LS.GetApproximantFromString(self.approximant)} not "
                 f"implemented. When adding this approximant to this method, make sure "
-                f"the the output dict hlm_td contains the TD modes in the *L0 frame*. "
+                f"the output dict hlm_td contains the TD modes in the *L0 frame*. "
                 f"In particular, adding an approximant that is implemented in the same "
                 f"domain and frame as one of the approximants should just be a matter of "
                 f"adding the approximant number (here: {self.approximant}) to the "

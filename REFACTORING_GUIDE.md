@@ -1,0 +1,287 @@
+# Refactoring Guide: Integrating a New Lens Model
+
+This is a guide for adding a new lens model to DINGO-Lensing: Either a new
+amplification function for a lens code we already support (`modwaveforms`),
+or an entirely new lens code (e.g. Gravelamps). It covers the general logic
+just enough to work with it, then walks through exactly what to do, using
+Gravelamps as a worked example.
+
+## How it works, briefly
+
+`LensedWaveformGenerator` doesn't hardcode anything about any specific lens
+model. Every model is a small object with two methods:
+
+```python
+def resolve(self, parameters: dict, lens_model_defaults: dict) -> dict:
+    """Pull whatever this model needs out of a sample's parameters."""
+
+def compute(self, frequency_array, resolved: dict):
+    """Turn those values into the amplification factor array."""
+```
+
+`resolve()` runs once per sample. It pops the values it needs out of
+`parameters` (so they never reach the base, unlensed waveform code),
+falling back to a configured default if a value isn't in the sample.
+`compute()` then turns whatever `resolve()` returned into the actual
+amplification factor.
+
+Two pieces of bookkeeping every model does, on top of those two methods:
+
+- **`PARAMETER_NAMES`**: A dict mapping every value this model reads to the
+  DINGO-Lensing standard name it should be found under in a sample. This is
+  required, and checked automatically when a model is loaded. Get a name
+  wrong here and `resolve()` will look for something that isn't there and
+  quietly fall back to a default instead. That's the main thing to get
+  right when integrating a new model.
+- **Fallback logging**: Every time `resolve()` falls back to a default
+  (either `lens_model_defaults` or a model's own built-in one) it logs it at
+  `logging.DEBUG`, silent unless you turn it on. Worth doing once while
+  testing a new model, to confirm it's actually reading real values and not
+  quietly defaulting everything:
+  ```python
+  logging.getLogger("dingo_lensing.<your_code>_amplification").setLevel(logging.DEBUG)
+  ```
+
+And two separate places a value can come from beyond the sample itself:
+
+- **`lens_model_defaults`**: Per-sample fallback values, set once when the
+  generator is configured, used whenever a sample doesn't include that
+  value.
+- **`lens_model_settings`**: Fixed configuration built once at generator
+  construction, forwarded straight to your model class's `__init__`. Use
+  this for anything that isn't a per-sample value at all, like a lookup
+  table loaded from a file.
+
+## What you need to do
+
+1. **Write your model class**, with `resolve()`, `compute()`, and
+   `PARAMETER_NAMES`. If it needs one-time setup (a file to load, etc.),
+   take that as an `__init__` argument, it'll arrive via
+   `lens_model_settings`.
+2. **If your lens code doesn't exist yet**, add a
+   `dingo_lensing/<code>_amplification.py` module holding your model
+   class(es), an `_AMPLIFICATION_MODEL_CLASSES` dict mapping amplification
+   function names to classes, and a
+   `get_model(amplification_factor_function, **lens_model_settings)`
+   factory. (If you're adding a model to a lens code that already exists,
+   this step is just adding a class and a dict entry to its existing
+   module.)
+3. **Register the lens code** by adding one entry to `_LENS_CODE_MODULES` in
+   `lens_code_loader.py`.
+4. **Point a dataset settings YAML at it**: Set `lens_model_code`,
+   `amplification_factor_function`, and, if you need them,
+   `lens_model_settings` and/or `lens_model_defaults`.
+
+That's it. Nothing else in the package needs to change: Not
+`waveform_generator.py`, not any other model's file, not the loader beyond
+that one registration line.
+
+## Worked example: Gravelamps
+
+Gravelamps is a real sibling package with its own amplification functions
+and its own established parameter names (`lens_mass`,
+`lens_fractional_distance`, `source_position`). Here's what integrating its
+isolated point mass lensing model (`gravelamps.models.isolated_point`, one of
+its actively maintained, currently-used models) looks like, step by step.
+
+Reading `gravelamps/models/isolated_point`'s Python bindings, the function to
+call is:
+
+```python
+def amplification(dimensionless_frequency, source_position, geo_switch=1000, precision=1000):
+    ...
+```
+
+`geo_switch` is the dimensionless frequency above which the calculation
+switches from wave optics to the much cheaper geometric optics
+approximation, and `precision` is the numeric precision, in bits, used for
+the wave-optics calculation. Both have sensible defaults, but are fixed for
+a whole run rather than sampled, so they're a `lens_model_settings` case,
+not a per-sample one.
+
+`dimensionless_frequency` isn't the waveform's frequency array directly
+either, it's converted via Gravelamps' own generic
+`frequency_to_dimensionless_frequency(frequency_array, lens_mass)` (from
+`gravelamps.core.conversion`), given the lens mass in natural units, itself
+converted from the sampled, detector-frame solar-mass value via
+`lens_mass_source_to_lens_mass` and `solar_mass_to_natural_mass`.
+
+Calling `amplification()` directly recomputes it from scratch for every
+sample, fine here, expensive for some lens models. For those, Gravelamps
+precomputes a grid of values once (with its own standalone
+`gravelamps_generate_lens` tool, outside DINGO-Lensing entirely) and
+interpolates over it instead, via `gravelamps.interpolator.interpolator`:
+`read_and_validate_interpolator_files` loads the four grid/data files, and
+`generate_complex_interpolator` turns them into a callable. This is exactly
+a `lens_model_settings` case too: The file paths and the interpolator built
+from them are fixed for the whole run, not resolved per sample, so they're
+built once in `__init__`, and `compute()` uses the interpolator instead of
+calling `amplification()` directly whenever one was given.
+
+**Step 1: Write the model class, in `dingo_lensing/gravelamps_amplification.py`**
+
+```python
+import logging
+
+from gravelamps.models import isolated_point
+from gravelamps.core.conversion import (
+    frequency_to_dimensionless_frequency,
+    lens_mass_source_to_lens_mass,
+    solar_mass_to_natural_mass,
+)
+from gravelamps.interpolator.interpolator import (
+    generate_complex_interpolator,
+    read_and_validate_interpolator_files,
+)
+
+
+logger = logging.getLogger(__name__)
+
+
+def _resolve_with_default(name, parameters, lens_model_defaults):
+    # Deliberately duplicated from modwaveforms_amplification.py rather than
+    # imported: This module has zero import-time coupling to any other lens
+    # code's module, by design.
+    value = parameters.pop(name, None)
+    if value is None:
+        value = lens_model_defaults.get(name)
+        logger.debug(
+            "Parameter '%s' not found in sample parameters; falling back to "
+            "lens_model_defaults value %r.", name, value,
+        )
+    return value
+
+
+class IsolatedPoint:
+    # Standard name -> standard name for the three values this model reads
+    # from a sample. If the team later decides source_position is the same
+    # physical quantity as PointLens's own "y" and wants one shared standard
+    # name for it, this is the only line that would change, to
+    # {"source_position": "y"}; nothing else in this class would need to.
+    PARAMETER_NAMES = {
+        "lens_mass": "lens_mass",
+        "lens_fractional_distance": "lens_fractional_distance",
+        "source_position": "source_position",
+    }
+
+    def __init__(self, geo_switch=1000, precision=1000, interpolator_files=None):
+        # All three are fixed for the whole run rather than sampled, so
+        # they arrive as lens_model_settings. interpolator_files, when
+        # given, is a dict of the four grid/data file paths Gravelamps'
+        # own precomputation tooling produces (see read_and_validate_
+        # interpolator_files' docstring for the exact keys); the
+        # interpolator built from them is stored once, here, not rebuilt
+        # per sample.
+        self._geo_switch = geo_switch
+        self._precision = precision
+        self._interpolator = None
+        if interpolator_files is not None:
+            grids = read_and_validate_interpolator_files(interpolator_files)
+            self._interpolator = generate_complex_interpolator(
+                grids["dimensionless_frequency"],
+                grids["source_position"],
+                grids["amplification_factor_real"],
+                grids["amplification_factor_imag"],
+            )
+
+    def resolve(self, parameters, lens_model_defaults):
+        names = self.PARAMETER_NAMES
+        return {
+            "lens_mass": _resolve_with_default(
+                names["lens_mass"], parameters, lens_model_defaults
+            ),
+            "lens_fractional_distance": _resolve_with_default(
+                names["lens_fractional_distance"], parameters, lens_model_defaults
+            ),
+            "source_position": _resolve_with_default(
+                names["source_position"], parameters, lens_model_defaults
+            ),
+            # luminosity_distance is a source parameter the *base* (unlensed)
+            # waveform model also needs, so unlike the three keys above, it
+            # must be read here, not popped, or the base generator loses it.
+            "luminosity_distance": parameters["luminosity_distance"],
+        }
+
+    def compute(self, frequency_array, resolved):
+        lens_mass = solar_mass_to_natural_mass(
+            lens_mass_source_to_lens_mass(
+                resolved["lens_mass"],
+                resolved["lens_fractional_distance"],
+                resolved["luminosity_distance"],
+            )
+        )
+        dimensionless_frequency = frequency_to_dimensionless_frequency(
+            frequency_array, lens_mass
+        )
+        if self._interpolator is not None:
+            return self._interpolator(
+                dimensionless_frequency, resolved["source_position"]
+            )
+        return isolated_point.amplification(
+            dimensionless_frequency,
+            resolved["source_position"],
+            geo_switch=self._geo_switch,
+            precision=self._precision,
+        )
+
+
+_AMPLIFICATION_MODEL_CLASSES = {"isolated_point": IsolatedPoint}
+SUPPORTED_AMPLIFICATION_FUNCTIONS = tuple(_AMPLIFICATION_MODEL_CLASSES)
+
+
+def get_model(amplification_factor_function, **lens_model_settings):
+    try:
+        model_class = _AMPLIFICATION_MODEL_CLASSES[amplification_factor_function]
+    except KeyError:
+        raise ValueError(
+            f"Unsupported lensing amplification function "
+            f"'{amplification_factor_function}'. Available functions are: "
+            f"{', '.join(SUPPORTED_AMPLIFICATION_FUNCTIONS)}."
+        ) from None
+    return model_class(**lens_model_settings)
+```
+
+**Step 2: Register the lens code, in `lens_code_loader.py`**
+
+```python
+_LENS_CODE_MODULES = {
+    "modwaveforms": "dingo_lensing.modwaveforms_amplification",
+    "gravelamps": "dingo_lensing.gravelamps_amplification",
+}
+```
+
+**Step 3: Use it from a dataset settings YAML**
+
+Computing directly, every sample:
+
+```yaml
+lens_model_code: gravelamps
+amplification_factor_function: isolated_point
+lens_model_settings:
+  geo_switch: 500
+  precision: 2000
+lens_model_defaults:
+  lens_fractional_distance: 0.5
+```
+
+Or, using a grid Gravelamps already precomputed instead:
+
+```yaml
+lens_model_code: gravelamps
+amplification_factor_function: isolated_point
+lens_model_settings:
+  interpolator_files:
+    dimensionless_frequency: /path/to/dimensionless_frequency.dat
+    source_position: /path/to/source_position.dat
+    amplification_factor_real: /path/to/amplification_factor_real.dat
+    amplification_factor_imag: /path/to/amplification_factor_imag.dat
+lens_model_defaults:
+  lens_fractional_distance: 0.5
+```
+
+Either way, `lens_model_settings` is the entry point: It reaches
+`IsolatedPoint.__init__` directly, so whatever the model needs built once,
+a couple of tuning knobs or a whole interpolator loaded from files, is
+built there and only there. `lens_model_defaults` is a per-sample fallback
+exactly like the modwaveforms models already have; drop it if
+`lens_fractional_distance` is always sampled per-event instead.

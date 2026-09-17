@@ -122,7 +122,7 @@ def plot_waveform_overlay(
     )
     if not np.any(valid):
         raise ValueError(
-            "Cannot plot waveform overlay: lensed and nonlensed waveforms have no "
+            "Cannot plot waveform overlay: Lensed and nonlensed waveforms have no "
             "common finite, positive frequency support."
         )
     frequencies = frequencies[valid]
@@ -170,7 +170,7 @@ def plot_waveform_overlay(
         fig.tight_layout(rect=(0.0, 0.0, 0.68, 1.0))
     else:
         fig.tight_layout()
-    fig.savefig(output_dir / f"waveform_sample_{sample_index:06d}.png")
+    fig.savefig(output_dir / f"waveform_sample_{sample_index:06d}.pdf")
     plt.close(fig)
 
 
@@ -202,7 +202,7 @@ def plot_amplification_factor(
     )
     if not np.any(valid):
         raise ValueError(
-            "Cannot plot amplification factor: no finite, positive frequency "
+            "Cannot plot amplification factor: No finite, positive frequency "
             "support."
         )
     frequencies = frequencies[valid]
@@ -227,7 +227,7 @@ def plot_amplification_factor(
             axes[1].set_xlim(left=left, right=right)
 
     fig.tight_layout()
-    fig.savefig(output_dir / f"amplification_sample_{sample_index:06d}.png")
+    fig.savefig(output_dir / f"amplification_sample_{sample_index:06d}.pdf")
     plt.close(fig)
 
 
