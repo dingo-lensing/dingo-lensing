@@ -190,7 +190,7 @@ class GravelampsPointLens(GravelampsBaseModel):
     def __init__(
         self,
         geo_switch: int = 1000,
-        precision: int = 1000,
+        precision: int = 2048,
         interpolator_files=None,
         **lens_model_settings,
     ):
