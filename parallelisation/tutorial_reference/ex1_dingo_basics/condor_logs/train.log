@@ -1,0 +1,106 @@
+000 (225588317.000.000) 2026-09-01 21:05:43 Job submitted from host: <131.215.5.225:9618?PrivAddr=%3c10.14.0.75:9618%3fsock%3dschedd_2573_7145%3e&PrivNet=LIGO-Caltech&addrs=131.215.5.225-9618&alias=ldas-osg.ligo.caltech.edu&noUDP&sock=schedd_2573_7145>
+    [ JobBatchName = "dingo_train_ex1_resume" ]
+...
+028 (225588317.000.000) 2026-09-01 21:05:43 Job ad information event triggered.
+Cluster = 225588317
+EventTime = "2026-09-01T21:05:43.957"
+EventTypeNumber = 28
+JOB_GLIDEIN_ClusterId = "$$(GLIDEIN_ClusterId:Unknown)"
+JOB_GLIDEIN_Entry_Name = "$$(GLIDEIN_Entry_Name:Unknown)"
+JOB_GLIDEIN_Factory = "$$(GLIDEIN_Factory:Unknown)"
+JOB_GLIDEIN_Name = "$$(GLIDEIN_Name:Unknown)"
+JOB_GLIDEIN_ProcId = "$$(GLIDEIN_ProcId:Unknown)"
+JOB_GLIDEIN_Schedd = "$$(GLIDEIN_Schedd:Unknown)"
+JOB_GLIDEIN_Site = "$$(GLIDEIN_Site:Unknown)"
+JOB_GLIDEIN_SiteWMS = "$$(GLIDEIN_SiteWMS:Unknown)"
+JOB_GLIDEIN_SiteWMS_JobId = "$$(GLIDEIN_SiteWMS_JobId:Unknown)"
+JOB_GLIDEIN_SiteWMS_Queue = "$$(GLIDEIN_SiteWMS_Queue:Unknown)"
+JOB_GLIDEIN_SiteWMS_Slot = "$$(GLIDEIN_SiteWMS_Slot:Unknown)"
+JOB_Site = "$$(GLIDEIN_Site:Unknown)"
+MyType = "SubmitEvent"
+Proc = 0
+StructuredNotes = [ JobBatchName = "dingo_train_ex1_resume" ]
+SubmitHost = "<131.215.5.225:9618?PrivAddr=%3c10.14.0.75:9618%3fsock%3dschedd_2573_7145%3e&PrivNet=LIGO-Caltech&addrs=131.215.5.225-9618&alias=ldas-osg.ligo.caltech.edu&noUDP&sock=schedd_2573_7145>"
+Subproc = 0
+TriggerEventTypeName = "ULOG_SUBMIT"
+TriggerEventTypeNumber = 0
+...
+009 (225588317.000.000) 2026-09-01 21:54:49 Job was aborted.
+	via condor_rm (by user kailibryan.doney)
+...
+028 (225588317.000.000) 2026-09-01 21:54:49 Job ad information event triggered.
+Cluster = 225588317
+EventTime = "2026-09-01T21:54:49.855"
+EventTypeNumber = 28
+JOB_GLIDEIN_ClusterId = "$$(GLIDEIN_ClusterId:Unknown)"
+JOB_GLIDEIN_Entry_Name = "$$(GLIDEIN_Entry_Name:Unknown)"
+JOB_GLIDEIN_Factory = "$$(GLIDEIN_Factory:Unknown)"
+JOB_GLIDEIN_Name = "$$(GLIDEIN_Name:Unknown)"
+JOB_GLIDEIN_ProcId = "$$(GLIDEIN_ProcId:Unknown)"
+JOB_GLIDEIN_Schedd = "$$(GLIDEIN_Schedd:Unknown)"
+JOB_GLIDEIN_Site = "$$(GLIDEIN_Site:Unknown)"
+JOB_GLIDEIN_SiteWMS = "$$(GLIDEIN_SiteWMS:Unknown)"
+JOB_GLIDEIN_SiteWMS_JobId = "$$(GLIDEIN_SiteWMS_JobId:Unknown)"
+JOB_GLIDEIN_SiteWMS_Queue = "$$(GLIDEIN_SiteWMS_Queue:Unknown)"
+JOB_GLIDEIN_SiteWMS_Slot = "$$(GLIDEIN_SiteWMS_Slot:Unknown)"
+JOB_Site = "$$(GLIDEIN_Site:Unknown)"
+MyType = "JobAbortedEvent"
+Proc = 0
+Reason = "via condor_rm (by user kailibryan.doney)"
+Subproc = 0
+TriggerEventTypeName = "ULOG_JOB_ABORTED"
+TriggerEventTypeNumber = 9
+...
+000 (225589340.000.000) 2026-09-01 21:54:49 Job submitted from host: <131.215.5.225:9618?PrivAddr=%3c10.14.0.75:9618%3fsock%3dschedd_2573_7145%3e&PrivNet=LIGO-Caltech&addrs=131.215.5.225-9618&alias=ldas-osg.ligo.caltech.edu&noUDP&sock=schedd_2573_7145>
+    [ JobBatchName = "dingo_train_ex1_resume" ]
+...
+028 (225589340.000.000) 2026-09-01 21:54:49 Job ad information event triggered.
+Cluster = 225589340
+EventTime = "2026-09-01T21:54:49.993"
+EventTypeNumber = 28
+JOB_GLIDEIN_ClusterId = "$$(GLIDEIN_ClusterId:Unknown)"
+JOB_GLIDEIN_Entry_Name = "$$(GLIDEIN_Entry_Name:Unknown)"
+JOB_GLIDEIN_Factory = "$$(GLIDEIN_Factory:Unknown)"
+JOB_GLIDEIN_Name = "$$(GLIDEIN_Name:Unknown)"
+JOB_GLIDEIN_ProcId = "$$(GLIDEIN_ProcId:Unknown)"
+JOB_GLIDEIN_Schedd = "$$(GLIDEIN_Schedd:Unknown)"
+JOB_GLIDEIN_Site = "$$(GLIDEIN_Site:Unknown)"
+JOB_GLIDEIN_SiteWMS = "$$(GLIDEIN_SiteWMS:Unknown)"
+JOB_GLIDEIN_SiteWMS_JobId = "$$(GLIDEIN_SiteWMS_JobId:Unknown)"
+JOB_GLIDEIN_SiteWMS_Queue = "$$(GLIDEIN_SiteWMS_Queue:Unknown)"
+JOB_GLIDEIN_SiteWMS_Slot = "$$(GLIDEIN_SiteWMS_Slot:Unknown)"
+JOB_Site = "$$(GLIDEIN_Site:Unknown)"
+MyType = "SubmitEvent"
+Proc = 0
+StructuredNotes = [ JobBatchName = "dingo_train_ex1_resume" ]
+SubmitHost = "<131.215.5.225:9618?PrivAddr=%3c10.14.0.75:9618%3fsock%3dschedd_2573_7145%3e&PrivNet=LIGO-Caltech&addrs=131.215.5.225-9618&alias=ldas-osg.ligo.caltech.edu&noUDP&sock=schedd_2573_7145>"
+Subproc = 0
+TriggerEventTypeName = "ULOG_SUBMIT"
+TriggerEventTypeNumber = 0
+...
+009 (225589340.000.000) 2026-09-01 22:05:33 Job was aborted.
+	via condor_rm (by user kailibryan.doney)
+...
+028 (225589340.000.000) 2026-09-01 22:05:33 Job ad information event triggered.
+Cluster = 225589340
+EventTime = "2026-09-01T22:05:33.287"
+EventTypeNumber = 28
+JOB_GLIDEIN_ClusterId = "$$(GLIDEIN_ClusterId:Unknown)"
+JOB_GLIDEIN_Entry_Name = "$$(GLIDEIN_Entry_Name:Unknown)"
+JOB_GLIDEIN_Factory = "$$(GLIDEIN_Factory:Unknown)"
+JOB_GLIDEIN_Name = "$$(GLIDEIN_Name:Unknown)"
+JOB_GLIDEIN_ProcId = "$$(GLIDEIN_ProcId:Unknown)"
+JOB_GLIDEIN_Schedd = "$$(GLIDEIN_Schedd:Unknown)"
+JOB_GLIDEIN_Site = "$$(GLIDEIN_Site:Unknown)"
+JOB_GLIDEIN_SiteWMS = "$$(GLIDEIN_SiteWMS:Unknown)"
+JOB_GLIDEIN_SiteWMS_JobId = "$$(GLIDEIN_SiteWMS_JobId:Unknown)"
+JOB_GLIDEIN_SiteWMS_Queue = "$$(GLIDEIN_SiteWMS_Queue:Unknown)"
+JOB_GLIDEIN_SiteWMS_Slot = "$$(GLIDEIN_SiteWMS_Slot:Unknown)"
+JOB_Site = "$$(GLIDEIN_Site:Unknown)"
+MyType = "JobAbortedEvent"
+Proc = 0
+Reason = "via condor_rm (by user kailibryan.doney)"
+Subproc = 0
+TriggerEventTypeName = "ULOG_JOB_ABORTED"
+TriggerEventTypeNumber = 9
+...

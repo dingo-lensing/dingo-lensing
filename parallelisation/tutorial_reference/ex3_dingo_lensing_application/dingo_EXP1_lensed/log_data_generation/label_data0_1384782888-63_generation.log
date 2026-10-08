@@ -1,0 +1,220 @@
+000 (225715616.000.000) 2026-09-06 20:28:48 Job submitted from host: <131.215.5.225:9618?PrivAddr=%3c10.14.0.75:9618%3fsock%3dschedd_2573_7145%3e&PrivNet=LIGO-Caltech&addrs=131.215.5.225-9618&alias=ldas-osg.ligo.caltech.edu&noUDP&sock=schedd_2573_7145>
+    [ DAGNodeName = "label_data0_1384782888-63_generation_arg_0"; JobBatchName = "dag_label.submit+225715614" ]
+    WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:MY.flock_local is deprecated. Use MY.POOLS = "IGWN,CIT".
+...
+028 (225715616.000.000) 2026-09-06 20:28:48 Job ad information event triggered.
+Cluster = 225715616
+EventTime = "2026-09-06T20:28:48.651"
+EventTypeNumber = 28
+JOB_GLIDEIN_ClusterId = "$$(GLIDEIN_ClusterId:Unknown)"
+JOB_GLIDEIN_Entry_Name = "$$(GLIDEIN_Entry_Name:Unknown)"
+JOB_GLIDEIN_Factory = "$$(GLIDEIN_Factory:Unknown)"
+JOB_GLIDEIN_Name = "$$(GLIDEIN_Name:Unknown)"
+JOB_GLIDEIN_ProcId = "$$(GLIDEIN_ProcId:Unknown)"
+JOB_GLIDEIN_Schedd = "$$(GLIDEIN_Schedd:Unknown)"
+JOB_GLIDEIN_Site = "$$(GLIDEIN_Site:Unknown)"
+JOB_GLIDEIN_SiteWMS = "$$(GLIDEIN_SiteWMS:Unknown)"
+JOB_GLIDEIN_SiteWMS_JobId = "$$(GLIDEIN_SiteWMS_JobId:Unknown)"
+JOB_GLIDEIN_SiteWMS_Queue = "$$(GLIDEIN_SiteWMS_Queue:Unknown)"
+JOB_GLIDEIN_SiteWMS_Slot = "$$(GLIDEIN_SiteWMS_Slot:Unknown)"
+JOB_Site = "$$(GLIDEIN_Site:Unknown)"
+LogNotes = "DAG Node: label_data0_1384782888-63_generation_arg_0"
+MyType = "SubmitEvent"
+Proc = 0
+StructuredNotes = [ DAGNodeName = "label_data0_1384782888-63_generation_arg_0"; JobBatchName = "dag_label.submit+225715614" ]
+SubmitHost = "<131.215.5.225:9618?PrivAddr=%3c10.14.0.75:9618%3fsock%3dschedd_2573_7145%3e&PrivNet=LIGO-Caltech&addrs=131.215.5.225-9618&alias=ldas-osg.ligo.caltech.edu&noUDP&sock=schedd_2573_7145>"
+Subproc = 0
+TriggerEventTypeName = "ULOG_SUBMIT"
+TriggerEventTypeNumber = 0
+Warnings = "QMGMT:0:MY.flock_local is deprecated. Use MY.POOLS = \"IGWN,CIT\"."
+...
+040 (225715616.000.000) 2026-09-06 20:29:12 Started transferring input files
+	Transferring to host: <10.14.9.166:9618?addrs=10.14.9.166-9618&alias=node2166.cluster.ldas.cit&noUDP&sock=slot1_3_39578_0803_1184>
+...
+028 (225715616.000.000) 2026-09-06 20:29:12 Job ad information event triggered.
+Cluster = 225715616
+EventTime = "2026-09-06T20:29:12.555"
+EventTypeNumber = 28
+Host = "<10.14.9.166:9618?addrs=10.14.9.166-9618&alias=node2166.cluster.ldas.cit&noUDP&sock=slot1_3_39578_0803_1184>"
+JOB_GLIDEIN_ClusterId = "Unknown"
+JOB_GLIDEIN_Entry_Name = "Unknown"
+JOB_GLIDEIN_Factory = "Unknown"
+JOB_GLIDEIN_Name = "Unknown"
+JOB_GLIDEIN_ProcId = "Unknown"
+JOB_GLIDEIN_Schedd = "Unknown"
+JOB_GLIDEIN_Site = "Unknown"
+JOB_GLIDEIN_SiteWMS = "Unknown"
+JOB_GLIDEIN_SiteWMS_JobId = "Unknown"
+JOB_GLIDEIN_SiteWMS_Queue = "Unknown"
+JOB_GLIDEIN_SiteWMS_Slot = "Unknown"
+JOB_Site = "Unknown"
+MyType = "FileTransferEvent"
+Proc = 0
+Subproc = 0
+TriggerEventTypeName = "ULOG_FILE_TRANSFER"
+TriggerEventTypeNumber = 40
+Type = 2
+...
+040 (225715616.000.000) 2026-09-06 20:29:30 Finished transferring input files
+...
+028 (225715616.000.000) 2026-09-06 20:29:30 Job ad information event triggered.
+Cluster = 225715616
+EventTime = "2026-09-06T20:29:30.714"
+EventTypeNumber = 28
+JOB_GLIDEIN_ClusterId = "Unknown"
+JOB_GLIDEIN_Entry_Name = "Unknown"
+JOB_GLIDEIN_Factory = "Unknown"
+JOB_GLIDEIN_Name = "Unknown"
+JOB_GLIDEIN_ProcId = "Unknown"
+JOB_GLIDEIN_Schedd = "Unknown"
+JOB_GLIDEIN_Site = "Unknown"
+JOB_GLIDEIN_SiteWMS = "Unknown"
+JOB_GLIDEIN_SiteWMS_JobId = "Unknown"
+JOB_GLIDEIN_SiteWMS_Queue = "Unknown"
+JOB_GLIDEIN_SiteWMS_Slot = "Unknown"
+JOB_Site = "Unknown"
+MyType = "FileTransferEvent"
+Proc = 0
+Subproc = 0
+TriggerEventTypeName = "ULOG_FILE_TRANSFER"
+TriggerEventTypeNumber = 40
+Type = 3
+...
+001 (225715616.000.000) 2026-09-06 20:29:30 Job executing on host: <10.14.9.166:9618?addrs=10.14.9.166-9618&alias=node2166.cluster.ldas.cit&noUDP&sock=startd_39537_ac03>
+	SlotName: slot1_3@node2166.cluster.ldas.cit
+	CondorScratchDir = "/var/lib/condor/execute/dir_2357323/scratch"
+	Cpus = 1
+	Disk = 5242880
+	GPUs = 0
+	Memory = 16384
+...
+028 (225715616.000.000) 2026-09-06 20:29:30 Job ad information event triggered.
+Cluster = 225715616
+EventTime = "2026-09-06T20:29:30.738"
+EventTypeNumber = 28
+ExecuteHost = "<10.14.9.166:9618?addrs=10.14.9.166-9618&alias=node2166.cluster.ldas.cit&noUDP&sock=startd_39537_ac03>"
+ExecuteProps = [ Cpus = 1; Disk = 5242880; GPUs = 0; Memory = 16384; CondorScratchDir = "/var/lib/condor/execute/dir_2357323/scratch" ]
+JOB_GLIDEIN_ClusterId = "Unknown"
+JOB_GLIDEIN_Entry_Name = "Unknown"
+JOB_GLIDEIN_Factory = "Unknown"
+JOB_GLIDEIN_Name = "Unknown"
+JOB_GLIDEIN_ProcId = "Unknown"
+JOB_GLIDEIN_Schedd = "Unknown"
+JOB_GLIDEIN_Site = "Unknown"
+JOB_GLIDEIN_SiteWMS = "Unknown"
+JOB_GLIDEIN_SiteWMS_JobId = "Unknown"
+JOB_GLIDEIN_SiteWMS_Queue = "Unknown"
+JOB_GLIDEIN_SiteWMS_Slot = "Unknown"
+JOB_Site = "Unknown"
+MyType = "ExecuteEvent"
+Proc = 0
+SlotName = "slot1_3@node2166.cluster.ldas.cit"
+Subproc = 0
+TriggerEventTypeName = "ULOG_EXECUTE"
+TriggerEventTypeNumber = 1
+...
+021 (225715616.000.000) 2026-09-06 20:29:30 Error from starter on slot1_3@node2166.cluster.ldas.cit:
+	Failed to execute '/var/lib/condor/execute/dir_2357323/scratch/dingo_lensing_pipe_generation' with arguments dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_generation --idx 0 --trigger-time 1384782888.63 --outdir dingo_EXP1_lensed: invalid interpreter (/home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/python3.13) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+004 (225715616.000.000) 2026-09-06 20:29:40 Job was evicted. Code 6 Subcode 2
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	4521092518  -  Run Bytes Received By Job
+	Reason: Error from slot1_3@node2166.cluster.ldas.cit: Failed to execute '/var/lib/condor/execute/dir_2357323/scratch/dingo_lensing_pipe_generation' with arguments dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_generation --idx 0 --trigger-time 1384782888.63 --outdir dingo_EXP1_lensed: invalid interpreter (/home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/python3.13) specified on first line of script (errno=2: 'No such file or directory')
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 1         1 
+	   Disk (KB)            :  4500000  5242880   5242880 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             16384     16384 
+	   TimeSlotBusy (s)     :       18                    
+...
+028 (225715616.000.000) 2026-09-06 20:29:40 Job ad information event triggered.
+Checkpointed = false
+Cluster = 225715616
+EventTime = "2026-09-06T20:29:40.800"
+EventTypeNumber = 28
+JOB_GLIDEIN_ClusterId = "Unknown"
+JOB_GLIDEIN_Entry_Name = "Unknown"
+JOB_GLIDEIN_Factory = "Unknown"
+JOB_GLIDEIN_Name = "Unknown"
+JOB_GLIDEIN_ProcId = "Unknown"
+JOB_GLIDEIN_Schedd = "Unknown"
+JOB_GLIDEIN_Site = "Unknown"
+JOB_GLIDEIN_SiteWMS = "Unknown"
+JOB_GLIDEIN_SiteWMS_JobId = "Unknown"
+JOB_GLIDEIN_SiteWMS_Queue = "Unknown"
+JOB_GLIDEIN_SiteWMS_Slot = "Unknown"
+JOB_Site = "Unknown"
+MyType = "JobEvictedEvent"
+Proc = 0
+Reason = "Error from slot1_3@node2166.cluster.ldas.cit: Failed to execute '/var/lib/condor/execute/dir_2357323/scratch/dingo_lensing_pipe_generation' with arguments dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_generation --idx 0 --trigger-time 1384782888.63 --outdir dingo_EXP1_lensed: invalid interpreter (/home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/python3.13) specified on first line of script (errno=2: 'No such file or directory')"
+ReasonCode = 6
+ReasonSubCode = 2
+ReceivedBytes = 4521092518.0
+RunLocalUsage = "Usr 0 00:00:00, Sys 0 00:00:00"
+RunRemoteUsage = "Usr 0 00:00:00, Sys 0 00:00:00"
+SentBytes = 0.0
+Subproc = 0
+TerminatedAndRequeued = false
+TerminatedNormally = false
+TriggerEventTypeName = "ULOG_JOB_EVICTED"
+TriggerEventTypeNumber = 4
+...
+012 (225715616.000.000) 2026-09-06 20:29:40 Job was held.
+	Error from slot1_3@node2166.cluster.ldas.cit: Failed to execute '/var/lib/condor/execute/dir_2357323/scratch/dingo_lensing_pipe_generation' with arguments dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_generation --idx 0 --trigger-time 1384782888.63 --outdir dingo_EXP1_lensed: invalid interpreter (/home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/python3.13) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+028 (225715616.000.000) 2026-09-06 20:29:40 Job ad information event triggered.
+Cluster = 225715616
+EventTime = "2026-09-06T20:29:40.818"
+EventTypeNumber = 28
+HoldReason = "Error from slot1_3@node2166.cluster.ldas.cit: Failed to execute '/var/lib/condor/execute/dir_2357323/scratch/dingo_lensing_pipe_generation' with arguments dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_generation --idx 0 --trigger-time 1384782888.63 --outdir dingo_EXP1_lensed: invalid interpreter (/home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/python3.13) specified on first line of script (errno=2: 'No such file or directory')"
+HoldReasonCode = 6
+HoldReasonSubCode = 2
+JOB_GLIDEIN_ClusterId = "$$(GLIDEIN_ClusterId:Unknown)"
+JOB_GLIDEIN_Entry_Name = "$$(GLIDEIN_Entry_Name:Unknown)"
+JOB_GLIDEIN_Factory = "$$(GLIDEIN_Factory:Unknown)"
+JOB_GLIDEIN_Name = "$$(GLIDEIN_Name:Unknown)"
+JOB_GLIDEIN_ProcId = "$$(GLIDEIN_ProcId:Unknown)"
+JOB_GLIDEIN_Schedd = "$$(GLIDEIN_Schedd:Unknown)"
+JOB_GLIDEIN_Site = "$$(GLIDEIN_Site:Unknown)"
+JOB_GLIDEIN_SiteWMS = "$$(GLIDEIN_SiteWMS:Unknown)"
+JOB_GLIDEIN_SiteWMS_JobId = "$$(GLIDEIN_SiteWMS_JobId:Unknown)"
+JOB_GLIDEIN_SiteWMS_Queue = "$$(GLIDEIN_SiteWMS_Queue:Unknown)"
+JOB_GLIDEIN_SiteWMS_Slot = "$$(GLIDEIN_SiteWMS_Slot:Unknown)"
+JOB_Site = "$$(GLIDEIN_Site:Unknown)"
+MyType = "JobHeldEvent"
+Proc = 0
+Subproc = 0
+TriggerEventTypeName = "ULOG_JOB_HELD"
+TriggerEventTypeNumber = 12
+...
+009 (225715616.000.000) 2026-09-07 19:57:23 Job was aborted.
+	DAG Removed: User removed scheduler job from queue. (by user kailibryan.doney)
+...
+028 (225715616.000.000) 2026-09-07 19:57:23 Job ad information event triggered.
+Cluster = 225715616
+EventTime = "2026-09-07T19:57:23.488"
+EventTypeNumber = 28
+JOB_GLIDEIN_ClusterId = "$$(GLIDEIN_ClusterId:Unknown)"
+JOB_GLIDEIN_Entry_Name = "$$(GLIDEIN_Entry_Name:Unknown)"
+JOB_GLIDEIN_Factory = "$$(GLIDEIN_Factory:Unknown)"
+JOB_GLIDEIN_Name = "$$(GLIDEIN_Name:Unknown)"
+JOB_GLIDEIN_ProcId = "$$(GLIDEIN_ProcId:Unknown)"
+JOB_GLIDEIN_Schedd = "$$(GLIDEIN_Schedd:Unknown)"
+JOB_GLIDEIN_Site = "$$(GLIDEIN_Site:Unknown)"
+JOB_GLIDEIN_SiteWMS = "$$(GLIDEIN_SiteWMS:Unknown)"
+JOB_GLIDEIN_SiteWMS_JobId = "$$(GLIDEIN_SiteWMS_JobId:Unknown)"
+JOB_GLIDEIN_SiteWMS_Queue = "$$(GLIDEIN_SiteWMS_Queue:Unknown)"
+JOB_GLIDEIN_SiteWMS_Slot = "$$(GLIDEIN_SiteWMS_Slot:Unknown)"
+JOB_Site = "$$(GLIDEIN_Site:Unknown)"
+MyType = "JobAbortedEvent"
+Proc = 0
+Reason = "DAG Removed: User removed scheduler job from queue. (by user kailibryan.doney)"
+Subproc = 0
+TriggerEventTypeName = "ULOG_JOB_ABORTED"
+TriggerEventTypeNumber = 9
+...

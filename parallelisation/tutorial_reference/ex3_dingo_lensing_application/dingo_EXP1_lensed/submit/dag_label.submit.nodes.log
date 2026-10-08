@@ -1,0 +1,33 @@
+000 (225715616.000.000) 2026-09-06 20:28:48 Job submitted from host: <131.215.5.225:9618?PrivAddr=%3c10.14.0.75:9618%3fsock%3dschedd_2573_7145%3e&PrivNet=LIGO-Caltech&addrs=131.215.5.225-9618&alias=ldas-osg.ligo.caltech.edu&noUDP&sock=schedd_2573_7145>
+    [ DAGNodeName = "label_data0_1384782888-63_generation_arg_0"; JobBatchName = "dag_label.submit+225715614" ]
+    WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:MY.flock_local is deprecated. Use MY.POOLS = "IGWN,CIT".
+...
+001 (225715616.000.000) 2026-09-06 20:29:30 Job executing on host: <10.14.9.166:9618?addrs=10.14.9.166-9618&alias=node2166.cluster.ldas.cit&noUDP&sock=startd_39537_ac03>
+	SlotName: slot1_3@node2166.cluster.ldas.cit
+	CondorScratchDir = "/var/lib/condor/execute/dir_2357323/scratch"
+	Cpus = 1
+	Disk = 5242880
+	GPUs = 0
+	Memory = 16384
+...
+004 (225715616.000.000) 2026-09-06 20:29:40 Job was evicted. Code 6 Subcode 2
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	4521092518  -  Run Bytes Received By Job
+	Reason: Error from slot1_3@node2166.cluster.ldas.cit: Failed to execute '/var/lib/condor/execute/dir_2357323/scratch/dingo_lensing_pipe_generation' with arguments dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_generation --idx 0 --trigger-time 1384782888.63 --outdir dingo_EXP1_lensed: invalid interpreter (/home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/python3.13) specified on first line of script (errno=2: 'No such file or directory')
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 1         1 
+	   Disk (KB)            :  4500000  5242880   5242880 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             16384     16384 
+	   TimeSlotBusy (s)     :       18                    
+...
+012 (225715616.000.000) 2026-09-06 20:29:40 Job was held.
+	Error from slot1_3@node2166.cluster.ldas.cit: Failed to execute '/var/lib/condor/execute/dir_2357323/scratch/dingo_lensing_pipe_generation' with arguments dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_generation --idx 0 --trigger-time 1384782888.63 --outdir dingo_EXP1_lensed: invalid interpreter (/home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/python3.13) specified on first line of script (errno=2: 'No such file or directory')
+	Code 6 Subcode 2
+...
+009 (225715616.000.000) 2026-09-07 19:57:23 Job was aborted.
+	DAG Removed: User removed scheduler job from queue. (by user kailibryan.doney)
+...
