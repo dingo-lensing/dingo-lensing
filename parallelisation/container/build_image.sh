@@ -63,12 +63,17 @@ mkdir -p "$IMAGE_DIR"
 ls -lh "$IMAGE"
 
 step "Check the image"
-# --cleanenv keeps the access point's environment (PYTHONPATH, conda) out.
-apptainer test --cleanenv "$IMAGE"
+# Run from /, so the old package copy at the sync branch's root (or any other
+# folder) can't shadow the image's. --cleanenv keeps the access point's
+# environment out; --contain also hides /home, as on CIT's execute nodes.
+cd /
+apptainer test --cleanenv --contain "$IMAGE"
 echo "pip check inside the image:"
-apptainer exec --cleanenv "$IMAGE" cat /opt/pip-check.txt
+apptainer exec --cleanenv --contain "$IMAGE" cat /opt/pip-check.txt
 T1_MODEL="$(sed -n 's/^model *= *//p' "$SYNC/parallelisation/option_a/T1a_single.ini")"
 T2_MODEL="$(sed -n 's/^model *= *//p' "$SYNC/parallelisation/option_a/T2a_single.ini")"
+# The model check needs /home for the model files (and the script), but runs
+# the script by path, so only its own folder is added to Python's path.
 apptainer exec --cleanenv --bind /home "$IMAGE" /opt/dingo_env/bin/python \
     "$SYNC/parallelisation/option_a/check_models.py" "$T1_MODEL" "$T2_MODEL"
 

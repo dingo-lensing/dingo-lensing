@@ -130,6 +130,11 @@ work for software in `/home`; see the launch attempts above.)
   cluster's older GCC. GCC 15 also changed the default C standard to `gnu23`
   (GCC 15 porting notes). The recipe now pins conda-forge's `gcc=13`, which has
   neither change.
+- Third build (recipe `f8acded`) succeeded: 834 MB. Its self-test then failed
+  correctly: Run from `~/dingo-lensing-sync`, Python imported the old package copy
+  at that branch's root instead of the image's, because Apptainer shares the
+  current folder and home by default. The checks now run from `/`, the self-test
+  with `--contain` (no `/home`, as on execute nodes) and Python with `-P`.
 - `container/build_image.sh`: Builds, self-tests and model-checks the image, then
   stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
   made of both commits (staged files can never be replaced).

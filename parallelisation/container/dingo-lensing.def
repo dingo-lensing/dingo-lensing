@@ -72,7 +72,10 @@ EOF
 
 %test
     set -eu
-    /opt/dingo_env/bin/python - <<'EOF'
+    # Run from / with -P, so no package in the caller's current folder (or the
+    # host's home, if bound) can shadow the image's own.
+    cd /
+    /opt/dingo_env/bin/python -P - <<'EOF'
 import importlib
 import importlib.metadata as metadata
 
