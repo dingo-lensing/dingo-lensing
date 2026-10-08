@@ -12,11 +12,22 @@ from __future__ import annotations
 
 import argparse
 import math
+import re
 import sys
 import urllib.request
 from pathlib import Path
 
 from pipe_config import data_window, parse_dict, read_pipe_ini
+
+
+def channel_names_in(path, detector: str) -> list:
+    """Names of a detector's channels in a GWF file, found in its raw bytes.
+
+    GWF stores channel names as plain text, so this needs no frame library.
+    It turns a wrong channel-dict entry into an error that names the fix.
+    """
+    pattern = re.compile(re.escape(detector.encode()) + rb":[A-Za-z0-9_\-]+")
+    return sorted({name.decode() for name in pattern.findall(Path(path).read_bytes())})
 
 
 def main(argv=None) -> None:
@@ -77,7 +88,12 @@ def main(argv=None) -> None:
         try:
             data = TimeSeries.read(str(destination), channel, start=start, end=end)
         except Exception as error:
-            sys.exit(f"{detector}: Could not read {channel} from {destination}: {error}")
+            found = ", ".join(channel_names_in(destination, detector)) or "none"
+            sys.exit(
+                f"{detector}: Could not read {channel} from {destination}: {error}\n"
+                f"{detector}: Channels in that file: {found}. Update channel-dict in "
+                f"the T1 configs to match."
+            )
         expected_samples = (end - start) * sampling_frequency
         if abs(len(data) - expected_samples) > 1:
             sys.exit(

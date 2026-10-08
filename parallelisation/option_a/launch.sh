@@ -28,6 +28,20 @@ TESTS=(
 fail() { echo "ERROR: $*" >&2; exit 1; }
 step() { printf '\n== %s\n' "$*"; }
 
+# On failure, say whether anything reached Condor and what to clean up.
+CREATED_RUN_ROOT=0
+SUBMITTED=0
+on_exit() {
+    local status=$?
+    [[ $status -eq 0 || $CREATED_RUN_ROOT -eq 0 ]] && return
+    if [[ $SUBMITTED -eq 0 ]]; then
+        echo "Nothing was submitted. Remove $RUN_ROOT before running again." >&2
+    else
+        echo "$SUBMITTED workflow(s) were submitted before the failure; check condor_q before removing $RUN_ROOT." >&2
+    fi
+}
+trap on_exit EXIT
+
 check_workflow() {
     local label="$1" dir="$2" events="$3"
     local submit_dir="$dir/$label/submit"
@@ -90,6 +104,7 @@ done
 
 step "Run folder $RUN_ROOT"
 mkdir -p "$RUN_ROOT/T1" "$RUN_ROOT/T2"
+CREATED_RUN_ROOT=1
 cp "$HERE/T1a_single.ini" "$HERE/T1b_twice.ini" "$HERE/T1b_gps.txt" "$RUN_ROOT/T1/"
 cp "$HERE/T2a_single.ini" "$HERE/T2b_three.ini" "$HERE/T2b_gps.txt" "$RUN_ROOT/T2/"
 cp -r "$TUTORIAL_EX3/gwf_files" "$RUN_ROOT/T2/"
@@ -124,6 +139,7 @@ for entry in "${TESTS[@]}"; do
     dir="$RUN_ROOT/$folder"
     dag="$(cd "$dir" && ls "$label"/submit/dag_*.submit)"
     (cd "$dir" && condor_submit_dag "$dag") | tee -a "$RUN_ROOT/submissions.txt"
+    SUBMITTED=$((SUBMITTED + 1))
 done
 
 step "Submitted T1a, T1b, T2a and T2b"

@@ -45,8 +45,10 @@ agree with each other and with the event run alone?
   trained on a single O1 noise ASD near GW150914):
   `~/dingo_lensing_tutorial/materials/ex2_dingo_lensing/training/model_latest.pt`.
 - Data: GW150914, from the 4096 s, 4 kHz GWOSC frame file per detector
-  (fetched by the launch script). Each event's PSD is estimated from its own
-  data: 128 × 4 s immediately before the segment.
+  (fetched by the launch script). GWOSC serves the original O1 release
+  (`H-H1_LOSC_4_V1-1126256640-4096.gwf` and the L1 equivalent), whose strain
+  channel is `LOSC-STRAIN`. Each event's PSD is estimated from its own data:
+  128 × 4 s immediately before the segment.
 - Settings: 4 s duration, 2 s post-trigger, 10,000 samples, importance sampling
   on (the model infers the phase, so no synthetic-phase step), 8 CPUs per job.
 
@@ -90,6 +92,12 @@ reference, and how does the wall time of three events compare with one?
    combined uncertainty.
 3. Timing recorded for every job: Queue wait, input transfer, run time and CPU
    used, plus each workflow's total wall time, so T2b can be compared with T2a.
+
+### Launch attempts
+
+| Date (UTC) | Outcome |
+|---|---|
+| 2026-10-08 06:33 | Stopped at the T1 data step; nothing was submitted. The configs named the strain channel `GWOSC-4KHZ_R1_STRAIN`, but GWOSC served the original O1 release, whose channel is `LOSC-STRAIN` (read from the files themselves). Every earlier check passed: Unit tests, environment, code at `a4de31e`, inputs. Fixed in the T1 configs. |
 
 ### Results
 

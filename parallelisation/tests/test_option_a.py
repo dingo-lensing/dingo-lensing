@@ -17,6 +17,7 @@ OPTION_A = PARALLELISATION / "option_a"
 TUTORIAL = PARALLELISATION / "tutorial_reference"
 sys.path.insert(0, str(OPTION_A))
 
+from fetch_gwosc_frames import channel_names_in  # noqa: E402
 from pipe_config import (  # noqa: E402
     data_window,
     is_unset,
@@ -119,6 +120,21 @@ class TestReadGpsFile(unittest.TestCase):
         path = Path(directory.name) / "gps.txt"
         path.write_text("# header\n100.5\n200.25, 7  # trailing comment\n\n300\n")
         self.assertEqual(read_gps_file(path), [100.5, 200.25, 300.0])
+
+
+class TestChannelNamesIn(unittest.TestCase):
+    def test_finds_each_channel_of_the_detector_once_in_raw_bytes(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        path = Path(directory.name) / "frame.gwf"
+        path.write_bytes(
+            b"\x00\x07H1:LOSC-STRAIN\x00\xffH1:LOSC-DQMASK\x01"
+            b"H1:LOSC-STRAIN\x00L1:LOSC-STRAIN\x00"
+        )
+        self.assertEqual(
+            channel_names_in(path, "H1"), ["H1:LOSC-DQMASK", "H1:LOSC-STRAIN"]
+        )
+        self.assertEqual(channel_names_in(path, "V1"), [])
 
 
 class TestSegmentArithmetic(unittest.TestCase):
