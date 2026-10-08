@@ -1,0 +1,6 @@
+# Segment start times for T2b: Exercise 3's injection listed three times.
+# start = trigger time - (duration - post-trigger duration)
+#       = 1384782888.63 - (8 - 2) = 1384782882.63
+1384782882.63
+1384782882.63
+1384782882.63

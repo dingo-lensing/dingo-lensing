@@ -1,0 +1,5 @@
+# Segment start times for T1b: GW150914 listed twice.
+# start = trigger time - (duration - post-trigger duration)
+#       = 1126259462.4 - (4 - 2) = 1126259460.4
+1126259460.4
+1126259460.4
