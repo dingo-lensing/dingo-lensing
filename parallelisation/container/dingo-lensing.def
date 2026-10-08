@@ -1,0 +1,95 @@
+# CPU-only DINGO-Lensing image for Condor jobs, which can no longer see /home on
+# CIT's execute nodes (see ../test_log.md). Build it with build_image.sh, which
+# supplies both commits below, checks the result and stages it on OSDF.
+#
+# Contents: Python 3.13.13 from conda-forge; every package at dingo_env's exact
+# version (requirements-cpu.txt), with PyTorch as CPU builds; modwaveforms at the
+# commit dingo_env has; DINGO-Lensing at one commit of our branch.
+
+Bootstrap: docker
+From: condaforge/miniforge3:latest
+
+%arguments
+    DINGO_LENSING_COMMIT=
+    MODWAVEFORMS_COMMIT=
+
+%files
+    requirements-cpu.txt /opt/requirements-cpu.txt
+
+%post
+    set -eu
+    if [ -z "{{ DINGO_LENSING_COMMIT }}" ] || [ -z "{{ MODWAVEFORMS_COMMIT }}" ]; then
+        echo "Build with build_image.sh: Both commits must be given as build arguments." >&2
+        exit 1
+    fi
+
+    conda create --yes --quiet --prefix /opt/dingo_env --channel conda-forge \
+        python=3.13.13 pip=26.1.1
+    PYTHON=/opt/dingo_env/bin/python
+    $PYTHON -m pip install --no-cache-dir --requirement /opt/requirements-cpu.txt
+    $PYTHON -m pip install --no-cache-dir --no-deps \
+        "https://github.com/ezquiaga/modwaveforms/archive/{{ MODWAVEFORMS_COMMIT }}.tar.gz"
+
+    # DINGO-Lensing is an editable install with its source kept in the image,
+    # because a normal install leaves out dingo_lensing/pipe/ (it has no
+    # __init__.py), and with it every pipeline command.
+    mkdir -p /opt/dingo-lensing
+    $PYTHON - <<'EOF'
+import io
+import tarfile
+import urllib.request
+
+url = "https://github.com/dingo-lensing/dingo-lensing/archive/{{ DINGO_LENSING_COMMIT }}.tar.gz"
+with urllib.request.urlopen(url) as response:
+    archive = tarfile.open(fileobj=io.BytesIO(response.read()), mode="r:gz")
+for member in archive.getmembers():
+    # Drop the archive's top-level folder so files land at /opt/dingo-lensing/...
+    _, _, relative = member.name.partition("/")
+    if relative:
+        member.name = relative
+        archive.extract(member, "/opt/dingo-lensing", filter="data")
+EOF
+    $PYTHON -m pip install --no-cache-dir --no-deps --editable /opt/dingo-lensing
+
+    # Record what went in, plus anything pip considers inconsistent.
+    echo "{{ DINGO_LENSING_COMMIT }}" > /opt/dingo-lensing.commit
+    echo "{{ MODWAVEFORMS_COMMIT }}" > /opt/modwaveforms.commit
+    $PYTHON -m pip list --format=freeze > /opt/pip-list.txt
+    $PYTHON -m pip check > /opt/pip-check.txt 2>&1 || true
+    conda clean --all --yes
+
+%environment
+    export PATH=/opt/dingo_env/bin:$PATH
+
+%test
+    set -eu
+    /opt/dingo_env/bin/python - <<'EOF'
+import importlib.metadata as metadata
+
+import bilby_pipe
+import dingo
+import dingo_lensing
+import dingo_lensing.pipe.data_generation
+import dingo_lensing.pipe.importance_sampling
+import dingo_lensing.pipe.main
+import dingo_lensing.pipe.sampling
+import lalsimulation
+import modwaveforms
+import torch
+
+assert dingo_lensing.__file__ == "/opt/dingo-lensing/dingo_lensing/__init__.py", dingo_lensing.__file__
+assert torch.__version__.endswith("+cpu"), torch.__version__
+for name in ("dingo-gw", "dingo_lensing", "modwaveforms", "bilby", "bilby_pipe", "lalsuite", "torch"):
+    print(f"{name}: {metadata.version(name)}")
+EOF
+    for exe in dingo_lensing_pipe dingo_lensing_pipe_generation dingo_lensing_pipe_sampling \
+               dingo_lensing_pipe_importance_sampling dingo_pipe_plot; do
+        test -x "/opt/dingo_env/bin/$exe"
+    done
+    /opt/dingo_env/bin/dingo_lensing_pipe --help > /dev/null
+    echo "dingo_lensing commit: $(cat /opt/dingo-lensing.commit)"
+
+%labels
+    dingo_lensing_commit {{ DINGO_LENSING_COMMIT }}
+    modwaveforms_commit {{ MODWAVEFORMS_COMMIT }}
+    torch_build cpu

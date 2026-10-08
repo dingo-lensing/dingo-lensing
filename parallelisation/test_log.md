@@ -100,6 +100,27 @@ reference, and how does the wall time of three events compare with one?
 | 2026-10-08 06:33 | Stopped at the T1 data step; nothing was submitted. The configs named the strain channel `GWOSC-4KHZ_R1_STRAIN`, but GWOSC served the original O1 release, whose channel is `LOSC-STRAIN` (read from the files themselves). Every earlier check passed: Unit tests, environment, code at `a4de31e`, inputs. Fixed in the T1 configs. |
 | 2026-10-08 06:37 | All checks passed and all four workflows were submitted from `ldas-grid`. Code `a4de31e`, tests `ef1e845`. T1 data: 2,113,536 samples per detector (516 s at 4096 Hz), all finite. Model check: Our branch rebuilt both models' lensed waveform generators (`modwaveforms/two_images_BBH`; IMRPhenomD for the toy model, IMRPhenomXPHM for Juno's) and generated one prior draw from each. Workflows: T1a 4 jobs, T1b 8 (2 events), T2a 4, T2b 12 (3 events), every job running from `dingo_env`. DAGMan clusters: T1a 569226231, T1b 569226232, T2a 569226233, T2b 569226234. |
 
+| 2026-10-08 06:40 | All four data-generation jobs went on hold before running: "invalid interpreter (/home/kailibryan.doney/.conda/envs/dingo_env/bin/python3.13) ... No such file or directory" on node1720, node1243, node2305 and node2268. CIT is disabling `/home` on execute nodes (IGWN Computing Guide, "shared filesystem" page), so `dingo_env` does not exist where jobs run. Next: Run every job inside a container image staged on OSDF (`container/`), the guide's recommended route for custom software. |
+
+### Running jobs without `/home`: The container
+
+- `container/dingo-lensing.def`: CPU-only image with Python 3.13.13, every package
+  at `dingo_env`'s exact version (`requirements-cpu.txt`, generated from
+  `dingo_env_pip_list.txt` by `make_requirements.py`; PyTorch 2.13.0 and
+  torchvision 0.28.0 as CPU builds; the 19 CUDA-only packages left out),
+  modwaveforms at the commit `dingo_env` has, and DINGO-Lensing at one commit of
+  our branch (editable install, since a normal install omits `dingo_lensing/pipe/`).
+- `container/build_image.sh`: Builds, self-tests and model-checks the image, then
+  stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
+  made of both commits (staged files can never be replaced).
+- `container/smoke_test.sh`: One Condor job run inside the staged image exactly as
+  bilby_pipe will run the pipeline's jobs, before T1 and T2.
+- Tokens: The CIT access points issue job tokens themselves
+  (`LOCAL_CREDMON_ISSUER = https://osdf.igwn.org/cit`), so jobs use
+  `use_oauth_services = scitokens` and no browser login is needed.
+- Models: Sent by Condor from their `/home` paths for now, because DINGO's grid
+  mode requests a different token type for models on OSDF (finding 13).
+
 ### Results
 
 Not run yet.
