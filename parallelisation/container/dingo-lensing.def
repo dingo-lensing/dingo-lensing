@@ -27,9 +27,12 @@ From: condaforge/miniforge3:latest
         python=3.13.13 pip=26.1.1
     PYTHON=/opt/dingo_env/bin/python
     # ligo-segments 1.4.0 and python-ligo-lw 1.8.4 exist only as source on PyPI
-    # for Linux, so pip compiles them, as it did for dingo_env. The compiler goes
-    # in a separate prefix that is deleted afterwards, so the image doesn't ship it.
-    conda create --yes --quiet --prefix /opt/build-tools --channel conda-forge gcc
+    # for Linux, so pip compiles them, as it did for dingo_env. Their C code needs a
+    # pre-GCC-14 compiler: GCC 14 made -Wint-conversion and similar warnings errors,
+    # and GCC 15 changed the default standard from gnu17 to gnu23. GCC 13 has
+    # neither change. The compiler goes in a separate prefix that is deleted
+    # afterwards, so the image doesn't ship it.
+    conda create --yes --quiet --prefix /opt/build-tools --channel conda-forge "gcc=13"
     PATH="/opt/build-tools/bin:$PATH" $PYTHON -m pip install --no-cache-dir \
         --requirement /opt/requirements-cpu.txt
     rm -rf /opt/build-tools

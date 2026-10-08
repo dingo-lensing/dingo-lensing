@@ -105,14 +105,14 @@ reference, and how does the wall time of three events compare with one?
 |---|---|
 | 2026-10-08 06:33 | Stopped at the T1 data step; nothing was submitted. The configs named the strain channel `GWOSC-4KHZ_R1_STRAIN`, but GWOSC served the original O1 release, whose channel is `LOSC-STRAIN` (read from the files themselves). Every earlier check passed: Unit tests, environment, code at `a4de31e`, inputs. Fixed in the T1 configs. |
 | 2026-10-08 06:37 | All checks passed and all four workflows were submitted from `ldas-grid`. Code `a4de31e`, tests `ef1e845`. T1 data: 2,113,536 samples per detector (516 s at 4096 Hz), all finite. Model check: Our branch rebuilt both models' lensed waveform generators (`modwaveforms/two_images_BBH`; IMRPhenomD for the toy model, IMRPhenomXPHM for Juno's) and generated one prior draw from each. Workflows: T1a 4 jobs, T1b 8 (2 events), T2a 4, T2b 12 (3 events), every job running from `dingo_env`. DAGMan clusters: T1a 569226231, T1b 569226232, T2a 569226233, T2b 569226234. |
-
 | 2026-10-08 06:40 | All four data-generation jobs went on hold before running: "invalid interpreter (/home/kailibryan.doney/.conda/envs/dingo_env/bin/python3.13) ... No such file or directory" on node1720, node1243, node2305 and node2268. CIT is disabling `/home` on execute nodes (IGWN Computing Guide, "shared filesystem" page), so `dingo_env` does not exist where jobs run. Next: Run every job inside a container image staged on OSDF (`container/`), the guide's recommended route for custom software. |
-
 | 2026-10-08 09:35 | Relaunch with the EPNFS requirement (tests `79a77c6`, code `a4de31e`). All checks passed, including 2195 EPNFS nodes available and every built job ending with the EPNFS requirement. DAGMan clusters: T1a 569281751, T1b 569281752, T2a 569281753, T2b 569281754. The held attempt's run folder is kept as `option_a_held_20261008`. |
+| 2026-10-08 09:38 | Held again, the same way: "invalid interpreter (.../dingo_env/bin/python3.13)", this time on node2436, node2273, node2292 and node2282. The submit files end with the EPNFS requirement, and node2436 does advertise `EPNFS = true`, yet the job could not see `/home/kailibryan.doney` (on the `home5` server). The IGWN guide also says "Do not point `executable` at, or activate, a Conda environment or virtual environment that lives under `/home`." EPNFS dropped; T1 and T2 move into the container. |
 
 ### Running jobs without `/home`: The container
 
-For production; T1 and T2 use the EPNFS nodes above in the meantime.
+T1 and T2 will run inside this image. (EPNFS nodes were tried first and did not
+work for software in `/home`; see the launch attempts above.)
 
 - `container/dingo-lensing.def`: CPU-only image with Python 3.13.13, every package
   at `dingo_env`'s exact version (`requirements-cpu.txt`, generated from
@@ -127,7 +127,9 @@ For production; T1 and T2 use the EPNFS nodes above in the meantime.
 - Second build (recipe `83ecffc`) found conda-forge's GCC 16, which rejects their
   older C code: Since GCC 14, `-Wint-conversion` and similar warnings are errors
   by default (GCC 14 porting notes), whereas `dingo_env` was compiled with the
-  cluster's older GCC. Documented fix: `-fpermissive`. Not yet retried.
+  cluster's older GCC. GCC 15 also changed the default C standard to `gnu23`
+  (GCC 15 porting notes). The recipe now pins conda-forge's `gcc=13`, which has
+  neither change.
 - `container/build_image.sh`: Builds, self-tests and model-checks the image, then
   stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
   made of both commits (staged files can never be replaced).
