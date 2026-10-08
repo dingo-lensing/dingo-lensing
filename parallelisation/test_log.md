@@ -17,6 +17,12 @@ importance sampling, plot), and Condor runs the chains side by side.
 - Environment: `dingo_env` (`/home/kailibryan.doney/.conda/envs/dingo_env`),
   set as `conda-env` in every config so all jobs run our branch.
 - Submitted to Condor from `ldas-grid`. No local mode.
+- Jobs run only on execute nodes that still mount `/home` (where `dingo_env`
+  lives): Every config carries
+  `extra-lines = [requirements = (TARGET.EPNFS =?= True)]`, and `launch.sh` checks
+  that every built job ends with that requirement. 2195 machines advertised
+  `EPNFS` on 2026-10-08. The guide's dedicated access point,
+  `epnfs.ligo.caltech.edu`, does not resolve from `ldas-grid`.
 - Files: Configs and scripts in `option_a/`, unit tests in `tests/`.
 - Run folder on the cluster: `~/dingo-lensing-runs/option_a/` (`T1/` and `T2/`).
   Large outputs stay there; logs and summaries come back through this branch.
@@ -104,6 +110,8 @@ reference, and how does the wall time of three events compare with one?
 
 ### Running jobs without `/home`: The container
 
+For production; T1 and T2 use the EPNFS nodes above in the meantime.
+
 - `container/dingo-lensing.def`: CPU-only image with Python 3.13.13, every package
   at `dingo_env`'s exact version (`requirements-cpu.txt`, generated from
   `dingo_env_pip_list.txt` by `make_requirements.py`; PyTorch 2.13.0 and
@@ -114,6 +122,10 @@ reference, and how does the wall time of three events compare with one?
   for Linux (conda-forge has no 1.8.4 for Python 3.13), so the build compiles them
   with conda-forge's `gcc` from a temporary prefix that is deleted afterwards.
 - First build (recipe `97860b7`) stopped at exactly that: No `gcc` in the base image.
+- Second build (recipe `83ecffc`) found conda-forge's GCC 16, which rejects their
+  older C code: Since GCC 14, `-Wint-conversion` and similar warnings are errors
+  by default (GCC 14 porting notes), whereas `dingo_env` was compiled with the
+  cluster's older GCC. Documented fix: `-fpermissive`. Not yet retried.
 - `container/build_image.sh`: Builds, self-tests and model-checks the image, then
   stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
   made of both commits (staged files can never be replaced).

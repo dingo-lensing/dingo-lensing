@@ -167,6 +167,18 @@ class TestOptionAConfigs(unittest.TestCase):
                 self.assertEqual(config["scheduler"], "condor")
                 self.assertEqual(config["conda-env"], DINGO_ENV)
 
+    def test_every_config_restricts_jobs_to_nodes_that_mount_home(self):
+        # dingo_env lives in /home, which only EPNFS nodes still mount. bilby_pipe
+        # splits list values on commas, so the requirement must stay one entry.
+        for name in ALL_CONFIGS:
+            with self.subTest(config=name):
+                config = load(name)
+                self.assertIn("extra-lines", config, "No EPNFS requirement")
+                raw = config["extra-lines"]
+                self.assertTrue(raw.startswith("[") and raw.endswith("]"), raw)
+                entries = [entry.strip() for entry in raw[1:-1].split(",")]
+                self.assertEqual(entries, ["requirements = (TARGET.EPNFS =?= True)"])
+
     def test_single_event_configs_give_a_trigger_time_and_no_gps_file(self):
         for name in SINGLE_CONFIGS.values():
             with self.subTest(config=name):
@@ -232,7 +244,8 @@ class TestOptionAConfigs(unittest.TestCase):
         )
         t2a = load("T2a_single.ini")
         self.assertEqual(
-            differing_keys(tutorial, t2a), {"local", "conda-env", "label", "outdir"}
+            differing_keys(tutorial, t2a),
+            {"local", "conda-env", "label", "outdir", "extra-lines"},
         )
         self.assertEqual(t2a["local"], "False")
 

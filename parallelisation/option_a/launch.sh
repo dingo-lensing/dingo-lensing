@@ -61,7 +61,15 @@ check_workflow() {
     [[ "$n_from_env" -eq "$n_jobs" ]] \
         || fail "$label: Only $n_from_env of $n_jobs jobs run from $ENV_PATH/bin"
     ! grep -q '_merge' "$dag" || fail "$label: Found a merge job"
-    echo "$label: $n_jobs jobs for $events event(s), all running from $ENV_PATH/bin"
+    # Every job's final requirements line must be the EPNFS one (from extra-lines).
+    local submit_file last_requirement
+    for submit_file in "$submit_dir"/*.submit; do
+        [[ "$submit_file" == "$dag" ]] && continue
+        last_requirement="$(grep '^requirements' "$submit_file" | tail -n 1)"
+        [[ "$last_requirement" == *"TARGET.EPNFS =?= True"* ]] \
+            || fail "$label: $(basename "$submit_file") ends with '$last_requirement', not the EPNFS requirement"
+    done
+    echo "$label: $n_jobs jobs for $events event(s), all running from $ENV_PATH/bin on EPNFS nodes"
 }
 
 step "Unit tests"
@@ -70,6 +78,9 @@ step "Unit tests"
 step "Environment and code"
 [[ -x "$PYTHON" ]] || fail "No python at $PYTHON (set ENV_PATH)"
 command -v condor_submit_dag > /dev/null || fail "condor_submit_dag not found"
+n_epnfs="$(condor_status -const 'EPNFS =?= True' -af Machine | sort -u | wc -l)"
+[[ "$n_epnfs" -gt 0 ]] || fail "No execute nodes advertise EPNFS, so no job could see dingo_env in /home"
+echo "Execute nodes that still mount /home (EPNFS): $n_epnfs"
 for exe in dingo_lensing_pipe dingo_lensing_pipe_generation dingo_lensing_pipe_sampling \
            dingo_lensing_pipe_importance_sampling dingo_pipe_plot; do
     path="$ENV_PATH/bin/$exe"
