@@ -136,6 +136,15 @@ work for software in `/home`; see the launch attempts above.)
   current folder and home by default. The checks now run from `/`, the self-test
   with `--contain` (no `/home`, as on execute nodes) and in Python's isolated
   mode, the model check without user site-packages.
+- Fourth build (recipe `714878f`) passed every check: The self-test (with no
+  `/home`), `pip check` ("No broken requirements found") and the model check, in
+  which the image rebuilt both models' lensed waveform generators. Staged as
+  `osdf:///igwn/cit/staging/kailibryan.doney/containers/dingo-lensing_a4de31e72e_recipe-714878f_cpu.sif`
+  (834 MB). bilby_pipe warns that frameCPP is missing. dingo_env has neither
+  frameCPP nor FrameL, so its frame reads (the T1 data check) went through gwpy
+  4.0.2's third reader, LALFrame, which comes with `lalsuite` 7.26.15; the image
+  has the same versions. The launch checks will read both tests' frames inside
+  the image before anything is submitted.
 - `container/build_image.sh`: Builds, self-tests and model-checks the image, then
   stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
   made of both commits (staged files can never be replaced).
