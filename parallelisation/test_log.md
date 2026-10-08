@@ -123,6 +123,7 @@ reference, and how does the wall time of three events compare with one?
 | 2026-10-08 06:40 | All four data-generation jobs went on hold before running: "invalid interpreter (/home/kailibryan.doney/.conda/envs/dingo_env/bin/python3.13) ... No such file or directory" on node1720, node1243, node2305 and node2268. CIT is disabling `/home` on execute nodes (IGWN Computing Guide, "shared filesystem" page), so `dingo_env` does not exist where jobs run. Next: Run every job inside a container image staged on OSDF (`container/`), the guide's recommended route for custom software. |
 | 2026-10-08 09:35 | Relaunch with the EPNFS requirement (tests `79a77c6`, code `a4de31e`). All checks passed, including 2195 EPNFS nodes available and every built job ending with the EPNFS requirement. DAGMan clusters: T1a 569281751, T1b 569281752, T2a 569281753, T2b 569281754. The held attempt's run folder is kept as `option_a_held_20261008`. |
 | 2026-10-08 09:38 | Held again, the same way: "invalid interpreter (.../dingo_env/bin/python3.13)", this time on node2436, node2273, node2292 and node2282. The submit files end with the EPNFS requirement, and node2436 does advertise `EPNFS = true`, yet the job could not see `/home/kailibryan.doney` (on the `home5` server). The IGWN guide also says "Do not point `executable` at, or activate, a Conda environment or virtual environment that lives under `/home`." EPNFS dropped; T1 and T2 move into the container. |
+| 2026-10-08, after the smoke test | First launch inside the image (tests `ac977f5`). Stopped at the inputs check, because the EPNFS attempt's run folder was still at `option_a`; nothing was created or submitted. Every earlier check passed: 83 unit tests, code `a4de31e`, the staged image (same commit), all six inputs. |
 
 ### Running jobs without `/home`: The container
 
@@ -164,7 +165,12 @@ work for software in `/home`; see the launch attempts above.)
   2026-10-08 14:52 UTC from `ldas-grid`. HTCondor accepted it with an advisory to
   use its newer container universe instead of `MY.SingularityImage`; bilby_pipe
   writes every job the older way, so T1 and T2's jobs will carry the same
-  advisory. Result pending.
+  advisory. Passed on node1070: The job ran the image's Python inside Apptainer,
+  imported DINGO, DINGO-Lensing (from the image, commit `a4de31e`) and its
+  pipeline, LAL, modwaveforms and PyTorch 2.13.0+cpu, and ran
+  `dingo_lensing_pipe --help`, on a node where `/home/kailibryan.doney` was not
+  visible. So the OSDF transfer, the access point's token and the
+  `(HAS_SINGULARITY=?=True)` requirement all work on CIT's pool.
 - `container/build_image.sh`: Builds, self-tests and model-checks the image, then
   stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
   made of both commits (staged files can never be replaced).
