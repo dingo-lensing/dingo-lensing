@@ -1,0 +1,15 @@
+Loading dataset from dingo_EXP0_lensed/result/label_data0_1384782888-63_sampling.hdf5.
+Loading dataset from dingo_EXP0_lensed/result/label_data0_1384782888-63_sampling.hdf5.
+Loading dataset from dingo_EXP0_lensed/data/label_data0_1384782888-63_generation_event_data.hdf5.
+Estimating synthetic phase for 49783 samples.
+Setting spin_conversion_phase = 0.0. Using this value for the phase parameter for conversion to cartesian spins.
+Setting spin_conversion_phase = 0.0. Using this value for the phase parameter for conversion to cartesian spins.
+Done. This took 338.13 s.
+Setting spin_conversion_phase = 0.0. Using this value for the phase parameter for conversion to cartesian spins.
+Setting spin_conversion_phase = 0.0. Using this value for the phase parameter for conversion to cartesian spins.
+Calculating 49783 likelihoods.
+Done. This took 6.55 seconds.
+Number of samples: 50000
+Log(evidence): -5829.933 +- 0.013
+Effective samples 5033.1: (Sample efficiency = 10.07%)
+Saving dataset to dingo_EXP0_lensed/result/label_data0_1384782888-63_importance_sampling.hdf5

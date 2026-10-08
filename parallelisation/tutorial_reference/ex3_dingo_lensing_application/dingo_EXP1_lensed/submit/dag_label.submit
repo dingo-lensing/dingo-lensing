@@ -1,0 +1,15 @@
+JOB label_data0_1384782888-63_generation_arg_0 dingo_EXP1_lensed/submit/label_data0_1384782888-63_generation.submit
+VARS label_data0_1384782888-63_generation_arg_0 ARGS="dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_generation --idx 0 --trigger-time 1384782888.63 --outdir dingo_EXP1_lensed"
+Retry label_data0_1384782888-63_generation_arg_0 3
+JOB label_data0_1384782888-63_sampling_arg_0 dingo_EXP1_lensed/submit/label_data0_1384782888-63_sampling.submit
+VARS label_data0_1384782888-63_sampling_arg_0 ARGS="dingo_EXP1_lensed/label_config_complete.ini --label label_data0_1384782888-63_sampling --event-data-file dingo_EXP1_lensed/data/label_data0_1384782888-63_generation_event_data.hdf5 --outdir dingo_EXP1_lensed"
+JOB label_data0_1384782888-63_importance_sampling_arg_0 dingo_EXP1_lensed/submit/label_data0_1384782888-63_importance_sampling.submit
+VARS label_data0_1384782888-63_importance_sampling_arg_0 ARGS="dingo_EXP1_lensed/label_config_complete.ini --outdir dingo_EXP1_lensed --label label_data0_1384782888-63_importance_sampling --proposal-samples-file dingo_EXP1_lensed/result/label_data0_1384782888-63_sampling.hdf5 --event-data-file dingo_EXP1_lensed/data/label_data0_1384782888-63_generation_event_data.hdf5"
+JOB label_data0_1384782888-63_importance_sampling_plot_arg_0 dingo_EXP1_lensed/submit/label_data0_1384782888-63_importance_sampling_plot.submit
+VARS label_data0_1384782888-63_importance_sampling_plot_arg_0 ARGS="--label label_data0_1384782888-63_importance_sampling_plot --result dingo_EXP1_lensed/result/label_data0_1384782888-63_importance_sampling.hdf5 --outdir dingo_EXP1_lensed/result --corner"
+ENV GET HTGETTOKENOPTS
+
+#Inter-job dependencies
+Parent label_data0_1384782888-63_generation_arg_0 Child label_data0_1384782888-63_sampling_arg_0
+Parent label_data0_1384782888-63_sampling_arg_0 label_data0_1384782888-63_generation_arg_0 Child label_data0_1384782888-63_importance_sampling_arg_0
+Parent label_data0_1384782888-63_importance_sampling_arg_0 Child label_data0_1384782888-63_importance_sampling_plot_arg_0

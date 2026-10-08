@@ -1,0 +1,10 @@
+260827_050551 INFO: Generating plots for results file bilby_EXP1_lensed/result/bilby_lensed_data0_1384782888-63_analysis_H1L1_result.hdf5
+05:05 bilby INFO    : Global meta data was removed from the result object for compatibility. Use the `BILBY_INCLUDE_GLOBAL_METADATA` environment variable to include it. This behaviour will be removed in a future release. For more details see: https://bilby-dev.github.io/bilby/faq.html#global-meta-data
+260827_050551 INFO: Loaded data from bilby_EXP1_lensed/data/bilby_lensed_data0_1384782888-63_generation_data_dump.pickle
+260827_050551 INFO: Plots will be made in bilby_EXP1_lensed/result
+260827_050551 INFO: Generating plots for results file bilby_EXP1_lensed/result/bilby_lensed_data0_1384782888-63_analysis_H1L1_result.hdf5
+05:05 bilby INFO    : Global meta data was removed from the result object for compatibility. Use the `BILBY_INCLUDE_GLOBAL_METADATA` environment variable to include it. This behaviour will be removed in a future release. For more details see: https://bilby-dev.github.io/bilby/faq.html#global-meta-data
+260827_050551 INFO: Loaded data from bilby_EXP1_lensed/data/bilby_lensed_data0_1384782888-63_generation_data_dump.pickle
+260827_050551 INFO: Plots will be made in bilby_EXP1_lensed/result
+260827_050551 INFO: Generating intrinsic parameter corner
+260827_050552 INFO: Generating extrinsic parameter corner

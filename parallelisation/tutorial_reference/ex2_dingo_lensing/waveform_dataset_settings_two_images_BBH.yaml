@@ -1,0 +1,56 @@
+domain:
+  type: UniformFrequencyDomain
+  f_min: 20.0
+  f_max: 1024.0
+  delta_f: 0.25  # Expressions like 1.0/8.0 would require eval and are not supported
+
+waveform_generator:
+  approximant: IMRPhenomD  # SEOBNRv4PHM
+  f_ref: 20.0
+  fdsm_function: two_images_BBH
+  # f_start: 15.0  # Optional setting useful for EOB waveforms. Overrides f_min when generating waveforms.
+  spin_conversion_phase: 0.0
+  # Other fdsm models and their extra required parameters:
+  # one_image_BBH:
+  #   Delta_phase: bilby.core.prior.Uniform(minimum=0.0, maximum=6.283185307179586)
+  # fold_caustic:
+  #   lensing_delta_t: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
+  #   positive_phase: 1.0
+  # cusp_caustic:
+  #   Delta_t_10: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
+  #   Delta_t_20: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
+  #   mu_rel: bilby.gw.prior.Uniform(minimum=0.0, maximum=1.0)
+  #   positive_phase: 1.0
+  # pointlens:
+  #   ML: bilby.core.prior.Uniform(minimum=1000.0, maximum=3000.0)
+  #   y: bilby.core.prior.Uniform(minimum=0.1, maximum=0.2)
+
+# Dataset only samples over intrinsic parameters. Extrinsic parameters are chosen at train time.
+# vision: 
+intrinsic_prior:
+  mass_1: bilby.core.prior.Constraint(minimum=10.0, maximum=80.0, name='mass_1')
+  mass_2: bilby.core.prior.Constraint(minimum=10.0, maximum=80.0, name='mass_2')
+  chirp_mass: bilby.gw.prior.UniformInComponentsChirpMass(minimum=15.0, maximum=100.0, name='chirp_mass')
+  mass_ratio: bilby.gw.prior.UniformInComponentsMassRatio(minimum=0.125, maximum=1.0, name='mass_ratio')
+  phase: default
+  chi_1: bilby.gw.prior.AlignedSpin(name='chi_1', a_prior=Uniform(minimum=0, maximum=0.9))
+  chi_2: bilby.gw.prior.AlignedSpin(name='chi_2', a_prior=Uniform(minimum=0, maximum=0.9))
+  theta_jn: default
+  # Reference values for fixed (extrinsic) parameters. These are needed to generate a waveform.
+  luminosity_distance: 100.0  # Mpc
+  geocent_time: 0.0  # s
+  lensing_delta_t: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
+  mu_rel: bilby.gw.prior.Uniform(minimum=0.0, maximum=1.0)
+
+# Dataset size
+dev_mode: false
+num_samples: 10000
+
+# Save a compressed representation of the dataset
+#compression:
+#  svd:
+    # Truncate the SVD basis at this size. No truncation if zero.
+#    size: 300
+#    num_training_samples: 50000
+#    num_validation_samples: 10000
+#  whitening: Aplus_high_resolution.txt

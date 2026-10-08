@@ -1,0 +1,12 @@
+JOB GW150914_data0_1126259462-4_generation_arg_0 outdir_GW150914/submit/GW150914_data0_1126259462-4_generation.submit
+VARS GW150914_data0_1126259462-4_generation_arg_0 ARGS="outdir_GW150914/GW150914_config_complete.ini --label GW150914_data0_1126259462-4_generation --idx 0 --trigger-time 1126259462.4 --outdir outdir_GW150914"
+Retry GW150914_data0_1126259462-4_generation_arg_0 3
+JOB GW150914_data0_1126259462-4_sampling_arg_0 outdir_GW150914/submit/GW150914_data0_1126259462-4_sampling.submit
+VARS GW150914_data0_1126259462-4_sampling_arg_0 ARGS="outdir_GW150914/GW150914_config_complete.ini --label GW150914_data0_1126259462-4_sampling --event-data-file outdir_GW150914/data/GW150914_data0_1126259462-4_generation_event_data.hdf5 --outdir outdir_GW150914"
+JOB GW150914_data0_1126259462-4_sampling_plot_arg_0 outdir_GW150914/submit/GW150914_data0_1126259462-4_sampling_plot.submit
+VARS GW150914_data0_1126259462-4_sampling_plot_arg_0 ARGS="--label GW150914_data0_1126259462-4_sampling_plot --result outdir_GW150914/result/GW150914_data0_1126259462-4_sampling.hdf5 --outdir outdir_GW150914/result --corner"
+ENV GET HTGETTOKENOPTS
+
+#Inter-job dependencies
+Parent GW150914_data0_1126259462-4_generation_arg_0 Child GW150914_data0_1126259462-4_sampling_arg_0
+Parent GW150914_data0_1126259462-4_sampling_arg_0 Child GW150914_data0_1126259462-4_sampling_plot_arg_0

@@ -1,0 +1,5 @@
+Loading dataset from dingo_EXP0_lensed/data/label_data0_1384782888-63_generation_event_data.hdf5.
+Putting posterior model to device cpu.
+Running sampler to generate 50000 samples.
+Done. This took 334.5 s.
+Saving dataset to dingo_EXP0_lensed/result/label_data0_1384782888-63_sampling.hdf5

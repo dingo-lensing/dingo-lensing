@@ -1,0 +1,24 @@
+universe = vanilla
+executable = /home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/dingo_lensing_pipe_importance_sampling
+request_memory = 8.0GB
+request_disk = 5GB
+request_cpus = 32
+initialdir = /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application
+notification = Never
+requirements = 
+should_transfer_files = YES
+transfer_input_files = dingo_EXP1_lensed/result/label_data0_1384782888-63_sampling.hdf5,dingo_EXP1_lensed/data/label_data0_1384782888-63_generation_event_data.hdf5,dingo_EXP1_lensed/label_config_complete.ini
+transfer_output_files = dingo_EXP1_lensed
+when_to_transfer_output = ON_EXIT_OR_EVICT
+preserve_relative_paths = True
+stream_error = True
+stream_output = True
+log = dingo_EXP1_lensed/log_data_analysis/label_data0_1384782888-63_importance_sampling.log
+output = dingo_EXP1_lensed/log_data_analysis/label_data0_1384782888-63_importance_sampling.out
+error = dingo_EXP1_lensed/log_data_analysis/label_data0_1384782888-63_importance_sampling.err
+priority = 0
+environment = "HDF5_USE_FILE_LOCKING=FAlSE OMP_NUM_THREADS=1 OMP_PROC_BIND=false GWDATAFIND_SERVER=https://datafind.igwn.org"
+MY.flock_local = True
+MY.DESIRED_Sites = "nogrid"
+arguments = $(ARGS)
+queue

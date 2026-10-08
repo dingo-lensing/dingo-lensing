@@ -1,0 +1,25 @@
+universe   = vanilla
+executable = /home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/dingo_train
+arguments  = --checkpoint training/model_latest.pt --train_dir training
+
+initialdir = /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex1_dingo_basics
+
+should_transfer_files = NO
+
+log    = condor_logs/train.log
+error  = condor_logs/train.err
+output = condor_logs/train.out
+
+request_cpus   = 4
+request_memory = 8 GB
+request_disk   = 5 GB
+
+# Needs NFS access to both your home dir and chun-lung.chan's conda env —
+# pin to the local CIT site (has NFS), not remote OSG glidein sites.
+MY.DESIRED_Sites = "LIGO-CIT"
+
+notification     = Complete
+accounting_group = ligo.sim.o4.cbc.pe.dingo
+batch_name        = dingo_train_ex1_resume
+
+queue 1

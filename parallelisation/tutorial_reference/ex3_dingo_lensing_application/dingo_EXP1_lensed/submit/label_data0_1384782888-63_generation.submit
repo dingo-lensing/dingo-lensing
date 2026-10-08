@@ -1,0 +1,24 @@
+universe = vanilla
+executable = /home/chun-lung.chan/.conda/envs/dingo_lensing_team_20260826/bin/dingo_lensing_pipe_generation
+request_memory = 16.0GB
+request_disk = 5GB
+request_cpus = 1
+initialdir = /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application
+notification = Never
+requirements = 
+should_transfer_files = YES
+transfer_input_files = /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP1_lensed/label_config_complete.ini,/home/chun-lung.chan/dingo_lensing_team/tutorial_20260828/ex3_dingo_lensing_application/models/model_lensed.pt,/home/chun-lung.chan/dingo_lensing_team/tutorial_20260828/ex3_dingo_lensing_application/psds/H1_psd.txt,/home/chun-lung.chan/dingo_lensing_team/tutorial_20260828/ex3_dingo_lensing_application/psds/L1_psd.txt,gwf_files/H1.gwf,gwf_files/L1.gwf
+transfer_output_files = dingo_EXP1_lensed
+when_to_transfer_output = ON_EXIT_OR_EVICT
+preserve_relative_paths = True
+stream_error = True
+stream_output = True
+log = dingo_EXP1_lensed/log_data_generation/label_data0_1384782888-63_generation.log
+output = dingo_EXP1_lensed/log_data_generation/label_data0_1384782888-63_generation.out
+error = dingo_EXP1_lensed/log_data_generation/label_data0_1384782888-63_generation.err
+priority = 0
+environment = "HDF5_USE_FILE_LOCKING=FAlSE OMP_NUM_THREADS=1 OMP_PROC_BIND=false GWDATAFIND_SERVER=https://datafind.igwn.org"
+MY.flock_local = True
+MY.DESIRED_Sites = "nogrid"
+arguments = $(ARGS)
+queue
