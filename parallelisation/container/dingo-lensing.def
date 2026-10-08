@@ -26,7 +26,13 @@ From: condaforge/miniforge3:latest
     conda create --yes --quiet --prefix /opt/dingo_env --channel conda-forge \
         python=3.13.13 pip=26.1.1
     PYTHON=/opt/dingo_env/bin/python
-    $PYTHON -m pip install --no-cache-dir --requirement /opt/requirements-cpu.txt
+    # ligo-segments 1.4.0 and python-ligo-lw 1.8.4 exist only as source on PyPI
+    # for Linux, so pip compiles them, as it did for dingo_env. The compiler goes
+    # in a separate prefix that is deleted afterwards, so the image doesn't ship it.
+    conda create --yes --quiet --prefix /opt/build-tools --channel conda-forge gcc
+    PATH="/opt/build-tools/bin:$PATH" $PYTHON -m pip install --no-cache-dir \
+        --requirement /opt/requirements-cpu.txt
+    rm -rf /opt/build-tools
     $PYTHON -m pip install --no-cache-dir --no-deps \
         "https://github.com/ezquiaga/modwaveforms/archive/{{ MODWAVEFORMS_COMMIT }}.tar.gz"
 
@@ -64,6 +70,7 @@ EOF
 %test
     set -eu
     /opt/dingo_env/bin/python - <<'EOF'
+import importlib
 import importlib.metadata as metadata
 
 import bilby_pipe
@@ -79,6 +86,9 @@ import torch
 
 assert dingo_lensing.__file__ == "/opt/dingo-lensing/dingo_lensing/__init__.py", dingo_lensing.__file__
 assert torch.__version__.endswith("+cpu"), torch.__version__
+# Compiled from source during the build; must load now that the compiler is gone.
+for compiled in ("ligo.segments.__segments", "ligo.lw.tokenizer"):
+    importlib.import_module(compiled)
 for name in ("dingo-gw", "dingo_lensing", "modwaveforms", "bilby", "bilby_pipe", "lalsuite", "torch"):
     print(f"{name}: {metadata.version(name)}")
 EOF

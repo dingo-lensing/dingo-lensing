@@ -110,6 +110,10 @@ reference, and how does the wall time of three events compare with one?
   torchvision 0.28.0 as CPU builds; the 19 CUDA-only packages left out),
   modwaveforms at the commit `dingo_env` has, and DINGO-Lensing at one commit of
   our branch (editable install, since a normal install omits `dingo_lensing/pipe/`).
+  `ligo-segments` 1.4.0 and `python-ligo-lw` 1.8.4 exist only as source on PyPI
+  for Linux (conda-forge has no 1.8.4 for Python 3.13), so the build compiles them
+  with conda-forge's `gcc` from a temporary prefix that is deleted afterwards.
+- First build (recipe `97860b7`) stopped at exactly that: No `gcc` in the base image.
 - `container/build_image.sh`: Builds, self-tests and model-checks the image, then
   stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
   made of both commits (staged files can never be replaced).
