@@ -2,8 +2,10 @@
 # Runs one Condor job inside a staged image, set up exactly as bilby_pipe sets up
 # the pipeline's jobs when `container` and `conda-env = /opt/dingo_env` are given:
 # The image is fetched from OSDF with the access point's token and named in
-# MY.SingularityImage, and the executable lives inside it. This checks the image,
-# the OSDF transfer and the token on a real execute node before T1 and T2.
+# MY.SingularityImage, and the executable lives inside it. Like bilby_pipe's
+# local-pool jobs, it stays on CIT's own pool (flock_local, DESIRED_Sites
+# "nogrid"). This checks the image, the OSDF transfer and the token on a real
+# execute node before T1 and T2.
 #
 # Usage, on a CIT access point:
 #     bash smoke_test.sh osdf:///igwn/cit/staging/<user>/containers/<image>.sif
@@ -23,6 +25,8 @@ arguments = smoke_payload.py
 transfer_executable = False
 MY.SingularityImage = "./$(basename "$URL")"
 requirements = (HAS_SINGULARITY=?=True)
+MY.flock_local = True
+MY.DESIRED_Sites = "nogrid"
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files = $URL,smoke_payload.py
