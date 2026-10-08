@@ -14,21 +14,28 @@ importance sampling, plot), and Condor runs the chains side by side.
 
 - Code: DINGO-Lensing branch `kailib-parallelisation` (the launch script records
   the exact commit in `run_metadata.txt`), DINGO 0.9.8, bilby_pipe 1.8.0.
-- Environment: `dingo_env` (`/home/kailibryan.doney/.conda/envs/dingo_env`),
-  set as `conda-env` in every config so all jobs run our branch.
+- Environment: Every job runs inside the container image
+  `dingo-lensing_a4de31e72e_recipe-714878f_cpu.sif` (DINGO-Lensing `a4de31e`,
+  every package at `dingo_env`'s version; see "Running jobs without `/home`"
+  below), which each job receives from OSDF. `conda-env = /opt/dingo_env` names
+  the environment inside it. `dingo_env` still builds the workflows on the
+  access point, and `launch.sh` checks that the image holds the same commit.
 - Submitted to Condor from `ldas-grid`. No local mode.
-- Jobs run only on execute nodes that still mount `/home` (where `dingo_env`
-  lives): Every config carries
-  `extra-lines = [requirements = (TARGET.EPNFS =?= True)]`, and `launch.sh` checks
-  that every built job ends with that requirement. 2195 machines advertised
-  `EPNFS` on 2026-10-08. The guide's dedicated access point,
-  `epnfs.ligo.caltech.edu`, does not resolve from `ldas-grid`.
+- `osg = True` with a requirements override: DINGO sends the image (and, to
+  sampling, the model) to sampling and importance-sampling jobs only in osg mode,
+  and osg mode also limits those jobs to remote-pool slots (`IS_GLIDEIN`), which
+  `ldas-grid` does not submit to. Every config therefore also carries
+  `extra-lines = [requirements = (HAS_SINGULARITY=?=True)]`, which replaces every
+  job's requirements with the image's own, so all jobs stay on CIT's pool.
 - Files: Configs and scripts in `option_a/`, unit tests in `tests/`.
 - Run folder on the cluster: `~/dingo-lensing-runs/option_a/` (`T1/` and `T2/`).
   Large outputs stay there; logs and summaries come back through this branch.
 - Launch: `bash option_a/launch.sh` from this folder. It runs the unit tests and
-  all pre-flight checks, fetches the data, builds the four workflows, checks
-  them and only then submits.
+  the pre-flight checks, fetches the T1 data, reads both tests' frames and
+  checks both models inside the image, builds the four workflows, checks every
+  job in them (`check_workflow.py`: Runs inside the image, receives it with the
+  access point's token, ends with the override, receives the model and data it
+  reads, asks for enough disk) and only then submits.
 
 ### Things to remember (from the desk check)
 
@@ -41,6 +48,13 @@ importance sampling, plot), and Condor runs the chains side by side.
 6. `n-parallel` is broken for lensed runs (the merge step crashes), so every
    test keeps the default of 1.
 7. Lensed and non-lensed models need separate configs.
+8. With a container, DINGO's sampling and importance-sampling jobs receive the
+   image only in osg mode, and osg mode restricts them to remote-pool slots:
+   Hence `osg = True` plus the requirements override.
+9. Execute nodes no longer see `/home`, so every file a job reads must be sent
+   with it: Data-generation jobs receive the model, frames and PSD files, and
+   sampling jobs the model. T2's 4.5 GB model therefore travels to two jobs per
+   event, T2 asks for 12 GB of disk, and input transfer is part of T2's timing.
 
 ### T1: Mechanism and correctness (toy model)
 
@@ -82,9 +96,10 @@ reference, and how does the wall time of three events compare with one?
 - Model: Juno's production lensed model (4.5 GB, IMRPhenomXPHM), the same file
   as Exercise 3.
 - Data: Exercise 3's injection frames (`gwf_files/`) and PSD files, unchanged.
-- Settings: Exercise 3's, unchanged apart from Condor, `conda-env`, label and
-  outdir (50,000 samples, 32 CPUs for sampling and importance sampling,
-  8 s duration, 2 s post-trigger).
+- Settings: Exercise 3's, unchanged apart from label, outdir and the Condor
+  settings (the image, osg mode with the override, 12 GB of disk): 50,000
+  samples, 32 CPUs for sampling and importance sampling, 8 s duration, 2 s
+  post-trigger.
 
 | Test | Files | Event(s) |
 |---|---|---|
@@ -145,6 +160,11 @@ work for software in `/home`; see the launch attempts above.)
   4.0.2's third reader, LALFrame, which comes with `lalsuite` 7.26.15; the image
   has the same versions. The launch checks will read both tests' frames inside
   the image before anything is submitted.
+- Smoke test: One job inside the staged image, cluster 569423966, submitted
+  2026-10-08 14:52 UTC from `ldas-grid`. HTCondor accepted it with an advisory to
+  use its newer container universe instead of `MY.SingularityImage`; bilby_pipe
+  writes every job the older way, so T1 and T2's jobs will carry the same
+  advisory. Result pending.
 - `container/build_image.sh`: Builds, self-tests and model-checks the image, then
   stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
   made of both commits (staged files can never be replaced).

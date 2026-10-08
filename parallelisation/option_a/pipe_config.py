@@ -92,3 +92,29 @@ def data_window(
     start = segment_start(trigger_time, duration, post_trigger_duration)
     psd_duration = min(psd_length * duration, psd_maximum_duration)
     return start - psd_duration, start + duration
+
+
+def needed_window(entries: Dict[str, str], detector: str) -> Tuple[float, float]:
+    """GPS (start, end) of the strain a single-event config's job reads for a detector.
+
+    bilby_pipe's data generation reads the analysis segment, plus the PSD
+    stretch before it unless psd-dict gives that detector's PSD as a file.
+    """
+    if is_unset(entries, "trigger-time"):
+        raise ValueError("Needs a single-event config, with a trigger-time")
+    if not is_unset(entries, "psd-start-time"):
+        raise ValueError("A custom psd-start-time is not supported")
+    trigger_time = float(entries["trigger-time"])
+    duration = float(entries["duration"])
+    post_trigger_duration = float(entries["post-trigger-duration"])
+    psd_files = {} if is_unset(entries, "psd-dict") else parse_dict(entries["psd-dict"])
+    if psd_files.get(detector) not in (None, "None"):
+        start = segment_start(trigger_time, duration, post_trigger_duration)
+        return start, start + duration
+    return data_window(
+        trigger_time,
+        duration,
+        post_trigger_duration,
+        int(entries["psd-length"]),
+        float(entries.get("psd-maximum-duration", "1024")),
+    )

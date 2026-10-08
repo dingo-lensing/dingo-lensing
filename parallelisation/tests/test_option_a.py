@@ -18,9 +18,11 @@ TUTORIAL = PARALLELISATION / "tutorial_reference"
 sys.path.insert(0, str(OPTION_A))
 
 from fetch_gwosc_frames import channel_names_in  # noqa: E402
+from check_workflow import requirements_override  # noqa: E402
 from pipe_config import (  # noqa: E402
     data_window,
     is_unset,
+    needed_window,
     parse_dict,
     read_gps_file,
     read_pipe_ini,
@@ -28,7 +30,10 @@ from pipe_config import (  # noqa: E402
     trigger_time_from_start,
 )
 
-DINGO_ENV = "/home/kailibryan.doney/.conda/envs/dingo_env"
+IMAGE_ENV = "/opt/dingo_env"
+STAGED_IMAGES = "osdf:///igwn/cit/staging/kailibryan.doney/containers/"
+# The image's own requirement, replacing DINGO's remote-pool (IS_GLIDEIN) one.
+REQUIREMENTS_OVERRIDE = "(HAS_SINGULARITY=?=True)"
 SINGLE_CONFIGS = {"T1": "T1a_single.ini", "T2": "T2a_single.ini"}
 # Test -> (config, GPS file, number of events listed).
 MULTI_CONFIGS = {
@@ -157,27 +162,101 @@ class TestSegmentArithmetic(unittest.TestCase):
         self.assertAlmostEqual(start, 1126259460.4 - 1024.0, places=6)
 
 
+class TestNeededWindow(unittest.TestCase):
+    SINGLE = {
+        "trigger-time": "1000.0",
+        "duration": "8.0",
+        "post-trigger-duration": "2.0",
+        "psd-length": "32",
+        "psd-maximum-duration": "1024",
+    }
+
+    def window(self, detector="H1", **changes):
+        entries = dict(self.SINGLE)
+        entries.update({key.replace("_", "-"): value for key, value in changes.items()})
+        return needed_window(entries, detector)
+
+    def test_without_psd_files_the_psd_stretch_comes_first(self):
+        # Segment 994 to 1002, after min(32 * 8, 1024) = 256 s of PSD data.
+        self.assertEqual(self.window(), (994.0 - 256.0, 1002.0))
+
+    def test_with_a_psd_file_only_the_segment_is_read(self):
+        psd_dict = "{'H1': '/a/H1_psd.txt', 'L1': '/a/L1_psd.txt'}"
+        self.assertEqual(self.window(psd_dict=psd_dict), (994.0, 1002.0))
+
+    def test_psd_files_count_per_detector(self):
+        psd_dict = "{'H1': '/a/H1_psd.txt', 'L1': None}"
+        self.assertEqual(self.window("H1", psd_dict=psd_dict), (994.0, 1002.0))
+        self.assertEqual(self.window("L1", psd_dict=psd_dict), (994.0 - 256.0, 1002.0))
+        self.assertEqual(self.window("V1", psd_dict=psd_dict), (994.0 - 256.0, 1002.0))
+
+    def test_psd_dict_given_as_none_means_no_psd_files(self):
+        self.assertEqual(self.window(psd_dict="None"), (994.0 - 256.0, 1002.0))
+
+    def test_needs_a_trigger_time(self):
+        with self.assertRaisesRegex(ValueError, "single-event"):
+            self.window(trigger_time="None")
+
+    def test_rejects_a_custom_psd_start_time(self):
+        with self.assertRaisesRegex(ValueError, "psd-start-time"):
+            self.window(psd_start_time="-100")
+
+    def test_the_test_configs(self):
+        t1a = load("T1a_single.ini")
+        t2a = load("T2a_single.ini")
+        for detector in ("H1", "L1"):
+            with self.subTest(detector=detector):
+                # T1 estimates PSDs from 128 x 4 s before its segment; T2 has PSD files.
+                start, end = needed_window(t1a, detector)
+                self.assertAlmostEqual(start, 1126259460.4 - 512.0, places=6)
+                self.assertAlmostEqual(end, 1126259464.4, places=6)
+                start, end = needed_window(t2a, detector)
+                self.assertAlmostEqual(start, 1384782882.63, places=6)
+                self.assertAlmostEqual(end, 1384782890.63, places=6)
+
+
 class TestOptionAConfigs(unittest.TestCase):
-    def test_every_config_runs_on_condor_with_dingo_env(self):
-        # Trap 5: conda-env decides which code the jobs run.
+    def test_every_config_runs_on_condor_inside_a_staged_image(self):
+        # Trap 5: conda-env decides which code the jobs run; with a container,
+        # it names the environment inside the image.
         for name in ALL_CONFIGS:
             with self.subTest(config=name):
                 config = load(name)
                 self.assertEqual(config["local"], "False")
                 self.assertEqual(config["scheduler"], "condor")
-                self.assertEqual(config["conda-env"], DINGO_ENV)
+                self.assertEqual(config["conda-env"], IMAGE_ENV)
+                self.assertTrue(config["container"].startswith(STAGED_IMAGES), config["container"])
+                self.assertTrue(config["container"].endswith("_cpu.sif"), config["container"])
 
-    def test_every_config_restricts_jobs_to_nodes_that_mount_home(self):
-        # dingo_env lives in /home, which only EPNFS nodes still mount. bilby_pipe
-        # splits list values on commas, so the requirement must stay one entry.
+    def test_every_config_uses_the_same_image(self):
+        self.assertEqual(len({load(name)["container"] for name in ALL_CONFIGS}), 1)
+
+    def test_every_config_sends_the_image_to_every_job(self):
+        # DINGO's sampling and importance-sampling jobs receive the image only in osg mode.
+        for name in ALL_CONFIGS:
+            with self.subTest(config=name):
+                self.assertEqual(load(name)["osg"], "True")
+
+    def test_every_config_keeps_every_job_on_cits_pool(self):
+        # osg mode adds IS_GLIDEIN=?=True to sampling and importance-sampling jobs;
+        # the override replaces it. bilby_pipe splits list values on commas, so the
+        # requirement must stay one entry.
         for name in ALL_CONFIGS:
             with self.subTest(config=name):
                 config = load(name)
-                self.assertIn("extra-lines", config, "No EPNFS requirement")
+                self.assertIn("extra-lines", config, "No requirements override")
                 raw = config["extra-lines"]
                 self.assertTrue(raw.startswith("[") and raw.endswith("]"), raw)
                 entries = [entry.strip() for entry in raw[1:-1].split(",")]
-                self.assertEqual(entries, ["requirements = (TARGET.EPNFS =?= True)"])
+                self.assertEqual(entries, [f"requirements = {REQUIREMENTS_OVERRIDE}"])
+                self.assertEqual(requirements_override(config), REQUIREMENTS_OVERRIDE)
+
+    def test_t2_asks_for_disk_for_the_model_and_the_image(self):
+        # Data-generation and sampling jobs receive the 4.5 GB model and the
+        # 0.8 GB image; launch.sh checks the real sizes. Leave room for outputs.
+        for name in ("T2a_single.ini", "T2b_three.ini"):
+            with self.subTest(config=name):
+                self.assertGreaterEqual(float(load(name)["request-disk"]), 4.5 + 0.8 + 2)
 
     def test_single_event_configs_give_a_trigger_time_and_no_gps_file(self):
         for name in SINGLE_CONFIGS.values():
@@ -245,7 +324,16 @@ class TestOptionAConfigs(unittest.TestCase):
         t2a = load("T2a_single.ini")
         self.assertEqual(
             differing_keys(tutorial, t2a),
-            {"local", "conda-env", "label", "outdir", "extra-lines"},
+            {
+                "local",
+                "label",
+                "outdir",
+                "conda-env",
+                "container",
+                "osg",
+                "extra-lines",
+                "request-disk",
+            },
         )
         self.assertEqual(t2a["local"], "False")
 
