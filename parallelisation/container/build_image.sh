@@ -72,9 +72,10 @@ echo "pip check inside the image:"
 apptainer exec --cleanenv --contain "$IMAGE" cat /opt/pip-check.txt
 T1_MODEL="$(sed -n 's/^model *= *//p' "$SYNC/parallelisation/option_a/T1a_single.ini")"
 T2_MODEL="$(sed -n 's/^model *= *//p' "$SYNC/parallelisation/option_a/T2a_single.ini")"
-# The model check needs /home for the model files (and the script), but runs
-# the script by path, so only its own folder is added to Python's path.
-apptainer exec --cleanenv --bind /home "$IMAGE" /opt/dingo_env/bin/python \
+# The model check needs /home for the model files and the script. Python adds
+# only the script's own folder to its path, and -s keeps out any user
+# site-packages folder in the bound home.
+apptainer exec --cleanenv --bind /home "$IMAGE" /opt/dingo_env/bin/python -s \
     "$SYNC/parallelisation/option_a/check_models.py" "$T1_MODEL" "$T2_MODEL"
 
 step "Stage on OSDF"

@@ -72,10 +72,11 @@ EOF
 
 %test
     set -eu
-    # Run from / with -P, so no package in the caller's current folder (or the
-    # host's home, if bound) can shadow the image's own.
+    # Run from / in Python's isolated mode (-I), so nothing outside the image can
+    # shadow its packages: Not the caller's current folder, not a user
+    # site-packages folder in a bound home, not PYTHONPATH.
     cd /
-    /opt/dingo_env/bin/python -P - <<'EOF'
+    /opt/dingo_env/bin/python -I - <<'EOF'
 import importlib
 import importlib.metadata as metadata
 

@@ -134,7 +134,8 @@ work for software in `/home`; see the launch attempts above.)
   correctly: Run from `~/dingo-lensing-sync`, Python imported the old package copy
   at that branch's root instead of the image's, because Apptainer shares the
   current folder and home by default. The checks now run from `/`, the self-test
-  with `--contain` (no `/home`, as on execute nodes) and Python with `-P`.
+  with `--contain` (no `/home`, as on execute nodes) and in Python's isolated
+  mode, the model check without user site-packages.
 - `container/build_image.sh`: Builds, self-tests and model-checks the image, then
   stages it at `/osdf/igwn/cit/staging/kailibryan.doney/containers/` under a name
   made of both commits (staged files can never be replaced).
