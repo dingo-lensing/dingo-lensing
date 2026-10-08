@@ -11,7 +11,8 @@ This file lists all authors who contributed to the code.
 * Kailib Ryan Doney
 * Mick Wright
 * Sreekanth Harikumar
-
+* Eungwang Seo
+* Sudhagar Suyamprakasam
 
 ### Contributors
 
