@@ -7,7 +7,8 @@
 #
 # Nothing is staged unless every check passes. A staged file can never be
 # replaced, so each image is named after the two commits it is built from: Our
-# DINGO-Lensing branch and this recipe.
+# DINGO-Lensing branch, and the last commit that changed this recipe folder
+# (not this branch's head, so configs can name an image before it is built).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -29,7 +30,8 @@ step "Inputs"
 command -v apptainer > /dev/null || fail "apptainer not found"
 git -C "$SYNC" diff --quiet HEAD -- parallelisation/container \
     || fail "Commit the changes in parallelisation/container first: The image name records the recipe's commit"
-RECIPE_COMMIT="$(git -C "$SYNC" rev-parse --short=7 HEAD)"
+RECIPE_COMMIT="$(git -C "$SYNC" log -1 --format=%H -- parallelisation/container | cut -c1-7)"
+[[ "$RECIPE_COMMIT" =~ ^[0-9a-f]{7}$ ]] || fail "Could not find the last commit that changed parallelisation/container"
 [[ "$(git -C "$REPO" rev-parse --abbrev-ref HEAD)" == "$BRANCH" ]] || fail "$REPO is not on $BRANCH"
 git -C "$REPO" diff --quiet HEAD || fail "$REPO has uncommitted changes to tracked files"
 git -C "$REPO" fetch -q origin "$BRANCH"
