@@ -71,9 +71,16 @@ class TestT3Configs(unittest.TestCase):
                 self.assertEqual(float(load(name)["trigger-time"]), gps)
                 self.assertTrue(is_unset(load(name), "gps-file"))
 
-    def test_data_dict_globs_one_per_detector_in_standard_frame_names(self):
+    def test_data_dict_lists_both_events_frames_per_detector_in_standard_names(self):
+        # A list, not a glob: DINGO sets data-dict before transfer-files, so a glob
+        # is not expanded at build time and no frame reaches the jobs.
         data = parse_dict(load(MULTI)["data-dict"])
-        self.assertEqual(data, {"H1": "gwosc/H-H1_*.gwf", "L1": "gwosc/L-L1_*.gwf"})
+        self.assertEqual(sorted(data), ["H1", "L1"])
+        for detector, frames in data.items():
+            self.assertEqual(len(frames), 2)
+            for frame in frames:
+                self.assertTrue(frame.startswith(f"gwosc/{detector[0]}-{detector}_LOSC_4_V1-"), frame)
+                self.assertTrue(frame.endswith("-4096.gwf"), frame)
         self.assertTrue(is_unset(load(MULTI), "psd-dict"))  # Each event estimates its own PSD.
 
     def test_the_two_events_need_different_frame_files(self):
@@ -101,12 +108,10 @@ class TestDataDictFiles(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             run = Path(directory)
             (run / "gwosc").mkdir()
-            for name in ("H-H1_A-1-1.gwf", "H-H1_B-9-1.gwf", "L-L1_A-1-1.gwf", "L-L1_B-9-1.gwf"):
-                (run / "gwosc" / name).write_text("")
             expected = expected_settings(load(MULTI), run)
             frames = [p for p in expected["generation_inputs"] if p.endswith(".gwf")]
             self.assertEqual(len(frames), 4)
-            self.assertIn("gwosc/L-L1_B-9-1.gwf", frames)
+            self.assertIn("gwosc/L-L1_LOSC_4_V1-1128677376-4096.gwf", frames)
 
 
 class TestFetchDestination(unittest.TestCase):
@@ -121,11 +126,17 @@ class TestFetchDestination(unittest.TestCase):
             Path("/run/gwosc/H-H1_LOSC_4_V1-1126256640-4096.gwf"),
         )
 
+    def test_a_list_names_the_destination(self):
+        entry = ["gwosc/H-H1_LOSC_4_V1-1126256640-4096.gwf", "gwosc/H-H1_LOSC_4_V1-1128677376-4096.gwf"]
+        self.assertEqual(destination(entry, self.URL, Path("/run")), Path("/run") / entry[0])
+        with self.assertRaisesRegex(ValueError, "is not listed"):
+            destination(entry[1:], self.URL, Path("/run"))
+
     def test_a_glob_that_would_not_find_the_file_is_an_error(self):
         with self.assertRaisesRegex(ValueError, "does not match"):
             destination("gwosc/L-L1_*.gwf", self.URL, Path("/run"))
         with self.assertRaises(ValueError):
-            destination(["a.gwf"], self.URL, Path("/run"))
+            destination(42, self.URL, Path("/run"))
 
 
 if __name__ == "__main__":

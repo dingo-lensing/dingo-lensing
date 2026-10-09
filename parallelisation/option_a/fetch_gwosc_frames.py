@@ -7,8 +7,8 @@ here can drift from what dingo_lensing_pipe will use. For each detector it finds
 the single 4096 s GWOSC frame file covering the PSD stretch and the segment,
 saves it under the path the config's data-dict gives (Condor transfers exactly
 that path), and reads the whole window back with the config's channel name.
-If the data-dict entry is a glob (several events' frames), the file keeps
-GWOSC's name in the glob's folder, and must match the glob.
+If the data-dict entry lists several events' frames, the file goes to the
+listed path with GWOSC's name (see destination).
 """
 from __future__ import annotations
 
@@ -37,15 +37,21 @@ def channel_names_in(path, detector: str) -> list:
 def destination(entry, url: str, run_dir: Path) -> Path:
     """Where a downloaded frame file goes, for one data-dict entry.
 
-    A plain path is used as it is. For a glob, the file keeps GWOSC's name in
-    the glob's folder, so the jobs' own glob finds it.
+    A plain path is used as it is. For a list (several events' frames), the
+    file goes to the listed path with GWOSC's file name, which must be listed;
+    for a glob, it keeps GWOSC's name in the glob's folder and must match.
     """
+    name = posixpath.basename(url)
+    if isinstance(entry, list):
+        matches = [item for item in entry if posixpath.basename(item) == name]
+        if len(matches) != 1:
+            raise ValueError(f"GWOSC's file {name} is not listed (once) in the data-dict entry {entry}")
+        return run_dir / matches[0]
     if not isinstance(entry, str):
-        raise ValueError(f"Expected a path or a glob for each detector, got {entry!r}")
+        raise ValueError(f"Expected a path, list or glob for each detector, got {entry!r}")
     if "*" not in entry:
         return run_dir / entry
     folder, pattern = posixpath.split(entry)
-    name = posixpath.basename(url)
     if not fnmatch.fnmatch(name, pattern):
         raise ValueError(f"GWOSC's file {name} does not match the data-dict glob {entry}")
     return run_dir / folder / name

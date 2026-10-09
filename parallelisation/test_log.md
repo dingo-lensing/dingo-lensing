@@ -41,7 +41,7 @@ importance sampling, plot), and Condor runs the chains side by side.
 
 1. If `trigger-time` is set, `--gps-file` is ignored and only one event runs.
 2. `--gps-file` takes segment start times, not trigger times:
-   start = trigger time − (duration − post-trigger duration).
+   start = trigger time âˆ’ (duration âˆ’ post-trigger duration).
 3. `psd-dict` and `data-dict` apply to every event in a config.
 4. Later events' data-generation jobs wait for event 0's.
 5. `conda-env` decides which code the jobs run, on Condor as well as locally.
@@ -68,7 +68,7 @@ agree with each other and with the event run alone?
   (fetched by the launch script). GWOSC serves the original O1 release
   (`H-H1_LOSC_4_V1-1126256640-4096.gwf` and the L1 equivalent), whose strain
   channel is `LOSC-STRAIN`. Each event's PSD is estimated from its own data:
-  128 × 4 s immediately before the segment.
+  128 Ã— 4 s immediately before the segment.
 - Settings: 4 s duration, 2 s post-trigger, 10,000 samples, importance sampling
   on (the model infers the phase, so no synthetic-phase step), 8 CPUs per job.
 
@@ -109,7 +109,7 @@ reference, and how does the wall time of three events compare with one?
 **Pass criteria**
 1. T2b builds three complete chains, and every job finishes.
 2. All four results agree with the Exercise 3 reference (your local tutorial
-   run: log evidence −5829.945 ± 0.014, sample efficiency 9.40%) within
+   run: log evidence âˆ’5829.945 Â± 0.014, sample efficiency 9.40%) within
    combined uncertainty.
 3. Timing recorded for every job: Queue wait, input transfer, run time and CPU
    used, plus each workflow's total wall time, so T2b can be compared with T2a.
@@ -141,9 +141,12 @@ same analysis as running it alone? T1 and T2 only repeated one event.
   every event, and O1's GWOSC frames use `LOSC-STRAIN` while O2's do not.
   GW151012's distance (1080 Mpc) is above the prior's 1000 Mpc, so its posterior
   will pile up at that edge; like T1, this tests the machinery, not science.
-- Data: Both events' 4096 s GWOSC frames in `gwosc/`, given to every config as
-  `data-dict = {'H1': 'gwosc/H-H1_*.gwf', 'L1': 'gwosc/L-L1_*.gwf'}`. Each event
-  estimates its own PSD (no `psd-dict`).
+- Data: Both events' 4096 s GWOSC frames in `gwosc/`, listed per detector in
+  every config's `data-dict` under GWOSC's names. Not a glob: DINGO's MainInput
+  sets `data-dict` before `transfer-files`, and bilby_pipe expands a glob only
+  when file transfer is already on, so a glob reaches the job builder unexpanded
+  and no frame is sent to the jobs (finding 17; the launch check caught it).
+  Each event estimates its own PSD (no `psd-dict`).
 
 | Test | Files | Event(s) |
 |---|---|---|
@@ -176,6 +179,7 @@ launch, showing the fixes leave data handling unchanged.
 | 2026-10-08 09:38 | Held again, the same way: "invalid interpreter (.../dingo_env/bin/python3.13)", this time on node2436, node2273, node2292 and node2282. The submit files end with the EPNFS requirement, and node2436 does advertise `EPNFS = true`, yet the job could not see `/home/kailibryan.doney` (on the `home5` server). The IGWN guide also says "Do not point `executable` at, or activate, a Conda environment or virtual environment that lives under `/home`." EPNFS dropped; T1 and T2 move into the container. |
 | 2026-10-08, after the smoke test | First launch inside the image (tests `ac977f5`). Stopped at the inputs check, because the EPNFS attempt's run folder was still at `option_a`; nothing was created or submitted. Every earlier check passed: 83 unit tests, code `a4de31e`, the staged image (same commit), all six inputs. |
 | 2026-10-08 15:32 | Launched inside the image (tests `00a1914`, code `a4de31e`), after moving the EPNFS attempt's run folder to `option_a_held_epnfs_20261008`. Every check passed. Inside the image, gwpy read GWF with LALFrame: T1's GWOSC frames hold GPS 1126256640 to 1126260736 at 4096 Hz (the jobs need the 516 s from 1126258948.4), T2's injection frames hold 1384782874.63 to 1384782890.63 at 1024 Hz (the jobs need the 8 s segment from 1384782882.63), all finite. The image rebuilt both models' waveform generators. Every job of every workflow passed `check_workflow.py`: T1a 4 jobs, T1b 8, T2a 4, T2b 12. Submitted 15:39 UTC; DAGMan clusters T1a 569441103, T1b 569441104, T2a 569441115, T2b 569441121. At 15:46 UTC the first nodes had finished (T1a 1 of 4, T1b 3 of 8, T2a 1 of 4, T2b 1 of 12) and released their sampling jobs; nothing held. |
+| 2026-10-09 08:30 | T3, first try (tests `1410a65`, code `1d7c477`, new image `dingo-lensing_1d7c4771b4_recipe-ff6622d_cpu.sif` built and staged; all 166 unit tests passed on the cluster, including the 7 that need DINGO). Both events' GWOSC frames fetched; inside the image each event read only its own frame file. Stopped at the workflow checks, nothing submitted: T3a's data-generation job received none of the frame files, because the `data-dict` glob was never expanded at build time (finding 17). The configs now list the files. |
 
 ### Running jobs without `/home`: The container
 
