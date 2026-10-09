@@ -50,11 +50,15 @@ REFERENCES = {
 ALPHA = 0.01
 N_SIGMA = 3.0
 MIN_N_EFF = 100.0
+# An efficiency outside this factor of the reference's is flagged CHECK. Not a
+# test: When a few weights dominate, the efficiency has no reliable error.
+EFFICIENCY_FACTOR = 2.0
 NOT_PARAMETERS = {"log_prob", "log_likelihood", "log_prior", "delta_log_prob_target", "weights"}
 RESULT_FILE = re.compile(
     r"^(?P<label>.+)_data(?P<event>\d+)_[0-9-]+_(?P<kind>sampling|importance_sampling)\.hdf5$"
 )
 CORNER_PLOT = re.compile(r"^(?P<label>.+)_data(?P<event>\d+)_[0-9-]+_importance_sampling_plot_corner\.pdf$")
+EVENT_DATA = re.compile(r"^(?P<label>.+)_data(?P<event>\d+)_[0-9-]+_generation_event_data\.hdf5$")
 EVENT_INDEX = re.compile(r"_data(\d+)_")
 
 
@@ -78,6 +82,39 @@ def importance_summary(weights) -> dict:
         "sample_efficiency": n_eff / n,
         "log_evidence_std": math.sqrt(max(n - n_eff, 0.0) / (n * n_eff)),
     }
+
+
+def weight_diagnostics(weights) -> dict:
+    """How far the heaviest samples dominate the importance weights.
+
+    A proposal that misses part of the posterior gives a few samples huge
+    weights, which on their own drag the sample efficiency down; removing the
+    heaviest sample then restores much of it. Weights are in units of their mean.
+    """
+    weights = np.asarray(weights, dtype=float)
+    weights = weights / weights.mean()
+    order = np.argsort(weights)[::-1]
+    rest = weights[order[1:]]
+    return {
+        "largest_weight": float(weights[order[0]]),
+        "top_10_share": float(weights[order[:10]].sum() / weights.sum()),
+        "efficiency_without_heaviest": float(rest.sum() ** 2 / (rest**2).sum() / len(rest)),
+        "zero_weights": int(np.count_nonzero(weights == 0)),
+        "heaviest_index": int(order[0]),
+    }
+
+
+def event_data_comparison(digests: Dict[str, Dict[str, str]]) -> dict:
+    """Whether every run's event data are bit-identical, and which datasets differ."""
+    names = list(digests)
+    first = digests[names[0]]
+    differing = {
+        key
+        for name in names[1:]
+        for key in set(first) | set(digests[name])
+        if first.get(key) != digests[name].get(key)
+    }
+    return {"runs": names, "identical": not differing, "differing": sorted(differing)}
 
 
 def weighted_quantiles(values, weights, quantiles) -> np.ndarray:
@@ -175,6 +212,36 @@ def load_result(path: Path) -> dict:
         }
         log_evidence = float(file["log_evidence"][()]) if "log_evidence" in file else None
     return {"samples": samples, "log_evidence": log_evidence}
+
+
+def event_data_digests(path: Path) -> Dict[str, str]:
+    """SHA-256 of every dataset in an event data file's 'data' group: The strain
+    and ASDs that both the network and the likelihood see."""
+    import hashlib
+
+    import h5py
+
+    digests = {}
+    with h5py.File(path, "r") as file:
+        group = file["data"] if "data" in file else file
+
+        def visit(name, item):
+            if isinstance(item, h5py.Dataset):
+                digests[name] = hashlib.sha256(np.ascontiguousarray(item[()]).tobytes()).hexdigest()
+
+        group.visititems(visit)
+    return digests
+
+
+def event_data_files(data_dir: Path, label: str) -> Dict[int, List[Path]]:
+    """{event: [event data files]} for one label."""
+    files: Dict[int, List[Path]] = {}
+    if data_dir.is_dir():
+        for path in sorted(data_dir.iterdir()):
+            match = EVENT_DATA.match(path.name)
+            if match and match.group("label") == label:
+                files.setdefault(int(match.group("event")), []).append(path)
+    return files
 
 
 def result_files(result_dir: Path, label: str) -> Dict[int, Dict[str, List[Path]]]:
@@ -339,9 +406,29 @@ def compare_test(runs: Dict[str, dict], reference: Optional[dict], reference_sam
         }
         for parameter in parameters
     }
+    weights = {}
+    for name, run in runs.items():
+        samples = run["posterior"]["samples"]
+        diagnostics = weight_diagnostics(samples["weights"])
+        heaviest = diagnostics.pop("heaviest_index")
+        diagnostics["heaviest_sample"] = {key: float(values[heaviest]) for key, values in samples.items()}
+        weights[name] = diagnostics
+    data_files = {name: run.get("event_data") for name, run in runs.items()}
+    if all(path is not None for path in data_files.values()):
+        event_data = event_data_comparison({name: event_data_digests(path) for name, path in data_files.items()})
+    else:
+        event_data = {"identical": None, "missing": [name for name, path in data_files.items() if path is None]}
+    outside = []
+    if reference is not None:
+        low = reference["sample_efficiency"] / EFFICIENCY_FACTOR
+        high = reference["sample_efficiency"] * EFFICIENCY_FACTOR
+        outside = [name for name, s in importance.items() if not low <= s["sample_efficiency"] <= high]
     comparison = {
         "network_ks": ks_comparison(network),
         "importance": importance,
+        "weights": weights,
+        "efficiency_outside_reference_factor": outside,
+        "event_data": event_data,
         "evidence": evidence_comparison(evidences),
         "evidence_meaningful": meaningful,
         "posteriors": posteriors,
@@ -380,12 +467,15 @@ def analyse(run_root: Path, reference_results: Optional[Path] = None) -> dict:
         }
         test = next(test for test, labels in TESTS.items() if label in labels)
         files = result_files(outdir / "result", label)
+        data_files = event_data_files(outdir / "data", label)
         for event in range(events):
             kinds = files.get(event, {})
             if len(kinds.get("sampling", [])) == 1 and len(kinds.get("importance_sampling", [])) == 1:
+                event_data = data_files.get(event, [])
                 runs[test][run_name(label, event, events)] = {
                     "network": load_result(kinds["sampling"][0]),
                     "posterior": load_result(kinds["importance_sampling"][0]),
+                    "event_data": event_data[0] if len(event_data) == 1 else None,
                 }
     report["workflows"] = workflows
 
@@ -434,21 +524,33 @@ def shared_verdict(workflows: dict, label: str) -> Tuple[bool, str]:
     return True, f"{label}: Every output names its event"
 
 
-def agreement_verdict(comparison: Optional[dict]) -> Tuple[bool, str]:
+def agreement_verdict(comparison: Optional[dict]) -> Tuple[bool, str, bool]:
+    """(passed, evidence, needs a check) for a test's agreement criterion."""
     if comparison is None:
-        return False, "Fewer than two runs have results"
-    ks, evidence = comparison["network_ks"], comparison["evidence"]
+        return False, "Fewer than two runs have results", False
+    ks, evidence, data = comparison["network_ks"], comparison["evidence"], comparison["event_data"]
     worst_z = max((row["z"] for row in evidence["rows"]), default=0.0)
     if comparison["evidence_meaningful"]:
         evidence_text = f"log evidence: largest disagreement {worst_z:.2f} sigma (limit {N_SIGMA:g})"
     else:
         evidence_text = f"log evidence not compared, since a run has fewer than {MIN_N_EFF:g} effective samples"
-    passed = ks["passed"] and (evidence["passed"] or not comparison["evidence_meaningful"])
+    if data["identical"]:
+        data_text = "event data bit-identical across runs"
+    elif data["identical"] is None:
+        data_text = f"event data not compared: No single event data file for {', '.join(data['missing'])}"
+    else:
+        data_text = f"event data DIFFER between runs in {', '.join(data['differing'])}"
+    passed = (
+        ks["passed"]
+        and (evidence["passed"] or not comparison["evidence_meaningful"])
+        and data["identical"] is not False
+    )
+    check = data["identical"] is None or bool(comparison["efficiency_outside_reference_factor"])
     return passed, (
         f"Network samples: smallest KS p-value {ks['worst']['p_value']:.3g} ({ks['worst']['parameter']}, "
         f"{' vs '.join(ks['worst']['pair'])}) against a threshold of {ks['threshold']:.3g} over "
-        f"{ks['tests']} tests; {evidence_text}"
-    )
+        f"{ks['tests']} tests; {evidence_text}; {data_text}"
+    ), check
 
 
 def verdicts(report: dict) -> List[dict]:
@@ -457,23 +559,32 @@ def verdicts(report: dict) -> List[dict]:
     rows = []
 
     def add(criterion, verdict):
-        rows.append({"criterion": criterion, "passed": verdict[0], "evidence": verdict[1]})
+        passed, evidence = verdict[0], verdict[1]
+        check = verdict[2] if len(verdict) > 2 else False
+        rows.append({"criterion": criterion, "passed": passed, "check": check, "evidence": evidence})
 
     add("T1.1 T1b builds two complete chains, and every job finishes", complete_verdict(workflows, TESTS["T1"]))
     add("T1.2 No output file is written by more than one chain", shared_verdict(workflows, "T1b"))
     add("T1.3 The T1b copies agree with each other and with T1a", agreement_verdict(tests.get("T1")))
     add("T2.1 T2b builds three complete chains, and every job finishes", complete_verdict(workflows, TESTS["T2"]))
-    passed, text = agreement_verdict(tests.get("T2"))
+    passed, text, check = agreement_verdict(tests.get("T2"))
     if tests.get("T2"):
         efficiencies = ", ".join(
             f"{name} {100 * summary['sample_efficiency']:.2f}%" for name, summary in tests["T2"]["importance"].items()
         )
         reference = tests["T2"]["reference"]
         text += (
-            f", including {reference['name']}'s {reference['log_evidence']} +- {reference['log_evidence_std']}; "
-            f"sample efficiencies {efficiencies} (reference {100 * reference['sample_efficiency']:.2f}%)"
+            f"; log evidence compared with {reference['name']}'s {reference['log_evidence']} +- "
+            f"{reference['log_evidence_std']} too; sample efficiencies {efficiencies} (reference "
+            f"{100 * reference['sample_efficiency']:.2f}%)"
         )
-    add("T2.2 All four runs agree with the Exercise 3 reference", (passed, text))
+        outside = tests["T2"]["efficiency_outside_reference_factor"]
+        if outside:
+            text += (
+                f"; CHECK: {', '.join(outside)} outside a factor of {EFFICIENCY_FACTOR:g} of the reference's "
+                "efficiency (see Weights)"
+            )
+    add("T2.2 All four runs agree with the Exercise 3 reference", (passed, text, check))
     timing_complete = all(workflows[label]["timing"]["complete"] for labels in TESTS.values() for label in labels)
     add(
         "T2.3 Timing recorded for every job",
@@ -506,13 +617,26 @@ def number(value, digits: int = 3) -> str:
     return f"{value:.{digits}g}"
 
 
+def verdict_word(row: dict) -> str:
+    if not row["passed"]:
+        return "FAIL"
+    return "CHECK" if row.get("check") else "PASS"
+
+
 def render_markdown(report: dict) -> str:
     lines = ["# Option A results", "", f"Analysed {report['analysed']} from `{report['run_root']}`.", ""]
     if report.get("run_metadata"):
         lines += ["```", report["run_metadata"].strip(), "```", ""]
-    lines += ["## Verdicts", "", "| Criterion | Verdict | Evidence |", "|---|---|---|"]
+    lines += [
+        "## Verdicts",
+        "",
+        "CHECK means the test passed but something needs a look before calling it a pass.",
+        "",
+        "| Criterion | Verdict | Evidence |",
+        "|---|---|---|",
+    ]
     for row in report["verdicts"]:
-        lines.append(f"| {row['criterion']} | {'PASS' if row['passed'] else 'FAIL'} | {row['evidence']} |")
+        lines.append(f"| {row['criterion']} | {verdict_word(row)} | {row['evidence']} |")
     for test, comparison in report["tests"].items():
         ks = comparison["network_ks"]
         lines += [
@@ -562,6 +686,43 @@ def render_markdown(report: dict) -> str:
             lines.append(
                 f"| {' vs '.join(row['pair'])} | {row['difference']:+.3f} | {row['combined_std']:.3f} | {row['z']:.2f} |"
             )
+        data = comparison["event_data"]
+        if data["identical"]:
+            data_text = "bit-identical across " + ", ".join(data["runs"])
+        elif data["identical"] is None:
+            data_text = "not compared, as there's no single event data file for " + ", ".join(data["missing"])
+        else:
+            data_text = "DIFFERENT between runs, in " + ", ".join(data["differing"])
+        lines += [
+            "",
+            f"Event data (SHA-256 of every dataset in each event data file's data group): {data_text}.",
+            "",
+            "### Weights",
+            "",
+            "In units of each run's mean weight. A few heavy samples (a proposal missing part of the "
+            "posterior) drag the efficiency down on their own; removing the heaviest then restores much of it.",
+            "",
+            "| Run | Efficiency | Largest weight | Share of the 10 largest | Efficiency without the heaviest | Zero weights |",
+            "|---|---|---|---|---|---|",
+        ]
+        for name, diagnostics in comparison["weights"].items():
+            lines.append(
+                f"| {name} | {100 * comparison['importance'][name]['sample_efficiency']:.2f}% | "
+                f"{diagnostics['largest_weight']:.4g} | {100 * diagnostics['top_10_share']:.2f}% | "
+                f"{100 * diagnostics['efficiency_without_heaviest']:.2f}% | {diagnostics['zero_weights']} |"
+            )
+        names = list(comparison["weights"])
+        columns = list(next(iter(comparison["weights"].values()))["heaviest_sample"])
+        lines += [
+            "",
+            "The heaviest sample of each run:",
+            "",
+            "| Column | " + " | ".join(names) + " |",
+            "|---" * (len(names) + 1) + "|",
+        ]
+        for column in columns:
+            cells = [number(comparison["weights"][name]["heaviest_sample"].get(column), 6) for name in names]
+            lines.append(f"| {column} | " + " | ".join(cells) + " |")
         names = list(comparison["importance"])
         lines += [
             "",
@@ -644,7 +805,7 @@ def main(argv=None) -> None:
         for path in workflow["corner_plots"]:
             shutil.copy2(path, plots / Path(path).name)
     for row in report["verdicts"]:
-        print(f"{'PASS' if row['passed'] else 'FAIL'}  {row['criterion']}: {row['evidence']}")
+        print(f"{verdict_word(row)}  {row['criterion']}: {row['evidence']}")
     print(f"Written: {args.output / 'summary.md'}, summary.json and corner_plots/")
 
 

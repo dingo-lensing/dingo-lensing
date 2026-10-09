@@ -144,15 +144,46 @@ def fake_result(path) -> dict:
     n = 2000
     samples = {"a": rng.normal(0, 1, n), "b": rng.normal(5, 2, n), "log_prob": rng.normal(-10, 30, n)}
     if path.name.endswith("_importance_sampling.hdf5"):
+        if "T2" in path.name:
+            # 188 of 2000 samples carry the weight: Exercise 3's 9.40% efficiency.
+            weights = np.full(n, 1e-9)
+            weights[rng.choice(n, 188, replace=False)] = 1.0
+        else:
+            weights = rng.uniform(0.5, 1.5, n)
         samples.update(
             phase=rng.uniform(0, 2 * math.pi, n),
-            weights=rng.uniform(0.5, 1.5, n),
+            weights=weights,
             log_likelihood=rng.normal(size=n),
             log_prior=rng.normal(size=n),
         )
         base = REFERENCE_LOG_EVIDENCE if "T2" in path.name else -100.0
         return {"samples": samples, "log_evidence": base + 0.001 * (zlib.crc32(path.name.encode()) % 3)}
     return {"samples": samples, "log_evidence": None}
+
+
+def fake_digests(path) -> dict:
+    """Every copy of an event has the same data, as in the real tests."""
+    return {"waveform/H1": "w1", "waveform/L1": "w2", "asds/H1": "a1", "asds/L1": "a2"}
+
+
+def patched(load=fake_result, digests=fake_digests):
+    """Stand-ins for the two functions that read HDF5 files."""
+    stack = mock.patch.multiple(analyse_results, load_result=mock.DEFAULT, event_data_digests=mock.DEFAULT)
+    return _Patched(stack, load, digests)
+
+
+class _Patched:
+    def __init__(self, stack, load, digests):
+        self.stack, self.load, self.digests = stack, load, digests
+
+    def __enter__(self):
+        mocks = self.stack.__enter__()
+        mocks["load_result"].side_effect = self.load
+        mocks["event_data_digests"].side_effect = self.digests
+        return mocks
+
+    def __exit__(self, *exc):
+        return self.stack.__exit__(*exc)
 
 
 class TempDir(unittest.TestCase):
@@ -194,6 +225,26 @@ class TestStatistics(unittest.TestCase):
         equal = importance_summary(np.ones(10))
         self.assertAlmostEqual(equal["n_eff"], 10)
         self.assertAlmostEqual(equal["log_evidence_std"], 0.0)
+
+    def test_weight_diagnostics(self):
+        weights = np.ones(100)
+        weights[37] = 100.0  # In units of the mean (1.99): 50.25.
+        diagnostics = analyse_results.weight_diagnostics(weights)
+        self.assertAlmostEqual(diagnostics["largest_weight"], 100 / 1.99)
+        self.assertAlmostEqual(diagnostics["top_10_share"], (100 + 9) / 199)
+        self.assertAlmostEqual(diagnostics["efficiency_without_heaviest"], 1.0)
+        self.assertEqual(diagnostics["heaviest_index"], 37)
+        self.assertEqual(diagnostics["zero_weights"], 0)
+        self.assertEqual(analyse_results.weight_diagnostics([0.0, 1.0, 1.0])["zero_weights"], 1)
+
+    def test_event_data_comparison(self):
+        same = {"waveform/H1": "x", "asds/H1": "y"}
+        self.assertTrue(analyse_results.event_data_comparison({"r1": same, "r2": dict(same)})["identical"])
+        result = analyse_results.event_data_comparison(
+            {"r1": same, "r2": {"waveform/H1": "x", "asds/H1": "z"}, "r3": {"waveform/H1": "x"}}
+        )
+        self.assertFalse(result["identical"])
+        self.assertEqual(result["differing"], ["asds/H1"])
 
     def runs(self, shift=0.0, n=5000):
         rng = np.random.default_rng(7)
@@ -321,7 +372,7 @@ class TestAnalyse(TempDir):
             reference_dir.mkdir()
             (reference_dir / "label_data0_1384782888-63_sampling.hdf5").write_text("")
             (reference_dir / "label_data0_1384782888-63_importance_sampling.hdf5").write_text("")
-        with mock.patch.object(analyse_results, "load_result", side_effect=fake_result):
+        with patched():
             return analyse_results.analyse(root, reference_dir), root
 
     def verdicts(self, report):
@@ -337,6 +388,60 @@ class TestAnalyse(TempDir):
         self.assertIn("data/H1_psd.txt, data/L1_psd.txt", verdicts["T1.2"]["evidence"])
         self.assertIn("T1a 4 of 4 nodes done, T1b 8 of 8 nodes done", verdicts["T1.1"]["evidence"])
         self.assertIn("-5829.945", verdicts["T2.2"]["evidence"])
+        self.assertIn("event data bit-identical across runs", verdicts["T2.2"]["evidence"])
+        self.assertFalse(any(row["check"] for row in report["verdicts"]))
+        for name, summary in report["tests"]["T2"]["importance"].items():
+            self.assertAlmostEqual(summary["sample_efficiency"], 0.094, places=6, msg=name)
+
+    def test_an_efficiency_far_from_the_reference_needs_a_check(self):
+        def heavy(path):
+            result = fake_result(path)
+            if Path(path).name.startswith("T2b_data2_") and "weights" in result["samples"]:
+                weights = np.full(len(result["samples"]["weights"]), 1e-3)
+                weights[42] = 1.0  # One sample carries a third of the weight.
+                result["samples"]["weights"] = weights
+            return result
+
+        root = self.tempdir()
+        RunRoot(root)
+        with patched(load=heavy):
+            report = analyse_results.analyse(root)
+        verdict = self.verdicts(report)["T2.2"]
+        self.assertTrue(verdict["passed"])
+        self.assertTrue(verdict["check"])
+        self.assertEqual(report["tests"]["T2"]["efficiency_outside_reference_factor"], ["T2b/2"])
+        self.assertIn("CHECK: T2b/2", verdict["evidence"])
+        weights = report["tests"]["T2"]["weights"]["T2b/2"]
+        self.assertAlmostEqual(weights["top_10_share"], (1 + 9e-3) / (1 + 1999e-3))
+        self.assertEqual(weights["heaviest_sample"]["weights"], 1.0)
+        self.assertIn("| T2.2 All four runs agree with the Exercise 3 reference | CHECK |", render_markdown(report))
+
+    def test_event_data_that_differ_between_copies_fail_the_agreement(self):
+        def different(path):
+            digests = fake_digests(path)
+            if Path(path).name.startswith("T2b_data2_"):
+                digests["asds/H1"] = "changed"
+            return digests
+
+        root = self.tempdir()
+        RunRoot(root)
+        with patched(digests=different):
+            report = analyse_results.analyse(root)
+        verdict = self.verdicts(report)["T2.2"]
+        self.assertFalse(verdict["passed"])
+        self.assertIn("event data DIFFER between runs in asds/H1", verdict["evidence"])
+        self.assertTrue(self.verdicts(report)["T1.3"]["passed"])
+
+    def test_a_missing_event_data_file_needs_a_check(self):
+        root = self.tempdir()
+        RunRoot(root)
+        (root / "T1" / "T1b" / "data" / "T1b_data1_1126259462-4_generation_event_data.hdf5").unlink()
+        with patched():
+            report = analyse_results.analyse(root)
+        verdict = self.verdicts(report)["T1.3"]
+        self.assertTrue(verdict["passed"])
+        self.assertTrue(verdict["check"])
+        self.assertIn("No single event data file for T1b/1", verdict["evidence"])
 
     def test_every_run_and_job_is_found(self):
         report, _ = self.analyse()
@@ -361,7 +466,7 @@ class TestAnalyse(TempDir):
 
         root = self.tempdir()
         RunRoot(root)
-        with mock.patch.object(analyse_results, "load_result", side_effect=shifted):
+        with patched(load=shifted):
             report = analyse_results.analyse(root)
         self.assertFalse(self.verdicts(report)["T2.2"]["passed"])
         self.assertTrue(self.verdicts(report)["T1.3"]["passed"])
@@ -375,7 +480,7 @@ class TestAnalyse(TempDir):
 
         root = self.tempdir()
         RunRoot(root)
-        with mock.patch.object(analyse_results, "load_result", side_effect=offset):
+        with patched(load=offset):
             report = analyse_results.analyse(root)
         self.assertFalse(self.verdicts(report)["T2.2"]["passed"])
         failing = [row["pair"] for row in report["tests"]["T2"]["evidence"]["rows"] if not row["agree"]]
@@ -390,7 +495,7 @@ class TestAnalyse(TempDir):
 
         root = self.tempdir()
         RunRoot(root)
-        with mock.patch.object(analyse_results, "load_result", side_effect=shifted):
+        with patched(load=shifted):
             report = analyse_results.analyse(root)
         self.assertFalse(self.verdicts(report)["T1.3"]["passed"])
 
@@ -406,7 +511,7 @@ class TestAnalyse(TempDir):
 
         root = self.tempdir()
         RunRoot(root)
-        with mock.patch.object(analyse_results, "load_result", side_effect=lopsided):
+        with patched(load=lopsided):
             report = analyse_results.analyse(root)
         self.assertFalse(report["tests"]["T1"]["evidence_meaningful"])
         self.assertTrue(self.verdicts(report)["T1.3"]["passed"])
@@ -430,7 +535,7 @@ class TestAnalyse(TempDir):
         root = self.tempdir()
         RunRoot(root)
         output = root / "results"
-        with mock.patch.object(analyse_results, "load_result", side_effect=fake_result), mock.patch("builtins.print"):
+        with patched(), mock.patch("builtins.print"):
             analyse_results.main([str(root), str(output)])
         self.assertTrue((output / "summary.md").is_file())
         summary = json.loads((output / "summary.json").read_text())

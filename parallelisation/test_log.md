@@ -215,6 +215,16 @@ number) and the corner plots.
      efficiencies are reported next to the reference's 9.40%.
   3. The weighted median and 90% interval of every parameter, side by side, for
      reading.
+  4. Event data: The copies' event data files (the strain and ASDs that both the
+     network and the likelihood see) must be bit-identical, since identical
+     inputs are what the comparisons above assume.
+- Weights: For each run, how far the heaviest samples dominate (largest weight,
+  share of the 10 largest, efficiency without the heaviest sample) and the
+  heaviest sample itself. A proposal missing part of the posterior gives a few
+  samples huge weights, which drag the efficiency down on their own. A sample
+  efficiency outside a factor of 2 of the reference's is flagged CHECK: Not a
+  test, as the efficiency has no reliable error when a few weights dominate.
+- Verdicts: PASS, FAIL, or CHECK (passed, but something needs a look first).
 - Timing (T2.3): From each job's Condor event log: Queue wait (first submission
   to the start of the successful run), input transfer, run time, output
   transfer, CPU used and cores used against requested, memory and disk used
@@ -223,4 +233,15 @@ number) and the corner plots.
 
 ### Results
 
-Not run yet.
+All four workflows finished on 2026-10-08 (DAG status 0, every node done),
+about 8 min after submission for T1a and T1b, 2 h 46 min for T2a and 3 h 2 min
+for T2b. The first analysis (2026-10-09, analysis `6e865f5`):
+
+| Criterion | Verdict |
+|---|---|
+| T1.1 Complete chains | PASS: T1a 4 of 4 nodes, T1b 8 of 8, every event's results present |
+| T1.2 No shared files | FAIL, as expected from DINGO's code: Every T1b data-generation job writes `data/H1_psd.txt` and `data/L1_psd.txt` (finding 15). The same holds for T2b. |
+| T1.3 Agreement | PASS: Smallest KS p-value 0.119 (ra, T1a vs T1b/1) over 39 tests (threshold 0.000256). Log evidence not compared: Some run had fewer than 100 effective samples, as the toy model gives on real GW150914 data. |
+| T2.1 Complete chains | PASS: T2a 4 of 4 nodes, T2b 12 of 12 |
+| T2.2 Agreement with Exercise 3 | Open. Network samples agree (smallest KS p-value 0.0537, theta_jn, T2a vs T2b/1, over 96 tests; threshold 0.000104) and every log evidence agrees within 1.18 sigma, including with -5829.945 +- 0.014. But the sample efficiencies are T2a 10.42%, T2b/0 9.02%, T2b/1 1.54%, T2b/2 0.27%, against the reference's 9.40%, and that first analysis did not test efficiency. The weight and event-data diagnostics above were added to find out why. |
+| T2.3 Timing recorded | PASS |
