@@ -114,6 +114,57 @@ reference, and how does the wall time of three events compare with one?
 3. Timing recorded for every job: Queue wait, input transfer, run time and CPU
    used, plus each workflow's total wall time, so T2b can be compared with T2a.
 
+### T3: Two different events (toy model)
+
+**Question:** Does a config listing two *different* events give each event the
+same analysis as running it alone? T1 and T2 only repeated one event.
+
+- Two DINGO-Lensing fixes first (branch `kailib-parallelisation`, tests in
+  `tests/test_lensing_fixes.py`):
+  - `67e1f26`: Each data-generation job writes its PSDs to
+    `data/<job label>_<detector>_psd.txt`, not the shared
+    `data/<detector>_psd.txt` (finding 15).
+  - `1d7c477`: When `data-dict` lists several frame files per detector (a list
+    or a glob), each read uses only the files overlapping the data it needs.
+    bilby_pipe reads every listed file without a time range and joins them,
+    which fails for events weeks apart (gwpy's LALFrame reader opens them as one
+    stream). Needs standard frame file names
+    (`<observatory>-<tag>-<GPS start>-<duration>.gwf`); every generation job
+    still receives every listed file, so a node-side filter is a follow-up for
+    many events.
+- Image: `dingo-lensing_1d7c4771b4_recipe-ff6622d_cpu.sif` (images are now named
+  after the last commit that changed `container/`).
+- Model: Exercise 2's toy model, as T1. Events: GW150914 (GPS 1126259462.4) and
+  GW151012 (GPS 1128678900.4, GWOSC GWTC-1-confident v3), the only other O1
+  event inside the toy model's prior (detector-frame chirp mass about 18.4 Msun;
+  GW151226's is below 15). It must be O1: The config's `channel-dict` applies to
+  every event, and O1's GWOSC frames use `LOSC-STRAIN` while O2's do not.
+  GW151012's distance (1080 Mpc) is above the prior's 1000 Mpc, so its posterior
+  will pile up at that edge; like T1, this tests the machinery, not science.
+- Data: Both events' 4096 s GWOSC frames in `gwosc/`, given to every config as
+  `data-dict = {'H1': 'gwosc/H-H1_*.gwf', 'L1': 'gwosc/L-L1_*.gwf'}`. Each event
+  estimates its own PSD (no `psd-dict`).
+
+| Test | Files | Event(s) |
+|---|---|---|
+| T3a | `T3a_gw150914.ini` | GW150914 alone |
+| T3b | `T3b_gw151012.ini` | GW151012 alone |
+| T3c | `T3c_both.ini`, `T3c_gps.txt` | Both, segment starts 1126259460.4 and 1128678898.4 |
+
+Launch with `bash option_a/launch.sh T3` (run folder
+`~/dingo-lensing-runs/option_a_t3`), analyse with `bash option_a/analyse.sh T3`.
+
+**Pass criteria**
+1. Every chain of T3a, T3b and T3c finishes.
+2. No output file is written by more than one chain (T3c).
+3. Each event in T3c matches its single-event run: Bit-identical event data,
+   byte-identical PSD files, and network samples that pass the KS tests.
+4. The two events' event data and PSD files differ (so 3 is not trivial).
+5. Timing recorded for every job.
+
+Also: GW150914's event data should be bit-identical to T1a's from the first
+launch, showing the fixes leave data handling unchanged.
+
 ### Launch attempts
 
 | Date (UTC) | Outcome |

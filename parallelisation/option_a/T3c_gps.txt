@@ -1,0 +1,4 @@
+# Segment start times (trigger time - (duration - post-trigger duration)),
+# not trigger times: GW150914 (1126259462.4) and GW151012 (1128678900.4).
+1126259460.4
+1128678898.4

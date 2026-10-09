@@ -7,11 +7,15 @@ here can drift from what dingo_lensing_pipe will use. For each detector it finds
 the single 4096 s GWOSC frame file covering the PSD stretch and the segment,
 saves it under the path the config's data-dict gives (Condor transfers exactly
 that path), and reads the whole window back with the config's channel name.
+If the data-dict entry is a glob (several events' frames), the file keeps
+GWOSC's name in the glob's folder, and must match the glob.
 """
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import math
+import posixpath
 import re
 import sys
 import urllib.request
@@ -28,6 +32,23 @@ def channel_names_in(path, detector: str) -> list:
     """
     pattern = re.compile(re.escape(detector.encode()) + rb":[A-Za-z0-9_\-]+")
     return sorted({name.decode() for name in pattern.findall(Path(path).read_bytes())})
+
+
+def destination(entry, url: str, run_dir: Path) -> Path:
+    """Where a downloaded frame file goes, for one data-dict entry.
+
+    A plain path is used as it is. For a glob, the file keeps GWOSC's name in
+    the glob's folder, so the jobs' own glob finds it.
+    """
+    if not isinstance(entry, str):
+        raise ValueError(f"Expected a path or a glob for each detector, got {entry!r}")
+    if "*" not in entry:
+        return run_dir / entry
+    folder, pattern = posixpath.split(entry)
+    name = posixpath.basename(url)
+    if not fnmatch.fnmatch(name, pattern):
+        raise ValueError(f"GWOSC's file {name} does not match the data-dict glob {entry}")
+    return run_dir / folder / name
 
 
 def main(argv=None) -> None:
@@ -62,7 +83,7 @@ def main(argv=None) -> None:
     channel_dict = parse_dict(config["channel-dict"])
     print(f"Data needed per detector: GPS {start} to {end} ({end - start:g} s)")
 
-    for detector, relative_path in sorted(data_dict.items()):
+    for detector, entry in sorted(data_dict.items()):
         urls = [
             url
             for url in get_urls(
@@ -79,20 +100,20 @@ def main(argv=None) -> None:
                 f"{detector}: Expected exactly one 4096 s GWOSC frame file covering "
                 f"{start} to {end}, found {urls}"
             )
-        destination = args.run_dir / relative_path
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        print(f"{detector}: Downloading {urls[0]}")
-        urllib.request.urlretrieve(urls[0], destination)
+        path = destination(entry, urls[0], args.run_dir)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        print(f"{detector}: Downloading {urls[0]} to {path}")
+        urllib.request.urlretrieve(urls[0], path)
 
         channel = f"{detector}:{channel_dict[detector]}"
         try:
-            data = TimeSeries.read(str(destination), channel, start=start, end=end)
+            data = TimeSeries.read(str(path), channel, start=start, end=end)
         except Exception as error:
-            found = ", ".join(channel_names_in(destination, detector)) or "none"
+            found = ", ".join(channel_names_in(path, detector)) or "none"
             sys.exit(
-                f"{detector}: Could not read {channel} from {destination}: {error}\n"
+                f"{detector}: Could not read {channel} from {path}: {error}\n"
                 f"{detector}: Channels in that file: {found}. Update channel-dict in "
-                f"the T1 configs to match."
+                f"the config to match."
             )
         expected_samples = (end - start) * sampling_frequency
         if abs(len(data) - expected_samples) > 1:

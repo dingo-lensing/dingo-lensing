@@ -8,6 +8,7 @@ run both on the cluster and on a machine without DINGO installed.
 from __future__ import annotations
 
 import ast
+import glob
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -46,6 +47,22 @@ def parse_dict(raw: str) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"Expected a dict, got {raw!r}")
     return value
+
+
+def data_dict_files(value, run_dir) -> List[str]:
+    """The files one data-dict entry names, as bilby_pipe finds them from run_dir.
+
+    A list is kept, a glob is expanded and a single path is wrapped. Relative
+    paths stay relative to run_dir (with '/'), as bilby_pipe sends them to jobs.
+    """
+    if isinstance(value, (list, tuple)):
+        return [str(item) for item in value]
+    if "*" not in value:
+        return [value]
+    if Path(value).is_absolute():
+        return sorted(glob.glob(value))
+    base = Path(run_dir)
+    return sorted(Path(match).relative_to(base).as_posix() for match in glob.glob(str(base / value)))
 
 
 def read_gps_file(path) -> List[float]:

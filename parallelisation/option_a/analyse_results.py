@@ -43,6 +43,13 @@ WORKFLOWS = [
     ("T2b", "T2", "T2b_three.ini", 3),
 ]
 TESTS = {"T1": ("T1a", "T1b"), "T2": ("T2a", "T2b")}
+# T3: Two different events, alone (T3a, T3b) and together (T3c).
+T3_WORKFLOWS = [
+    ("T3a", "T3", "T3a_gw150914.ini", 1),
+    ("T3b", "T3", "T3b_gw151012.ini", 1),
+    ("T3c", "T3", "T3c_both.ini", 2),
+]
+T3_GROUPS = {"GW150914": [("T3a", 0), ("T3c", 0)], "GW151012": [("T3b", 0), ("T3c", 1)]}
 # Kaili's local Exercise 3 run (tutorial_reference/ex3_dingo_lensing_application/ex3_local.log).
 REFERENCES = {
     "T2": {"name": "Exercise 3", "log_evidence": -5829.945, "log_evidence_std": 0.014, "sample_efficiency": 0.0940}
@@ -60,6 +67,8 @@ RESULT_FILE = re.compile(
 CORNER_PLOT = re.compile(r"^(?P<label>.+)_data(?P<event>\d+)_[0-9-]+_importance_sampling_plot_corner\.pdf$")
 EVENT_DATA = re.compile(r"^(?P<label>.+)_data(?P<event>\d+)_[0-9-]+_generation_event_data\.hdf5$")
 EVENT_INDEX = re.compile(r"_data(\d+)_")
+EVENT_TIME = re.compile(r"_data\d+_[0-9-]+_")
+PSD_FILE = re.compile(r"^(?P<label>.+)_data(?P<event>\d+)_[0-9-]+_generation_(?P<detector>[A-Z][A-Z0-9]*)_psd\.txt$")
 
 
 # -- Statistics ---------------------------------------------------------------
@@ -244,6 +253,24 @@ def event_data_files(data_dir: Path, label: str) -> Dict[int, List[Path]]:
     return files
 
 
+def psd_files(data_dir: Path, label: str) -> Dict[int, Dict[str, Path]]:
+    """{event: {detector: PSD text file}}, as each data-generation job writes them
+    with DINGO-Lensing's fix."""
+    files: Dict[int, Dict[str, Path]] = {}
+    if data_dir.is_dir():
+        for path in sorted(data_dir.iterdir()):
+            match = PSD_FILE.match(path.name)
+            if match and match.group("label") == label:
+                files.setdefault(int(match.group("event")), {})[match.group("detector")] = path
+    return files
+
+
+def file_digest(path: Path) -> str:
+    import hashlib
+
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
 def result_files(result_dir: Path, label: str) -> Dict[int, Dict[str, List[Path]]]:
     """{event: {"sampling" | "importance_sampling" | "corner": [paths]}} for one label."""
     files: Dict[int, Dict[str, List[Path]]] = {}
@@ -298,7 +325,8 @@ def shared_outputs(outdir: Path, events: int) -> dict:
             continue
         match = EVENT_INDEX.search(relative)
         if match:
-            per_event.setdefault(int(match.group(1)), set()).add(EVENT_INDEX.sub("_data<i>_", relative))
+            # Different events also differ in the trigger time that follows the index.
+            per_event.setdefault(int(match.group(1)), set()).add(EVENT_TIME.sub("_data<i>_<time>_", relative))
         else:
             unindexed.append(relative)
     outputs = list(per_event.values())
@@ -413,6 +441,13 @@ def compare_test(runs: Dict[str, dict], reference: Optional[dict], reference_sam
         heaviest = diagnostics.pop("heaviest_index")
         diagnostics["heaviest_sample"] = {key: float(values[heaviest]) for key, values in samples.items()}
         weights[name] = diagnostics
+    psds = {name: run.get("psd_files") or {} for name, run in runs.items()}
+    if all(psds.values()):
+        psd_comparison = event_data_comparison(
+            {name: {det: file_digest(p) for det, p in files.items()} for name, files in psds.items()}
+        )
+    else:
+        psd_comparison = {"identical": None, "missing": [name for name, files in psds.items() if not files]}
     data_files = {name: run.get("event_data") for name, run in runs.items()}
     if all(path is not None for path in data_files.values()):
         event_data = event_data_comparison({name: event_data_digests(path) for name, path in data_files.items()})
@@ -429,6 +464,7 @@ def compare_test(runs: Dict[str, dict], reference: Optional[dict], reference_sam
         "weights": weights,
         "efficiency_outside_reference_factor": outside,
         "event_data": event_data,
+        "psd_files": psd_comparison,
         "evidence": evidence_comparison(evidences),
         "evidence_meaningful": meaningful,
         "posteriors": posteriors,
@@ -442,16 +478,15 @@ def compare_test(runs: Dict[str, dict], reference: Optional[dict], reference_sam
     return comparison
 
 
-def analyse(run_root: Path, reference_results: Optional[Path] = None) -> dict:
-    report = {"run_root": str(run_root), "analysed": datetime.now().isoformat(timespec="seconds")}
-    metadata = run_root / "run_metadata.txt"
-    report["run_metadata"] = metadata.read_text() if metadata.is_file() else None
+def load_workflows(run_root: Path, workflow_list) -> Tuple[dict, Dict[Tuple[str, int], dict]]:
+    """Each workflow's completion, shared files and timing, and every event's run."""
     workflows = {}
-    runs: Dict[str, Dict[str, dict]] = {test: {} for test in TESTS}
-    for label, folder, config_name, events in WORKFLOWS:
+    runs: Dict[Tuple[str, int], dict] = {}
+    for label, folder, config_name, events in workflow_list:
         run_dir = run_root / folder
         outdir = run_dir / read_pipe_ini(run_dir / config_name)["outdir"]
         rows = job_rows(run_dir, outdir)
+        files = result_files(outdir / "result", label)
         workflows[label] = {
             "events": events,
             "completion": completion(outdir, label, events),
@@ -459,24 +494,54 @@ def analyse(run_root: Path, reference_results: Optional[Path] = None) -> dict:
             "jobs": rows,
             "timing": workflow_timing(rows),
             "corner_plots": [
-                str(paths[0])
-                for kinds in result_files(outdir / "result", label).values()
-                for kind, paths in kinds.items()
-                if kind == "corner"
+                str(paths[0]) for kinds in files.values() for kind, paths in kinds.items() if kind == "corner"
             ],
         }
-        test = next(test for test, labels in TESTS.items() if label in labels)
-        files = result_files(outdir / "result", label)
         data_files = event_data_files(outdir / "data", label)
+        psds = psd_files(outdir / "data", label)
         for event in range(events):
             kinds = files.get(event, {})
             if len(kinds.get("sampling", [])) == 1 and len(kinds.get("importance_sampling", [])) == 1:
                 event_data = data_files.get(event, [])
-                runs[test][run_name(label, event, events)] = {
+                runs[(label, event)] = {
+                    "name": run_name(label, event, events),
                     "network": load_result(kinds["sampling"][0]),
                     "posterior": load_result(kinds["importance_sampling"][0]),
                     "event_data": event_data[0] if len(event_data) == 1 else None,
+                    "psd_files": psds.get(event, {}),
                 }
+    return workflows, runs
+
+
+def group_runs(runs: Dict[Tuple[str, int], dict], members, workflows: dict) -> Dict[str, dict]:
+    """The runs of one comparison group; an event of None means all of a workflow's events."""
+    group = {}
+    for label, event in members:
+        indices = range(workflows[label]["events"]) if event is None else [event]
+        for index in indices:
+            if (label, index) in runs:
+                run = runs[(label, index)]
+                group[run["name"]] = run
+    return group
+
+
+def analyse(
+    run_root: Path,
+    reference_results: Optional[Path] = None,
+    suite: str = "T1T2",
+    earlier_run_root: Optional[Path] = None,
+) -> dict:
+    report = {"run_root": str(run_root), "suite": suite, "analysed": datetime.now().isoformat(timespec="seconds")}
+    metadata = run_root / "run_metadata.txt"
+    report["run_metadata"] = metadata.read_text() if metadata.is_file() else None
+    if suite == "T1T2":
+        workflow_list = WORKFLOWS
+        groups = {test: [(label, None) for label in labels] for test, labels in TESTS.items()}
+    elif suite == "T3":
+        workflow_list, groups = T3_WORKFLOWS, T3_GROUPS
+    else:
+        raise ValueError(f"Unknown suite {suite!r}")
+    workflows, runs = load_workflows(run_root, workflow_list)
     report["workflows"] = workflows
 
     reference_samples = None
@@ -486,17 +551,49 @@ def analyse(run_root: Path, reference_results: Optional[Path] = None) -> dict:
         if len(sampling) == 1:
             reference_samples = load_result(sampling[0])["samples"]
             report["reference_network_samples"] = str(sampling[0])
-    report["tests"] = {
-        test: compare_test(
-            test_runs,
-            REFERENCES.get(test),
-            reference_samples if test in REFERENCES else None,
-        )
-        for test, test_runs in runs.items()
-        if len(test_runs) >= 2
-    }
-    report["verdicts"] = verdicts(report)
+    tests = {}
+    for test, members in groups.items():
+        test_runs = group_runs(runs, members, workflows)
+        if len(test_runs) >= 2:
+            tests[test] = compare_test(
+                test_runs, REFERENCES.get(test), reference_samples if test in REFERENCES else None
+            )
+    report["tests"] = tests
+    if suite == "T3":
+        both = ("T3c", 0) in runs and ("T3c", 1) in runs
+        report["different_events"] = different_events(runs[("T3c", 0)], runs[("T3c", 1)]) if both else None
+        report["earlier_gw150914"] = earlier_event_data(runs.get(("T3a", 0)), earlier_run_root)
+        report["verdicts"] = verdicts_t3(report)
+    else:
+        report["verdicts"] = verdicts(report)
     return report
+
+
+def different_events(first: dict, second: dict) -> dict:
+    """Whether two events' event data and PSD files really differ."""
+    data_differ = None
+    if first["event_data"] is not None and second["event_data"] is not None:
+        data_differ = event_data_digests(first["event_data"]) != event_data_digests(second["event_data"])
+    psds_differ = None
+    if first["psd_files"] and second["psd_files"]:
+        psds_differ = {det: file_digest(p) for det, p in first["psd_files"].items()} != {
+            det: file_digest(p) for det, p in second["psd_files"].items()
+        }
+    return {"runs": [first["name"], second["name"]], "event_data_differ": data_differ, "psd_files_differ": psds_differ}
+
+
+def earlier_event_data(run: Optional[dict], earlier_run_root: Optional[Path]) -> Optional[dict]:
+    """GW150914's event data against T1a's from the first launch, before the fixes."""
+    if run is None or earlier_run_root is None or run["event_data"] is None:
+        return None
+    earlier = event_data_files(earlier_run_root / "T1" / "T1a" / "data", "T1a").get(0, [])
+    if len(earlier) != 1:
+        return {"identical": None, "earlier": str(earlier_run_root)}
+    comparison = event_data_comparison(
+        {run["name"]: event_data_digests(run["event_data"]), "T1a (first launch)": event_data_digests(earlier[0])}
+    )
+    comparison["earlier"] = str(earlier[0])
+    return comparison
 
 
 def complete_verdict(workflows: dict, labels) -> Tuple[bool, str]:
@@ -596,6 +693,58 @@ def verdicts(report: dict) -> List[dict]:
         ),
     )
     add("Also: No output file is written by more than one chain (T1.2's check on T2b)", shared_verdict(workflows, "T2b"))
+    return rows
+
+
+def verdicts_t3(report: dict) -> List[dict]:
+    """A verdict on each T3 criterion in test_log.md."""
+    workflows, tests = report["workflows"], report["tests"]
+    rows = []
+
+    def add(criterion, passed, evidence, check=False):
+        rows.append({"criterion": criterion, "passed": passed, "check": check, "evidence": evidence})
+
+    add("T3.1 Every chain completes", *complete_verdict(workflows, ("T3a", "T3b", "T3c")))
+    add("T3.2 No output file is written by more than one chain", *shared_verdict(workflows, "T3c"))
+    for test in T3_GROUPS:
+        comparison = tests.get(test)
+        passed, text, check = agreement_verdict(comparison)
+        if comparison is not None:
+            psd = comparison["psd_files"]
+            if psd["identical"]:
+                text += "; PSD files byte-identical"
+            elif psd["identical"] is None:
+                text += f"; PSD files not compared: None found for {', '.join(psd['missing'])}"
+                check = True
+            else:
+                text += f"; PSD files DIFFER for {', '.join(psd['differing'])}"
+                passed = False
+        add(f"T3.3 {test} in T3c matches its single-event run", passed, text, check)
+    different = report.get("different_events")
+    if different is None:
+        add("T3.4 The two events' data really differ", False, "T3c lacks a run for one of its events")
+    else:
+        add(
+            "T3.4 The two events' data really differ",
+            different["event_data_differ"] is True and different["psd_files_differ"] is True,
+            f"{' vs '.join(different['runs'])}: event data differ: {different['event_data_differ']}, "
+            f"PSD files differ: {different['psd_files_differ']}",
+        )
+    timing_complete = all(workflows[label]["timing"]["complete"] for label in ("T3a", "T3b", "T3c"))
+    add(
+        "T3.5 Timing recorded for every job",
+        timing_complete,
+        "From each job's Condor log" if timing_complete else "Some job has no successful run in its Condor log",
+    )
+    earlier = report.get("earlier_gw150914")
+    if earlier is not None:
+        criterion = "Also: GW150914's event data match T1a's from the first launch"
+        if earlier["identical"] is None:
+            add(criterion, True, f"Not compared: No T1a event data under {earlier['earlier']}", check=True)
+        elif earlier["identical"]:
+            add(criterion, True, "Bit-identical, so the fixes leave data handling unchanged")
+        else:
+            add(criterion, False, f"DIFFER in {', '.join(earlier['differing'])}")
     return rows
 
 
@@ -794,8 +943,14 @@ def main(argv=None) -> None:
         type=Path,
         help="Exercise 3's result folder, to compare its network samples with T2's as well.",
     )
+    parser.add_argument("--suite", default="T1T2", choices=["T1T2", "T3"], help="Which tests the run folder holds.")
+    parser.add_argument(
+        "--earlier-run-root",
+        type=Path,
+        help="For T3: The first launch's run folder, to compare GW150914's event data with T1a's.",
+    )
     args = parser.parse_args(argv)
-    report = analyse(args.run_root, args.reference_results)
+    report = analyse(args.run_root, args.reference_results, args.suite, args.earlier_run_root)
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "summary.json").write_text(json.dumps(to_json(report), indent=2) + "\n")
     (args.output / "summary.md").write_text(render_markdown(report))

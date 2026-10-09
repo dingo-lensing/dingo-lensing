@@ -2,9 +2,11 @@
 """Read a config's frame files the way its data-generation job will.
 
 launch.sh runs this inside the image, so it tests the GWF reader the jobs will
-use. For each detector it reads the configured channel from the whole file, as
+use. For each detector it reads the configured channel from whole files, as
 bilby_pipe does for data-dict files, then checks the data cover the stretch the
-job needs (pipe_config.needed_window) with no NaN or infinite values.
+job needs (pipe_config.needed_window) with no NaN or infinite values. When the
+data-dict entry names several files (a list or a glob), it reads the ones
+DINGO-Lensing's data generation would choose for this event.
 """
 from __future__ import annotations
 
@@ -13,7 +15,7 @@ import importlib
 import sys
 from pathlib import Path
 
-from pipe_config import needed_window, parse_dict, read_pipe_ini
+from pipe_config import data_dict_files, needed_window, parse_dict, read_pipe_ini
 
 # The GWF libraries gwpy can read with, in the order it tries them.
 GWF_LIBRARIES = (
@@ -63,12 +65,25 @@ def main(argv=None) -> None:
     channels = parse_dict(config["channel-dict"])
     print(f"GWF library: {gwf_library()}")
     failed = False
-    for detector, relative_path in sorted(parse_dict(config["data-dict"]).items()):
-        path = args.run_dir / relative_path
+    for detector, value in sorted(parse_dict(config["data-dict"]).items()):
+        files = data_dict_files(value, args.run_dir)
         channel = f"{detector}:{channels[detector]}"
         start, end = needed_window(config, detector)
+        if len(files) > 1:
+            # Chosen as the jobs choose (dingo_lensing.pipe.multi_event, in the image).
+            from dingo_lensing.pipe.multi_event import frames_overlapping
+
+            chosen = frames_overlapping(files, start, end)
+            print(f"{detector}: {len(chosen)} of {len(files)} frame files overlap the data needed: {chosen}")
+            if not chosen:
+                print(f"FAILED  {detector}: None of {files} overlaps GPS {start:.3f} to {end:.3f}")
+                failed = True
+                continue
+            files = chosen
+        paths = [str(args.run_dir / name) for name in files]
+        path = paths[0] if len(paths) == 1 else paths
         try:
-            data = TimeSeries.read(str(path), channel)
+            data = TimeSeries.read(path, channel)
         except Exception as error:
             print(f"FAILED  {detector}: Could not read {channel} from {path}: {type(error).__name__}: {error}")
             failed = True

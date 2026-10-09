@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from pipe_config import is_unset, parse_dict, read_pipe_ini
+from pipe_config import data_dict_files, is_unset, parse_dict, read_pipe_ini
 
 IMAGE_ENV = "/opt/dingo_env"
 # The executable of each kind of job DINGO-Lensing builds: One of each per event.
@@ -84,10 +84,13 @@ def requirements_override(config: Dict[str, str]) -> str:
     return found[0]
 
 
-def expected_settings(config: Dict[str, str]) -> dict:
-    """What every job of a config's workflow should have, from the config alone."""
+def expected_settings(config: Dict[str, str], run_dir: Path) -> dict:
+    """What every job of a config's workflow should have, from the config (and,
+    for a data-dict glob, the frame files it matches in run_dir)."""
     image_url = config["container"]
-    data_files = list(parse_dict(config["data-dict"]).values())
+    data_files = [
+        path for value in parse_dict(config["data-dict"]).values() for path in data_dict_files(value, run_dir)
+    ]
     psd_files = []
     if not is_unset(config, "psd-dict"):
         psd_files = [
@@ -197,7 +200,7 @@ def check_workflow(
     """Problems with the workflow a config built in run_dir, and its jobs of each kind."""
     config = read_pipe_ini(run_dir / config_name)
     try:
-        expected = expected_settings(config)
+        expected = expected_settings(config, run_dir)
         sizes = file_sizes(expected, run_dir, osdf_root)
     except (OSError, ValueError, KeyError) as error:
         return [f"Cannot work out what to expect: {type(error).__name__}: {error}"], {}

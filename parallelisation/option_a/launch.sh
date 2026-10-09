@@ -1,35 +1,72 @@
 #!/usr/bin/env bash
-# Builds and submits the option A tests (T1a, T1b, T2a, T2b); see ../test_log.md.
+# Builds and submits an option A test suite; see ../test_log.md.
 #
 # Run on the cluster, from anywhere:
-#     bash ~/dingo-lensing-sync/parallelisation/option_a/launch.sh
+#     bash ~/dingo-lensing-sync/parallelisation/option_a/launch.sh        # T1 and T2
+#     bash ~/dingo-lensing-sync/parallelisation/option_a/launch.sh T3     # T3
 #
 # Every job runs inside the container image the configs name (../container/).
 # Nothing is submitted unless every check passes: The unit tests, the checks on
 # environment, code, image and inputs, the data fetch, the frame and model
-# checks (both run inside the image), and the checks on all four built
-# workflows. Paths can be overridden with the variables below.
+# checks (both run inside the image), and the checks on every built workflow.
+# Paths can be overridden with the variables below.
 set -euo pipefail
 
+SUITE="${1:-T1T2}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # dingo_env builds the workflows on the access point; the jobs run in the image.
 ENV_PATH="${ENV_PATH:-$HOME/.conda/envs/dingo_env}"
 REPO="${REPO:-$HOME/dingo-lensing}"
 BRANCH="kailib-parallelisation"
 TUTORIAL_EX3="${TUTORIAL_EX3:-$HOME/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application}"
-RUN_ROOT="${RUN_ROOT:-$HOME/dingo-lensing-runs/option_a}"
 PYTHON="$ENV_PATH/bin/python"
-
-# Label, run folder, config, number of events.
-TESTS=(
-    "T1a T1 T1a_single.ini 1"
-    "T1b T1 T1b_twice.ini 2"
-    "T2a T2 T2a_single.ini 1"
-    "T2b T2 T2b_three.ini 3"
-)
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 step() { printf '\n== %s\n' "$*"; }
+
+# Label, run folder, config, number of events.
+case "$SUITE" in
+    T1T2)
+        RUN_ROOT="${RUN_ROOT:-$HOME/dingo-lensing-runs/option_a}"
+        TESTS=(
+            "T1a T1 T1a_single.ini 1"
+            "T1b T1 T1b_twice.ini 2"
+            "T2a T2 T2a_single.ini 1"
+            "T2b T2 T2b_three.ini 3"
+        )
+        # T2's injection frames come from the tutorial.
+        EXTRA_INPUTS=("$TUTORIAL_EX3/gwf_files/H1.gwf" "$TUTORIAL_EX3/gwf_files/L1.gwf")
+        copy_extras() { cp -r "$TUTORIAL_EX3/gwf_files" "$RUN_ROOT/T2/"; }
+        ;;
+    T3)
+        RUN_ROOT="${RUN_ROOT:-$HOME/dingo-lensing-runs/option_a_t3}"
+        TESTS=(
+            "T3a T3 T3a_gw150914.ini 1"
+            "T3b T3 T3b_gw151012.ini 1"
+            "T3c T3 T3c_both.ini 2"
+        )
+        EXTRA_INPUTS=()
+        copy_extras() { :; }
+        ;;
+    *) fail "Unknown suite '$SUITE': Use T1T2 or T3" ;;
+esac
+
+# Ask a config for a value, or for its data-dict, psd-dict or gps-file paths.
+config_value() { sed -n "s/^$2 *= *//p" "$HERE/$1"; }
+config_paths() {
+    (cd "$HERE" && "$PYTHON" -c '
+import sys
+from pipe_config import is_unset, parse_dict, read_pipe_ini
+config, key = read_pipe_ini(sys.argv[1]), sys.argv[2]
+if not is_unset(config, key):
+    value = config[key]
+    values = [value] if key == "gps-file" else parse_dict(value).values()
+    for item in values:
+        for path in (item if isinstance(item, list) else [item]):
+            if path not in (None, "None"):
+                print(path)
+' "$1" "$2")
+}
 
 # On failure, say whether anything reached Condor and what to clean up.
 CREATED_RUN_ROOT=0
@@ -44,6 +81,8 @@ on_exit() {
     fi
 }
 trap on_exit EXIT
+
+echo "Suite $SUITE: ${#TESTS[@]} workflows, run folder $RUN_ROOT"
 
 step "Unit tests"
 (cd "$HERE/.." && "$PYTHON" -m unittest discover -s tests) || fail "Unit tests failed"
@@ -72,11 +111,12 @@ COMMIT="$(git -C "$REPO" rev-parse HEAD)"
 echo "dingo_env builds the workflows with $REPO, $BRANCH at $COMMIT"
 
 step "Image"
-IMAGE_URL="$(sed -n 's/^container *= *//p' "$HERE/T1a_single.ini")"
+read -r _ _ FIRST_CONFIG _ <<< "${TESTS[0]}"
+IMAGE_URL="$(config_value "$FIRST_CONFIG" container)"
 for entry in "${TESTS[@]}"; do
     read -r label folder config events <<< "$entry"
-    [[ "$(sed -n 's/^container *= *//p' "$HERE/$config")" == "$IMAGE_URL" ]] \
-        || fail "$config names a different image from T1a_single.ini"
+    [[ "$(config_value "$config" container)" == "$IMAGE_URL" ]] \
+        || fail "$config names a different image from $FIRST_CONFIG"
 done
 [[ "$IMAGE_URL" == osdf:///* ]] || fail "Expected the configs' container to be an osdf:/// URL, got '$IMAGE_URL'"
 # bilby_pipe sends the image with each job only if it finds it here, under /osdf.
@@ -93,27 +133,38 @@ echo "has DINGO-Lensing $IMAGE_COMMIT, the commit that builds the workflows"
 IN_IMAGE=(apptainer exec --cleanenv --bind /home "$IMAGE" /opt/dingo_env/bin/python -s)
 
 step "Inputs"
-T1_MODEL="$(sed -n 's/^model *= *//p' "$HERE/T1a_single.ini")"
-T2_MODEL="$(sed -n 's/^model *= *//p' "$HERE/T2a_single.ini")"
-mapfile -t T2_PSDS < <(cd "$HERE" && "$PYTHON" -c \
-    'from pipe_config import parse_dict, read_pipe_ini; print("\n".join(parse_dict(read_pipe_ini("T2a_single.ini")["psd-dict"]).values()))')
-INPUTS=("$T1_MODEL" "$T2_MODEL" "${T2_PSDS[@]}" "$TUTORIAL_EX3/gwf_files/H1.gwf" "$TUTORIAL_EX3/gwf_files/L1.gwf")
-[[ ${#INPUTS[@]} -eq 6 ]] || fail "Expected 6 input files, found ${#INPUTS[@]}: ${INPUTS[*]}"
-for input in "${INPUTS[@]}"; do
+MODELS=()
+INPUTS=("${EXTRA_INPUTS[@]+"${EXTRA_INPUTS[@]}"}")
+for entry in "${TESTS[@]}"; do
+    read -r label folder config events <<< "$entry"
+    model="$(config_value "$config" model)"
+    [[ " ${MODELS[*]+"${MODELS[*]}"} " == *" $model "* ]] || MODELS+=("$model")
+    while read -r psd; do
+        [[ -n "$psd" && " ${INPUTS[*]+"${INPUTS[*]}"} " != *" $psd "* ]] && INPUTS+=("$psd")
+    done < <(config_paths "$config" psd-dict)
+done
+for input in "${MODELS[@]}" "${INPUTS[@]+"${INPUTS[@]}"}"; do
     [[ -r "$input" ]] || fail "Cannot read $input"
     echo "ok  $input"
 done
 [[ ! -e "$RUN_ROOT" ]] || fail "$RUN_ROOT already exists; move it away or set RUN_ROOT"
 
 step "Run folder $RUN_ROOT"
-mkdir -p "$RUN_ROOT/T1" "$RUN_ROOT/T2"
+mkdir -p "$RUN_ROOT"
 CREATED_RUN_ROOT=1
-cp "$HERE/T1a_single.ini" "$HERE/T1b_twice.ini" "$HERE/T1b_gps.txt" "$RUN_ROOT/T1/"
-cp "$HERE/T2a_single.ini" "$HERE/T2b_three.ini" "$HERE/T2b_gps.txt" "$RUN_ROOT/T2/"
-cp -r "$TUTORIAL_EX3/gwf_files" "$RUN_ROOT/T2/"
+for entry in "${TESTS[@]}"; do
+    read -r label folder config events <<< "$entry"
+    mkdir -p "$RUN_ROOT/$folder"
+    cp "$HERE/$config" "$RUN_ROOT/$folder/"
+    while read -r gps; do
+        [[ -n "$gps" ]] && cp "$HERE/$gps" "$RUN_ROOT/$folder/"
+    done < <(config_paths "$config" gps-file)
+done
+copy_extras
 {
     echo "date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
     echo "host: $(hostname)"
+    echo "suite: $SUITE"
     echo "code: $BRANCH at $COMMIT"
     echo "tests: $(git -C "$HERE" rev-parse --abbrev-ref HEAD) at $(git -C "$HERE" rev-parse HEAD)"
     echo "image: $IMAGE_URL"
@@ -123,16 +174,28 @@ cp -r "$TUTORIAL_EX3/gwf_files" "$RUN_ROOT/T2/"
 } > "$RUN_ROOT/run_metadata.txt"
 cat "$RUN_ROOT/run_metadata.txt"
 
-step "GW150914 data for T1 (GWOSC)"
-(cd "$HERE" && "$PYTHON" fetch_gwosc_frames.py "$RUN_ROOT/T1/T1a_single.ini" --run-dir "$RUN_ROOT/T1")
+# Single-event configs carry the trigger times: They fetch GWOSC data and
+# check frames for the multi-event configs too (unit-tested to share events).
+step "GWOSC data"
+for entry in "${TESTS[@]}"; do
+    read -r label folder config events <<< "$entry"
+    [[ "$events" -eq 1 ]] || continue
+    if config_paths "$config" data-dict | grep -qv '^gwosc/'; then
+        echo "$label: Data not from GWOSC, nothing to fetch"
+        continue
+    fi
+    (cd "$HERE" && "$PYTHON" fetch_gwosc_frames.py "$RUN_ROOT/$folder/$config" --run-dir "$RUN_ROOT/$folder")
+done
 
 step "Frames, read inside the image as the data-generation jobs will"
-# T1b and T2b list the same events as T1a and T2a (unit-tested), so this covers all four.
-(cd "$HERE" && "${IN_IMAGE[@]}" check_frames.py "$RUN_ROOT/T1/T1a_single.ini" --run-dir "$RUN_ROOT/T1")
-(cd "$HERE" && "${IN_IMAGE[@]}" check_frames.py "$RUN_ROOT/T2/T2a_single.ini" --run-dir "$RUN_ROOT/T2")
+for entry in "${TESTS[@]}"; do
+    read -r label folder config events <<< "$entry"
+    [[ "$events" -eq 1 ]] || continue
+    (cd "$HERE" && "${IN_IMAGE[@]}" check_frames.py "$RUN_ROOT/$folder/$config" --run-dir "$RUN_ROOT/$folder")
+done
 
 step "Models: Can the image rebuild their lensed waveform generators?"
-(cd "$HERE" && "${IN_IMAGE[@]}" check_models.py "$T1_MODEL" "$T2_MODEL")
+(cd "$HERE" && "${IN_IMAGE[@]}" check_models.py "${MODELS[@]}")
 
 step "Build and check workflows"
 for entry in "${TESTS[@]}"; do
@@ -153,6 +216,6 @@ for entry in "${TESTS[@]}"; do
     SUBMITTED=$((SUBMITTED + 1))
 done
 
-step "Submitted T1a, T1b, T2a and T2b"
+step "Submitted suite $SUITE"
 echo "Record: $RUN_ROOT/run_metadata.txt and $RUN_ROOT/submissions.txt"
 echo "Watch:  condor_q -dag -nobatch"
