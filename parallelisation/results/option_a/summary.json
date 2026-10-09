@@ -1,0 +1,4701 @@
+{
+  "run_root": "/home/kailibryan.doney/dingo-lensing-runs/option_a",
+  "analysed": "2026-10-08T20:17:55",
+  "run_metadata": "date: 2026-10-08T15:32:00Z\nhost: ldas-grid\ncode: kailib-parallelisation at a4de31e72e75c9a38a100c2555a902d1eadc2f61\ntests: local-tests-sync at 00a1914df6d8a2136f0068de06265e85832e1d37\nimage: osdf:///igwn/cit/staging/kailibryan.doney/containers/dingo-lensing_a4de31e72e_recipe-714878f_cpu.sif\nworkflows built with: /home/kailibryan.doney/.conda/envs/dingo_env\nin the image: dingo 0.9.8, bilby_pipe 1.8.0, torch 2.13.0+cpu\n",
+  "workflows": {
+    "T1a": {
+      "events": 1,
+      "completion": {
+        "dag": {
+          "status": 0,
+          "status_name": "DAG_STATUS_OK",
+          "exit_status": 0,
+          "nodes": {
+            "total": 4,
+            "done": 4,
+            "pre": 0,
+            "queued": 0,
+            "post": 0,
+            "ready": 0,
+            "un-ready": 0,
+            "failed": 0,
+            "futile": 0
+          }
+        },
+        "problems": [],
+        "passed": true
+      },
+      "shared_outputs": {
+        "written_by_every_chain": [],
+        "events_with_outputs": [
+          0
+        ],
+        "same_outputs_per_event": true,
+        "passed": true
+      },
+      "jobs": [
+        {
+          "job": "T1a_data0_1126259462-4_generation_arg_0",
+          "kind": "generation",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:39:20",
+          "finished": "2026-10-08 08:42:30",
+          "wait_s": 105.0,
+          "input_transfer_s": 9.0,
+          "run_s": 73.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 43.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.589041095890411,
+          "memory_used_mb": 324.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 1157448.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 1184444747,
+          "host": "node2145.cluster.ldas.cit"
+        },
+        {
+          "job": "T1a_data0_1126259462-4_sampling_arg_0",
+          "kind": "sampling",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:42:37",
+          "finished": "2026-10-08 08:44:29",
+          "wait_s": 81.0,
+          "input_transfer_s": 9.0,
+          "run_s": 21.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 8.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 8.0,
+          "cores_used": 0.38095238095238093,
+          "memory_used_mb": 0.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 913752.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 934715107,
+          "host": "node1253.cluster.ldas.cit"
+        },
+        {
+          "job": "T1a_data0_1126259462-4_importance_sampling_arg_0",
+          "kind": "importance sampling",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:44:38",
+          "finished": "2026-10-08 08:45:23",
+          "wait_s": 2.0,
+          "input_transfer_s": 9.0,
+          "run_s": 25.0,
+          "output_transfer_s": 5.0,
+          "cpu_s": 19.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 8.0,
+          "cores_used": 0.76,
+          "memory_used_mb": 454.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 855348.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 874669002,
+          "host": "node1591.cluster.ldas.cit"
+        },
+        {
+          "job": "T1a_data0_1126259462-4_importance_sampling_plot_arg_0",
+          "kind": "plot",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:45:33",
+          "finished": "2026-10-08 08:46:58",
+          "wait_s": 40.0,
+          "input_transfer_s": 5.0,
+          "run_s": 37.0,
+          "output_transfer_s": 2.0,
+          "cpu_s": 16.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.43243243243243246,
+          "memory_used_mb": 408.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 854580.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 874691980,
+          "host": "node2378.cluster.ldas.cit"
+        }
+      ],
+      "timing": {
+        "complete": true,
+        "makespan_s": 458.0,
+        "chain_s": {
+          "0": 458.0
+        },
+        "cpu_hours": 0.02388888888888889,
+        "wasted_cpu_hours": 0.0,
+        "wait_s": 228.0
+      },
+      "corner_plots": [
+        "/home/kailibryan.doney/dingo-lensing-runs/option_a/T1/T1a/result/T1a_data0_1126259462-4_importance_sampling_plot_corner.pdf"
+      ]
+    },
+    "T1b": {
+      "events": 2,
+      "completion": {
+        "dag": {
+          "status": 0,
+          "status_name": "DAG_STATUS_OK",
+          "exit_status": 0,
+          "nodes": {
+            "total": 8,
+            "done": 8,
+            "pre": 0,
+            "queued": 0,
+            "post": 0,
+            "ready": 0,
+            "un-ready": 0,
+            "failed": 0,
+            "futile": 0
+          }
+        },
+        "problems": [],
+        "passed": true
+      },
+      "shared_outputs": {
+        "written_by_every_chain": [
+          "data/H1_psd.txt",
+          "data/L1_psd.txt"
+        ],
+        "events_with_outputs": [
+          0,
+          1
+        ],
+        "same_outputs_per_event": true,
+        "passed": false
+      },
+      "jobs": [
+        {
+          "job": "T1b_data0_1126259462-4_generation_arg_0",
+          "kind": "generation",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:39:21",
+          "finished": "2026-10-08 08:42:35",
+          "wait_s": 105.0,
+          "input_transfer_s": 17.0,
+          "run_s": 71.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 46.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.647887323943662,
+          "memory_used_mb": 341.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 1157444.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 1184445006,
+          "host": "node2126.cluster.ldas.cit"
+        },
+        {
+          "job": "T1b_data1_1126259462-4_generation_arg_0",
+          "kind": "generation",
+          "event": 1,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:42:42",
+          "finished": "2026-10-08 08:44:11",
+          "wait_s": 4.0,
+          "input_transfer_s": 13.0,
+          "run_s": 67.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 44.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.6567164179104478,
+          "memory_used_mb": 358.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 1157440.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 1184445006,
+          "host": "node2126.cluster.ldas.cit"
+        },
+        {
+          "job": "T1b_data0_1126259462-4_sampling_arg_0",
+          "kind": "sampling",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:42:42",
+          "finished": "2026-10-08 08:44:29",
+          "wait_s": 76.0,
+          "input_transfer_s": 9.0,
+          "run_s": 21.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 8.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 8.0,
+          "cores_used": 0.38095238095238093,
+          "memory_used_mb": 0.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 913752.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 934715178,
+          "host": "node1550.cluster.ldas.cit"
+        },
+        {
+          "job": "T1b_data1_1126259462-4_sampling_arg_0",
+          "kind": "sampling",
+          "event": 1,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:44:18",
+          "finished": "2026-10-08 08:45:02",
+          "wait_s": 11.0,
+          "input_transfer_s": 9.0,
+          "run_s": 22.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 8.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 8.0,
+          "cores_used": 0.36363636363636365,
+          "memory_used_mb": 0.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 913752.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 934715178,
+          "host": "node1253.cluster.ldas.cit"
+        },
+        {
+          "job": "T1b_data0_1126259462-4_importance_sampling_arg_0",
+          "kind": "importance sampling",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:44:34",
+          "finished": "2026-10-08 08:45:21",
+          "wait_s": 6.0,
+          "input_transfer_s": 8.0,
+          "run_s": 24.0,
+          "output_transfer_s": 4.0,
+          "cpu_s": 18.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 8.0,
+          "cores_used": 0.75,
+          "memory_used_mb": 529.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 855348.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 874669073,
+          "host": "node1550.cluster.ldas.cit"
+        },
+        {
+          "job": "T1b_data1_1126259462-4_importance_sampling_arg_0",
+          "kind": "importance sampling",
+          "event": 1,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:45:10",
+          "finished": "2026-10-08 08:45:46",
+          "wait_s": 2.0,
+          "input_transfer_s": 8.0,
+          "run_s": 23.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 19.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 8.0,
+          "cores_used": 0.8260869565217391,
+          "memory_used_mb": 528.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 855348.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 874669073,
+          "host": "node1253.cluster.ldas.cit"
+        },
+        {
+          "job": "T1b_data0_1126259462-4_importance_sampling_plot_arg_0",
+          "kind": "plot",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:45:31",
+          "finished": "2026-10-08 08:46:53",
+          "wait_s": 42.0,
+          "input_transfer_s": 4.0,
+          "run_s": 33.0,
+          "output_transfer_s": 2.0,
+          "cpu_s": 15.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.45454545454545453,
+          "memory_used_mb": 460.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 854576.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 874691980,
+          "host": "node2363.cluster.ldas.cit"
+        },
+        {
+          "job": "T1b_data1_1126259462-4_importance_sampling_plot_arg_0",
+          "kind": "plot",
+          "event": 1,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:45:56",
+          "finished": "2026-10-08 08:46:57",
+          "wait_s": 17.0,
+          "input_transfer_s": 5.0,
+          "run_s": 34.0,
+          "output_transfer_s": 3.0,
+          "cpu_s": 14.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.4117647058823529,
+          "memory_used_mb": 493.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 854576.0,
+          "disk_requested_kb": 5242880.0,
+          "bytes_received": 874691980,
+          "host": "node2379.cluster.ldas.cit"
+        }
+      ],
+      "timing": {
+        "complete": true,
+        "makespan_s": 456.0,
+        "chain_s": {
+          "0": 452.0,
+          "1": 255.0
+        },
+        "cpu_hours": 0.04777777777777778,
+        "wasted_cpu_hours": 0.0,
+        "wait_s": 263.0
+      },
+      "corner_plots": [
+        "/home/kailibryan.doney/dingo-lensing-runs/option_a/T1/T1b/result/T1b_data0_1126259462-4_importance_sampling_plot_corner.pdf",
+        "/home/kailibryan.doney/dingo-lensing-runs/option_a/T1/T1b/result/T1b_data1_1126259462-4_importance_sampling_plot_corner.pdf"
+      ]
+    },
+    "T2a": {
+      "events": 1,
+      "completion": {
+        "dag": {
+          "status": 0,
+          "status_name": "DAG_STATUS_OK",
+          "exit_status": 0,
+          "nodes": {
+            "total": 4,
+            "done": 4,
+            "pre": 0,
+            "queued": 0,
+            "post": 0,
+            "ready": 0,
+            "un-ready": 0,
+            "failed": 0,
+            "futile": 0
+          }
+        },
+        "problems": [],
+        "passed": true
+      },
+      "shared_outputs": {
+        "written_by_every_chain": [],
+        "events_with_outputs": [
+          0
+        ],
+        "same_outputs_per_event": true,
+        "passed": true
+      },
+      "jobs": [
+        {
+          "job": "T2a_data0_1384782888-63_generation_arg_0",
+          "kind": "generation",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:39:30",
+          "finished": "2026-10-08 08:42:49",
+          "wait_s": 95.0,
+          "input_transfer_s": 53.0,
+          "run_s": 49.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 24.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.4897959183673469,
+          "memory_used_mb": 376.0,
+          "memory_requested_mb": 16384.0,
+          "disk_used_kb": 5268964.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 5394720904,
+          "host": "node2062.cluster.ldas.cit"
+        },
+        {
+          "job": "T2a_data0_1384782888-63_sampling_arg_0",
+          "kind": "sampling",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:42:56",
+          "finished": "2026-10-08 11:07:37",
+          "wait_s": 8588.0,
+          "input_transfer_s": 19.0,
+          "run_s": 73.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 819.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 32.0,
+          "cores_used": 11.219178082191782,
+          "memory_used_mb": 416.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 5271520.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 5394280255,
+          "host": "node2155.cluster.ldas.cit"
+        },
+        {
+          "job": "T2a_data0_1384782888-63_importance_sampling_arg_0",
+          "kind": "importance sampling",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 11:07:43",
+          "finished": "2026-10-08 11:24:43",
+          "wait_s": 69.0,
+          "input_transfer_s": 4.0,
+          "run_s": 947.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 28438.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 32.0,
+          "cores_used": 30.029567053854276,
+          "memory_used_mb": 3200.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 862284.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 877425621,
+          "host": "node2280.cluster.ldas.cit"
+        },
+        {
+          "job": "T2a_data0_1384782888-63_importance_sampling_plot_arg_0",
+          "kind": "plot",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 11:24:48",
+          "finished": "2026-10-08 11:25:25",
+          "wait_s": 1.0,
+          "input_transfer_s": 3.0,
+          "run_s": 32.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 16.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.5,
+          "memory_used_mb": 543.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 859268.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 879035844,
+          "host": "node2280.cluster.ldas.cit"
+        }
+      ],
+      "timing": {
+        "complete": true,
+        "makespan_s": 9955.0,
+        "chain_s": {
+          "0": 9955.0
+        },
+        "cpu_hours": 8.138055555555555,
+        "wasted_cpu_hours": 0.0,
+        "wait_s": 8753.0
+      },
+      "corner_plots": [
+        "/home/kailibryan.doney/dingo-lensing-runs/option_a/T2/T2a/result/T2a_data0_1384782888-63_importance_sampling_plot_corner.pdf"
+      ]
+    },
+    "T2b": {
+      "events": 3,
+      "completion": {
+        "dag": {
+          "status": 0,
+          "status_name": "DAG_STATUS_OK",
+          "exit_status": 0,
+          "nodes": {
+            "total": 12,
+            "done": 12,
+            "pre": 0,
+            "queued": 0,
+            "post": 0,
+            "ready": 0,
+            "un-ready": 0,
+            "failed": 0,
+            "futile": 0
+          }
+        },
+        "problems": [],
+        "passed": true
+      },
+      "shared_outputs": {
+        "written_by_every_chain": [
+          "data/H1_psd.txt",
+          "data/L1_psd.txt"
+        ],
+        "events_with_outputs": [
+          0,
+          1,
+          2
+        ],
+        "same_outputs_per_event": true,
+        "passed": false
+      },
+      "jobs": [
+        {
+          "job": "T2b_data0_1384782888-63_generation_arg_0",
+          "kind": "generation",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:39:29",
+          "finished": "2026-10-08 08:43:08",
+          "wait_s": 96.0,
+          "input_transfer_s": 55.0,
+          "run_s": 60.0,
+          "output_transfer_s": 3.0,
+          "cpu_s": 25.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.4166666666666667,
+          "memory_used_mb": 272.0,
+          "memory_requested_mb": 16384.0,
+          "disk_used_kb": 5268968.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 5394721088,
+          "host": "node2084.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data1_1384782888-63_generation_arg_0",
+          "kind": "generation",
+          "event": 1,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:43:16",
+          "finished": "2026-10-08 08:44:58",
+          "wait_s": 10.0,
+          "input_transfer_s": 27.0,
+          "run_s": 54.0,
+          "output_transfer_s": 5.0,
+          "cpu_s": 23.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.42592592592592593,
+          "memory_used_mb": 308.0,
+          "memory_requested_mb": 16384.0,
+          "disk_used_kb": 5268968.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 5394721088,
+          "host": "node2084.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data2_1384782888-63_generation_arg_0",
+          "kind": "generation",
+          "event": 2,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:43:15",
+          "finished": "2026-10-08 08:44:37",
+          "wait_s": 11.0,
+          "input_transfer_s": 22.0,
+          "run_s": 44.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 23.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.5227272727272727,
+          "memory_used_mb": 377.0,
+          "memory_requested_mb": 16384.0,
+          "disk_used_kb": 5268968.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 5394721088,
+          "host": "node2062.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data0_1384782888-63_sampling_arg_0",
+          "kind": "sampling",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:43:15",
+          "finished": "2026-10-08 11:08:55",
+          "wait_s": 8629.0,
+          "input_transfer_s": 17.0,
+          "run_s": 92.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 1741.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 32.0,
+          "cores_used": 18.92391304347826,
+          "memory_used_mb": 420.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 5271520.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 5394280213,
+          "host": "node2280.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data1_1384782888-63_sampling_arg_0",
+          "kind": "sampling",
+          "event": 1,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:45:08",
+          "finished": "2026-10-08 11:09:07",
+          "wait_s": 8550.0,
+          "input_transfer_s": 19.0,
+          "run_s": 69.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 854.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 32.0,
+          "cores_used": 12.376811594202898,
+          "memory_used_mb": 484.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 5271520.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 5394280213,
+          "host": "node2155.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data2_1384782888-63_sampling_arg_0",
+          "kind": "sampling",
+          "event": 2,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 08:44:47",
+          "finished": "2026-10-08 11:08:52",
+          "wait_s": 8537.0,
+          "input_transfer_s": 17.0,
+          "run_s": 89.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 1648.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 32.0,
+          "cores_used": 18.51685393258427,
+          "memory_used_mb": 417.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 5271520.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 5394280213,
+          "host": "node2280.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data0_1384782888-63_importance_sampling_arg_0",
+          "kind": "importance sampling",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 11:09:01",
+          "finished": "2026-10-08 11:25:07",
+          "wait_s": 0.0,
+          "input_transfer_s": 4.0,
+          "run_s": 961.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 28406.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 32.0,
+          "cores_used": 29.558792924037462,
+          "memory_used_mb": 3133.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 862284.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 877425579,
+          "host": "node2280.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data1_1384782888-63_importance_sampling_arg_0",
+          "kind": "importance sampling",
+          "event": 1,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 11:09:16",
+          "finished": "2026-10-08 11:39:27",
+          "wait_s": 897.0,
+          "input_transfer_s": 4.0,
+          "run_s": 909.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 26021.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 32.0,
+          "cores_used": 28.625962596259626,
+          "memory_used_mb": 2514.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 862284.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 877425579,
+          "host": "node2155.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data2_1384782888-63_importance_sampling_arg_0",
+          "kind": "importance sampling",
+          "event": 2,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 11:09:01",
+          "finished": "2026-10-08 11:24:12",
+          "wait_s": 7.0,
+          "input_transfer_s": 5.0,
+          "run_s": 899.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 25497.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 32.0,
+          "cores_used": 28.3615127919911,
+          "memory_used_mb": 2560.0,
+          "memory_requested_mb": 8192.0,
+          "disk_used_kb": 862284.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 877425579,
+          "host": "node2155.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data0_1384782888-63_importance_sampling_plot_arg_0",
+          "kind": "plot",
+          "event": 0,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 11:25:13",
+          "finished": "2026-10-08 11:25:52",
+          "wait_s": 3.0,
+          "input_transfer_s": 4.0,
+          "run_s": 31.0,
+          "output_transfer_s": 1.0,
+          "cpu_s": 17.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.5483870967741935,
+          "memory_used_mb": 518.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 859264.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 879035844,
+          "host": "aframe.ldas.cit"
+        },
+        {
+          "job": "T2b_data1_1384782888-63_importance_sampling_plot_arg_0",
+          "kind": "plot",
+          "event": 1,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 11:39:34",
+          "finished": "2026-10-08 11:41:24",
+          "wait_s": 44.0,
+          "input_transfer_s": 5.0,
+          "run_s": 58.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 28.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.4827586206896552,
+          "memory_used_mb": 334.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 859276.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 879035844,
+          "host": "node2279.cluster.ldas.cit"
+        },
+        {
+          "job": "T2b_data2_1384782888-63_importance_sampling_plot_arg_0",
+          "kind": "plot",
+          "event": 2,
+          "succeeded": true,
+          "attempts": 1,
+          "submitted": "2026-10-08 11:24:18",
+          "finished": "2026-10-08 11:25:15",
+          "wait_s": 19.0,
+          "input_transfer_s": 4.0,
+          "run_s": 34.0,
+          "output_transfer_s": 0.0,
+          "cpu_s": 19.0,
+          "wasted_cpu_s": 0.0,
+          "cores_requested": 1.0,
+          "cores_used": 0.5588235294117647,
+          "memory_used_mb": 506.0,
+          "memory_requested_mb": 32768.0,
+          "disk_used_kb": 859276.0,
+          "disk_requested_kb": 12582912.0,
+          "bytes_received": 879035844,
+          "host": "aframe.ldas.cit"
+        }
+      ],
+      "timing": {
+        "complete": true,
+        "makespan_s": 10915.0,
+        "chain_s": {
+          "0": 9983.0,
+          "1": 10688.0,
+          "2": 9720.0
+        },
+        "cpu_hours": 23.41722222222222,
+        "wasted_cpu_hours": 0.0,
+        "wait_s": 26803.0
+      },
+      "corner_plots": [
+        "/home/kailibryan.doney/dingo-lensing-runs/option_a/T2/T2b/result/T2b_data0_1384782888-63_importance_sampling_plot_corner.pdf",
+        "/home/kailibryan.doney/dingo-lensing-runs/option_a/T2/T2b/result/T2b_data1_1384782888-63_importance_sampling_plot_corner.pdf",
+        "/home/kailibryan.doney/dingo-lensing-runs/option_a/T2/T2b/result/T2b_data2_1384782888-63_importance_sampling_plot_corner.pdf"
+      ]
+    }
+  },
+  "reference_network_samples": "/home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP1_lensed/result/label_data0_1384782888-63_sampling.hdf5",
+  "tests": {
+    "T1": {
+      "network_ks": {
+        "runs": [
+          "T1a",
+          "T1b/0",
+          "T1b/1"
+        ],
+        "parameters": [
+          "chirp_mass",
+          "mass_ratio",
+          "chi_1",
+          "chi_2",
+          "theta_jn",
+          "dec",
+          "ra",
+          "geocent_time",
+          "luminosity_distance",
+          "psi",
+          "phase",
+          "lensing_delta_t",
+          "mu_rel"
+        ],
+        "tests": 39,
+        "alpha": 0.01,
+        "threshold": 0.0002564102564102564,
+        "worst": {
+          "pair": [
+            "T1a",
+            "T1b/1"
+          ],
+          "parameter": "ra",
+          "statistic": 0.0168,
+          "p_value": 0.11890214798175557
+        },
+        "passed": true,
+        "identical_pairs": [],
+        "rows": [
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.0089,
+            "p_value": 0.8232670451557268
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0083,
+            "p_value": 0.8811642663237643
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "chi_1",
+            "statistic": 0.0116,
+            "p_value": 0.5116055794163079
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "chi_2",
+            "statistic": 0.0131,
+            "p_value": 0.3574576387469889
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.0089,
+            "p_value": 0.8232670451557268
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0103,
+            "p_value": 0.6637453476707832
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "ra",
+            "statistic": 0.0114,
+            "p_value": 0.5342696653345376
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0083,
+            "p_value": 0.8811642663237643
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0086,
+            "p_value": 0.8533882178607826
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "psi",
+            "statistic": 0.0077,
+            "p_value": 0.9282795837972042
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "phase",
+            "statistic": 0.0065,
+            "p_value": 0.9841448923336962
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0105,
+            "p_value": 0.6398931694241892
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.0109,
+            "p_value": 0.5924073621556236
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.0109,
+            "p_value": 0.5924073621556236
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0147,
+            "p_value": 0.23009750585879926
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "chi_1",
+            "statistic": 0.0165,
+            "p_value": 0.13138496726749369
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "chi_2",
+            "statistic": 0.0099,
+            "p_value": 0.7112026399498019
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.0085,
+            "p_value": 0.8629266196033867
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0069,
+            "p_value": 0.9711713729518725
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "ra",
+            "statistic": 0.0168,
+            "p_value": 0.11890214798175557
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0083,
+            "p_value": 0.8811642663237643
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.01,
+            "p_value": 0.6994009459719119
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "psi",
+            "statistic": 0.0117,
+            "p_value": 0.5004275626413702
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "phase",
+            "statistic": 0.0156,
+            "p_value": 0.175326677835407
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0081,
+            "p_value": 0.898195296299018
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.0068,
+            "p_value": 0.9749119230771707
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.0141,
+            "p_value": 0.27321683386131995
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0116,
+            "p_value": 0.5116055794163079
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "chi_1",
+            "statistic": 0.0133,
+            "p_value": 0.3393633805365633
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "chi_2",
+            "statistic": 0.0088,
+            "p_value": 0.8335435086261689
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.007,
+            "p_value": 0.967081996278138
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0101,
+            "p_value": 0.6875487335121528
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "ra",
+            "statistic": 0.0109,
+            "p_value": 0.5924073621556236
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0087,
+            "p_value": 0.8435889342947497
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0081,
+            "p_value": 0.898195296299018
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "psi",
+            "statistic": 0.0103,
+            "p_value": 0.6637453476707832
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "phase",
+            "statistic": 0.0159,
+            "p_value": 0.15954315749968195
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0054,
+            "p_value": 0.998613645737644
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.0132,
+            "p_value": 0.34833322133888034
+          }
+        ]
+      },
+      "importance": {
+        "T1a": {
+          "samples": 10000,
+          "n_eff": 1.089729041634844,
+          "sample_efficiency": 0.0001089729041634844,
+          "log_evidence_std": 0.9578931618933868,
+          "log_evidence": -5605.572264374829
+        },
+        "T1b/0": {
+          "samples": 10000,
+          "n_eff": 1.0000000038983645,
+          "sample_efficiency": 0.00010000000038983646,
+          "log_evidence_std": 0.9999499968006578,
+          "log_evidence": -5599.441326971432
+        },
+        "T1b/1": {
+          "samples": 10000,
+          "n_eff": 1.0,
+          "sample_efficiency": 0.0001,
+          "log_evidence_std": 0.9999499987499375,
+          "log_evidence": -5541.554780461222
+        }
+      },
+      "weights": {
+        "T1a": {
+          "largest_weight": 9569.877076737796,
+          "top_10_share": 0.9999999999999998,
+          "efficiency_without_heaviest": 0.00010089459163057888,
+          "zero_weights": 5953,
+          "heaviest_sample": {
+            "chirp_mass": 44.1793098449707,
+            "mass_ratio": 0.4864639341831207,
+            "chi_1": 0.004255037289112806,
+            "chi_2": 0.3137976825237274,
+            "theta_jn": 2.208311080932617,
+            "dec": -0.14919276535511017,
+            "ra": 2.568835914778799,
+            "geocent_time": -0.0009241777006536722,
+            "luminosity_distance": 752.6378173828125,
+            "psi": 2.3069608211517334,
+            "phase": 5.339288711547852,
+            "lensing_delta_t": 0.007160164415836334,
+            "mu_rel": 0.9194106459617615,
+            "log_prob": -13.336465835571289,
+            "log_prior": -11.723554351970316,
+            "log_likelihood": -5598.018800218711,
+            "weights": 9569.877076737796
+          }
+        },
+        "T1b/0": {
+          "largest_weight": 9999.999980508177,
+          "top_10_share": 1.0,
+          "efficiency_without_heaviest": 0.0001000204492434144,
+          "zero_weights": 5955,
+          "heaviest_sample": {
+            "chirp_mass": 45.84121322631836,
+            "mass_ratio": 0.5037704110145569,
+            "chi_1": -0.17380744218826294,
+            "chi_2": -0.0071592484600842,
+            "theta_jn": 0.9428975582122803,
+            "dec": -1.085720181465149,
+            "ra": 1.953849375891775,
+            "geocent_time": 0.004292485304176807,
+            "luminosity_distance": 952.054443359375,
+            "psi": 2.72761869430542,
+            "phase": 2.6420271396636963,
+            "lensing_delta_t": 0.058826521039009094,
+            "mu_rel": 0.6915174722671509,
+            "log_prob": -13.340177536010742,
+            "log_prior": -12.140645843187093,
+            "log_likelihood": -5591.430518294228,
+            "weights": 9999.999980508177
+          }
+        },
+        "T1b/1": {
+          "largest_weight": 10000.0,
+          "top_10_share": 1.0,
+          "efficiency_without_heaviest": 0.00010031846249253147,
+          "zero_weights": 5996,
+          "heaviest_sample": {
+            "chirp_mass": 28.86810302734375,
+            "mass_ratio": 0.43967270851135254,
+            "chi_1": 0.094381183385849,
+            "chi_2": 0.23744408786296844,
+            "theta_jn": 2.23516845703125,
+            "dec": -1.0810738801956177,
+            "ra": 1.7762977487326563,
+            "geocent_time": 0.015083455480635166,
+            "luminosity_distance": 653.0296630859375,
+            "psi": 1.3924925327301025,
+            "phase": 3.9991507530212402,
+            "lensing_delta_t": 0.0003068484365940094,
+            "mu_rel": 0.3062903583049774,
+            "log_prob": -13.81072998046875,
+            "log_prior": -13.450491682853844,
+            "log_likelihood": -5532.704678386861,
+            "weights": 10000.0
+          }
+        }
+      },
+      "efficiency_outside_reference_factor": [],
+      "event_data": {
+        "runs": [
+          "T1a",
+          "T1b/0",
+          "T1b/1"
+        ],
+        "identical": true,
+        "differing": []
+      },
+      "evidence": {
+        "n_sigma": 3.0,
+        "rows": [
+          {
+            "pair": [
+              "T1a",
+              "T1b/0"
+            ],
+            "difference": -6.130937403396274,
+            "combined_std": 1.3847235484759208,
+            "z": 4.427553362650773,
+            "agree": false
+          },
+          {
+            "pair": [
+              "T1a",
+              "T1b/1"
+            ],
+            "difference": -64.01748391360616,
+            "combined_std": 1.3847235498835535,
+            "z": 46.23123793842433,
+            "agree": false
+          },
+          {
+            "pair": [
+              "T1b/0",
+              "T1b/1"
+            ],
+            "difference": -57.88654651020988,
+            "combined_std": 1.4141428485487721,
+            "z": 40.93401636872432,
+            "agree": false
+          }
+        ],
+        "passed": false
+      },
+      "evidence_meaningful": false,
+      "posteriors": {
+        "chirp_mass": {
+          "T1a": [
+            44.16819896910947,
+            44.17880731209194,
+            44.19670537200074
+          ],
+          "T1b/0": [
+            45.8395824432306,
+            45.84121322631483,
+            45.84134712219235
+          ],
+          "T1b/1": [
+            28.86231460571289,
+            28.86810302734375,
+            28.87099380493164
+          ]
+        },
+        "mass_ratio": {
+          "T1a": [
+            0.48635317660952354,
+            0.48645892482898384,
+            0.486705355020718
+          ],
+          "T1b/0": [
+            0.5035202145577018,
+            0.5037704110146021,
+            0.5037912786007787
+          ],
+          "T1b/1": [
+            0.43949283957481383,
+            0.43967270851135254,
+            0.4397004425525665
+          ]
+        },
+        "chi_1": {
+          "T1a": [
+            0.0042092345558874126,
+            0.004261091291206237,
+            0.004387769137722456
+          ],
+          "T1b/0": [
+            -0.17422404289236582,
+            -0.17380744218713456,
+            -0.1732864364960212
+          ],
+          "T1b/1": [
+            0.0940390408039093,
+            0.094381183385849,
+            0.09443396255373955
+          ]
+        },
+        "chi_2": {
+          "T1a": [
+            0.3137376610635506,
+            0.3138384530635723,
+            0.31469912529341243
+          ],
+          "T1b/0": [
+            -0.007216716464845372,
+            -0.007159248460208649,
+            -0.007153922179714997
+          ],
+          "T1b/1": [
+            0.23730433136224746,
+            0.23744408786296844,
+            0.2375549167394638
+          ]
+        },
+        "theta_jn": {
+          "T1a": [
+            2.2074220799978725,
+            2.2082705321843292,
+            2.2092052404461087
+          ],
+          "T1b/0": [
+            0.9414729297164187,
+            0.9428975582152053,
+            0.9442481041010164
+          ],
+          "T1b/1": [
+            2.2348350048065186,
+            2.23516845703125,
+            2.2358368635177612
+          ]
+        },
+        "dec": {
+          "T1a": [
+            -0.1498725851787248,
+            -0.14916159139098958,
+            -0.1485035168299458
+          ],
+          "T1b/0": [
+            -1.0866074562070833,
+            -1.0857201814631765,
+            -1.0848094105683042
+          ],
+          "T1b/1": [
+            -1.0877525806427002,
+            -1.0810738801956177,
+            -1.078366458415985
+          ]
+        },
+        "ra": {
+          "T1a": [
+            2.567357165423625,
+            2.568970297707058,
+            2.5718071415397885
+          ],
+          "T1b/0": [
+            1.9523018485788777,
+            1.953849375893113,
+            1.9544671422746271
+          ],
+          "T1b/1": [
+            1.771695829081625,
+            1.7762977487326563,
+            1.7770926481963099
+          ]
+        },
+        "geocent_time": {
+          "T1a": [
+            -0.0009448642425613673,
+            -0.000923387386334488,
+            -0.0009068506511641974
+          ],
+          "T1b/0": [
+            0.0042806877754654185,
+            0.00429248530419974,
+            0.0043030750006873035
+          ],
+          "T1b/1": [
+            0.015072629414498806,
+            0.015083455480635166,
+            0.01510901441797614
+          ]
+        },
+        "luminosity_distance": {
+          "T1a": [
+            752.5186123187831,
+            752.6323802500174,
+            752.7067949144121
+          ],
+          "T1b/0": [
+            951.7079345688867,
+            952.0544433586246,
+            953.2071289060003
+          ],
+          "T1b/1": [
+            653.0139526367187,
+            653.0296630859375,
+            653.1563903808594
+          ]
+        },
+        "psi": {
+          "T1a": [
+            2.305727872709451,
+            2.306904584409907,
+            2.307283427413641
+          ],
+          "T1b/0": [
+            2.7273350238788376,
+            2.7276186943048057,
+            2.7276356458663904
+          ],
+          "T1b/1": [
+            1.3920432090759278,
+            1.3924925327301025,
+            1.3935585498809815
+          ]
+        },
+        "phase": {
+          "T1a": [
+            5.338557588157535,
+            5.339255363845762,
+            5.342940930420245
+          ],
+          "T1b/0": [
+            2.641249728199621,
+            2.6420271396620127,
+            2.643264174461097
+          ],
+          "T1b/1": [
+            3.9977590084075927,
+            3.9991507530212402,
+            4.000490140914917
+          ]
+        },
+        "lensing_delta_t": {
+          "T1a": [
+            0.007082722099449039,
+            0.007167420548174035,
+            0.007319249682375965
+          ],
+          "T1b/0": [
+            0.05881492383773323,
+            0.058826521038983975,
+            0.05884851515292645
+          ],
+          "T1b/1": [
+            0.00021967999637126923,
+            0.0003068484365940094,
+            0.0003356318920850754
+          ]
+        },
+        "mu_rel": {
+          "T1a": [
+            0.9184507528409429,
+            0.9193668637079663,
+            0.9194668511890594
+          ],
+          "T1b/0": [
+            0.6914817452430803,
+            0.6915174722674501,
+            0.6916556596761667
+          ],
+          "T1b/1": [
+            0.30615112483501433,
+            0.3062903583049774,
+            0.30632477104663847
+          ]
+        }
+      },
+      "reference": null
+    },
+    "T2": {
+      "network_ks": {
+        "runs": [
+          "T2a",
+          "T2b/0",
+          "T2b/1",
+          "T2b/2"
+        ],
+        "parameters": [
+          "chirp_mass",
+          "mass_ratio",
+          "a_1",
+          "a_2",
+          "tilt_1",
+          "tilt_2",
+          "phi_12",
+          "phi_jl",
+          "theta_jn",
+          "dec",
+          "ra",
+          "geocent_time",
+          "luminosity_distance",
+          "psi",
+          "lensing_delta_t",
+          "mu_rel"
+        ],
+        "tests": 96,
+        "alpha": 0.01,
+        "threshold": 0.00010416666666666667,
+        "worst": {
+          "pair": [
+            "T2a",
+            "T2b/1"
+          ],
+          "parameter": "theta_jn",
+          "statistic": 0.008500000000000008,
+          "p_value": 0.05366121545391567
+        },
+        "passed": true,
+        "identical_pairs": [],
+        "rows": [
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.0039000000000000146,
+            "p_value": 0.840022849787458
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0035199999999999676,
+            "p_value": 0.9149700525923528
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.005320000000000019,
+            "p_value": 0.47721740321234085
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0046399999999999775,
+            "p_value": 0.6529601030662224
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.005120000000000013,
+            "p_value": 0.527004901129307
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.0052400000000000085,
+            "p_value": 0.4968672681128189
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.0049799999999999844,
+            "p_value": 0.5630295973864953
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.00552000000000008,
+            "p_value": 0.4298431522293946
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.0032999999999999696,
+            "p_value": 0.9474444444687117
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "dec",
+            "statistic": 0.005659999999999998,
+            "p_value": 0.3983092785621598
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "ra",
+            "statistic": 0.0034399999999999986,
+            "p_value": 0.9277872175372158
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.006500000000000061,
+            "p_value": 0.2404040502773772
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0036599999999999966,
+            "p_value": 0.8899111024410605
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "psi",
+            "statistic": 0.007040000000000046,
+            "p_value": 0.16692446477334544
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0036199999999999566,
+            "p_value": 0.8973996854278651
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.005699999999999983,
+            "p_value": 0.3895606742630373
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.006800000000000028,
+            "p_value": 0.19703998127701916
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.003960000000000005,
+            "p_value": 0.8263800493256797
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.003960000000000019,
+            "p_value": 0.8263800493256763
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0041200000000000125,
+            "p_value": 0.7881626114615253
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.007120000000000015,
+            "p_value": 0.1577384732704784
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.005380000000000051,
+            "p_value": 0.46273310056857553
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.0043600000000000305,
+            "p_value": 0.7271067289207698
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.007099999999999995,
+            "p_value": 0.15999627222810486
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.008500000000000008,
+            "p_value": 0.05366121545391567
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0028400000000000647,
+            "p_value": 0.9873819480508271
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "ra",
+            "statistic": 0.00713999999999998,
+            "p_value": 0.15550618400752414
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0041400000000000325,
+            "p_value": 0.7832226944512868
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.004740000000000022,
+            "p_value": 0.6263068851623916
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "psi",
+            "statistic": 0.00649999999999995,
+            "p_value": 0.24040405027739453
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.006940000000000057,
+            "p_value": 0.1789976869944121
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.005180000000000018,
+            "p_value": 0.51184195721681
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.005400000000000071,
+            "p_value": 0.45795538753009724
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.00537999999999994,
+            "p_value": 0.46273310056860195
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.0048399999999999554,
+            "p_value": 0.5997710035187096
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0029400000000000537,
+            "p_value": 0.9816993227919981
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.0043400000000000105,
+            "p_value": 0.7323179467578325
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.00608000000000003,
+            "p_value": 0.3125185939367554
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.0039799999999999836,
+            "p_value": 0.8217424912265029
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.003920000000000035,
+            "p_value": 0.8355215988696746
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.004980000000000012,
+            "p_value": 0.563029597386488
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0031600000000000517,
+            "p_value": 0.963503059351908
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "ra",
+            "statistic": 0.0048799999999999955,
+            "p_value": 0.5892150994807934
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.006300000000000028,
+            "p_value": 0.27304473456231093
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0031200000000000117,
+            "p_value": 0.9674357226570611
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "psi",
+            "statistic": 0.0042200000000000015,
+            "p_value": 0.7631618593486247
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0042600000000000415,
+            "p_value": 0.7529700555236011
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.0033000000000000806,
+            "p_value": 0.9474444444686976
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.006979999999999986,
+            "p_value": 0.17408845143225593
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.005079999999999994,
+            "p_value": 0.5372107095965561
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.0028799999999999937,
+            "p_value": 0.9852862572943257
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0032200000000000006,
+            "p_value": 0.9570609608946361
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.004299999999999998,
+            "p_value": 0.7426851862704706
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.006859999999999977,
+            "p_value": 0.18914185590918875
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.007539999999999991,
+            "p_value": 0.115942016119709
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.005659999999999998,
+            "p_value": 0.3983092785621598
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.006699999999999984,
+            "p_value": 0.21076808615575526
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "dec",
+            "statistic": 0.006979999999999986,
+            "p_value": 0.17408845143225593
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "ra",
+            "statistic": 0.006240000000000023,
+            "p_value": 0.2834366110962706
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0043199999999999905,
+            "p_value": 0.7375112015123291
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0030400000000000427,
+            "p_value": 0.9744522814612239
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "psi",
+            "statistic": 0.007460000000000022,
+            "p_value": 0.12311341804279952
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.006440000000000001,
+            "p_value": 0.24987610122097703
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.0033000000000000806,
+            "p_value": 0.9474444444686976
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.005340000000000011,
+            "p_value": 0.47236449791610347
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0034200000000000896,
+            "p_value": 0.9308137128090149
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.004620000000000013,
+            "p_value": 0.6582940689498242
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0041400000000000325,
+            "p_value": 0.7832226944512868
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.0035600000000000076,
+            "p_value": 0.9081437720613811
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.0040999999999999925,
+            "p_value": 0.7930696291258396
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.004740000000000022,
+            "p_value": 0.6263068851623916
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.005620000000000069,
+            "p_value": 0.4071753360318179
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.0035800000000000276,
+            "p_value": 0.9046288361286801
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "dec",
+            "statistic": 0.007079999999999975,
+            "p_value": 0.1622797551718399
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "ra",
+            "statistic": 0.007520000000000082,
+            "p_value": 0.11770185425612911
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.007380000000000053,
+            "p_value": 0.13064382760601279
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0029600000000000737,
+            "p_value": 0.9803800081310359
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "psi",
+            "statistic": 0.007620000000000016,
+            "p_value": 0.10911782978888618
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0034800000000000386,
+            "p_value": 0.9215196958308662
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.007539999999999991,
+            "p_value": 0.115942016119709
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.005060000000000009,
+            "p_value": 0.5423409826506655
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.006280000000000063,
+            "p_value": 0.27647768803848927
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.005079999999999973,
+            "p_value": 0.5372107095965613
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.003459999999999991,
+            "p_value": 0.9246890303103773
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.006319999999999992,
+            "p_value": 0.26964270913306043
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.006420000000000009,
+            "p_value": 0.2530940787847572
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.006259999999999988,
+            "p_value": 0.27994162886320606
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.005680000000000018,
+            "p_value": 0.39392019982710413
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.00608000000000003,
+            "p_value": 0.3125185939367554
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0037600000000000966,
+            "p_value": 0.8701092292159127
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "ra",
+            "statistic": 0.005980000000000041,
+            "p_value": 0.33171022847665343
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0037000000000000366,
+            "p_value": 0.8821711875387847
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0030200000000000227,
+            "p_value": 0.976033962340499
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "psi",
+            "statistic": 0.0049400000000000555,
+            "p_value": 0.5734648739518806
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.00550000000000006,
+            "p_value": 0.4344609431540868
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.005759999999999987,
+            "p_value": 0.3766611225543809
+          }
+        ]
+      },
+      "importance": {
+        "T2a": {
+          "samples": 50000,
+          "n_eff": 5210.869414564893,
+          "sample_efficiency": 0.10421738829129787,
+          "log_evidence_std": 0.013111314022714626,
+          "log_evidence": -5829.932584424601
+        },
+        "T2b/0": {
+          "samples": 50000,
+          "n_eff": 4509.3751682972215,
+          "sample_efficiency": 0.09018750336594443,
+          "log_evidence_std": 0.014204232238448135,
+          "log_evidence": -5829.933270549357
+        },
+        "T2b/1": {
+          "samples": 50000,
+          "n_eff": 768.9117087171585,
+          "sample_efficiency": 0.01537823417434317,
+          "log_evidence_std": 0.035784625693369404,
+          "log_evidence": -5829.904906931492
+        },
+        "T2b/2": {
+          "samples": 50000,
+          "n_eff": 137.32846316211834,
+          "sample_efficiency": 0.0027465692632423666,
+          "log_evidence_std": 0.08521626387410201,
+          "log_evidence": -5829.843128267924
+        }
+      },
+      "weights": {
+        "T2a": {
+          "largest_weight": 199.29666004098016,
+          "top_10_share": 0.021774417912707903,
+          "efficiency_without_heaviest": 0.1127224301565612,
+          "zero_weights": 224,
+          "heaviest_sample": {
+            "chirp_mass": 131.06143188476562,
+            "mass_ratio": 0.3650572896003723,
+            "a_1": 0.9312255382537842,
+            "a_2": 0.3900528848171234,
+            "tilt_1": 2.2567977905273438,
+            "tilt_2": 0.9191598296165466,
+            "phi_12": 0.9245553016662598,
+            "phi_jl": 1.8538089990615845,
+            "theta_jn": 0.7915918231010437,
+            "dec": 0.669465959072113,
+            "ra": 4.305228233337402,
+            "geocent_time": -0.0010919820051640272,
+            "luminosity_distance": 3600.43798828125,
+            "psi": 2.472464084625244,
+            "lensing_delta_t": 0.0991334468126297,
+            "mu_rel": 0.0724533200263977,
+            "log_prob": -11.605796979627817,
+            "phase": 6.273921124062961,
+            "log_prior": -22.12189459910646,
+            "log_likelihood": -5814.121692336494,
+            "weights": 199.29666004098016
+          }
+        },
+        "T2b/0": {
+          "largest_weight": 268.6265010319056,
+          "top_10_share": 0.025360505349987038,
+          "efficiency_without_heaviest": 0.10257370805769649,
+          "zero_weights": 250,
+          "heaviest_sample": {
+            "chirp_mass": 103.45223999023438,
+            "mass_ratio": 0.16627644002437592,
+            "a_1": 0.9633731245994568,
+            "a_2": 0.8773519396781921,
+            "tilt_1": 1.7917065620422363,
+            "tilt_2": 1.0352575778961182,
+            "phi_12": 0.5331740379333496,
+            "phi_jl": 1.452166199684143,
+            "theta_jn": 1.266977310180664,
+            "dec": 0.0849682167172432,
+            "ra": 5.270335674285889,
+            "geocent_time": -0.0077630458399653435,
+            "luminosity_distance": 3070.033935546875,
+            "psi": 3.080275058746338,
+            "lensing_delta_t": 0.09960448741912842,
+            "mu_rel": 0.06090691685676575,
+            "log_prob": -3.738410342399111,
+            "phase": 0.7398016581251213,
+            "log_prior": -20.634319395926152,
+            "log_likelihood": -5807.444039553049,
+            "weights": 268.62650103190566
+          }
+        },
+        "T2b/1": {
+          "largest_weight": 1666.1835466162038,
+          "top_10_share": 0.05328915200185255,
+          "efficiency_without_heaviest": 0.09832904262494871,
+          "zero_weights": 223,
+          "heaviest_sample": {
+            "chirp_mass": 134.04019165039062,
+            "mass_ratio": 0.9186340570449829,
+            "a_1": 0.5222501158714294,
+            "a_2": 0.8705354928970337,
+            "tilt_1": 1.912648320198059,
+            "tilt_2": 2.2570455074310303,
+            "phi_12": 2.6862897872924805,
+            "phi_jl": 1.1951427459716797,
+            "theta_jn": 1.969360113143921,
+            "dec": 0.6985006928443909,
+            "ra": 3.9685208797454834,
+            "geocent_time": 0.004775417037308216,
+            "luminosity_distance": 5057.634765625,
+            "psi": 0.10317766666412354,
+            "lensing_delta_t": 0.008803937584161758,
+            "mu_rel": 0.60102778673172,
+            "log_prob": -16.157254648675107,
+            "phase": 5.384220346859565,
+            "log_prior": -22.666045637037904,
+            "log_likelihood": -5815.977824954432,
+            "weights": 1666.1835466162038
+          }
+        },
+        "T2b/2": {
+          "largest_weight": 4204.040160982096,
+          "top_10_share": 0.10860990006376797,
+          "efficiency_without_heaviest": 0.07905801503972612,
+          "zero_weights": 223,
+          "heaviest_sample": {
+            "chirp_mass": 83.404296875,
+            "mass_ratio": 0.27222883701324463,
+            "a_1": 0.971208930015564,
+            "a_2": 0.3808736205101013,
+            "tilt_1": 2.4913415908813477,
+            "tilt_2": 2.2460358142852783,
+            "phi_12": 2.912482500076294,
+            "phi_jl": 1.1852917671203613,
+            "theta_jn": 1.101468801498413,
+            "dec": 0.022662106901407242,
+            "ra": 3.1670901775360107,
+            "geocent_time": 0.023287897929549217,
+            "luminosity_distance": 3042.86669921875,
+            "psi": 1.7124255895614624,
+            "lensing_delta_t": 0.011383924633264542,
+            "mu_rel": 0.16038641333580017,
+            "log_prob": -11.96283956285141,
+            "phase": 1.4203484305544676,
+            "log_prior": -22.044935197737367,
+            "log_likelihood": -5811.417231348047,
+            "weights": 4204.040160982095
+          }
+        }
+      },
+      "efficiency_outside_reference_factor": [
+        "T2b/1",
+        "T2b/2"
+      ],
+      "event_data": {
+        "runs": [
+          "T2a",
+          "T2b/0",
+          "T2b/1",
+          "T2b/2"
+        ],
+        "identical": true,
+        "differing": []
+      },
+      "evidence": {
+        "n_sigma": 3.0,
+        "rows": [
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "difference": 0.0006861247557026218,
+            "combined_std": 0.019330462200526984,
+            "z": 0.03549448267635922,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "difference": -0.02767749310896761,
+            "combined_std": 0.03811096943685357,
+            "z": 0.7262342973150214,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "difference": -0.08945615667744278,
+            "combined_std": 0.08621901289195334,
+            "z": 1.037545590895898,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2a",
+              "Exercise 3"
+            ],
+            "difference": 0.012415575398335932,
+            "combined_std": 0.019180890370424235,
+            "z": 0.6472887941364803,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "difference": -0.028363617864670232,
+            "combined_std": 0.03850064479328006,
+            "z": 0.7367050088891198,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "difference": -0.0901422814331454,
+            "combined_std": 0.08639196630557933,
+            "z": 1.0434104615040332,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "Exercise 3"
+            ],
+            "difference": 0.01172945064263331,
+            "combined_std": 0.019943926731809093,
+            "z": 0.5881214266559504,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "difference": -0.06177866356847517,
+            "combined_std": 0.09242484008466088,
+            "z": 0.6684205621766409,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "Exercise 3"
+            ],
+            "difference": 0.04009306850730354,
+            "combined_std": 0.0384257652625755,
+            "z": 1.0433902417644731,
+            "agree": true
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "Exercise 3"
+            ],
+            "difference": 0.10187173207577871,
+            "combined_std": 0.08635862220219,
+            "z": 1.179635912176414,
+            "agree": true
+          }
+        ],
+        "passed": true
+      },
+      "evidence_meaningful": true,
+      "posteriors": {
+        "chirp_mass": {
+          "T2a": [
+            107.01831487690264,
+            147.63781897130275,
+            169.82743030400846
+          ],
+          "T2b/0": [
+            105.59468994336278,
+            147.46894267290153,
+            168.7603913454095
+          ],
+          "T2b/1": [
+            104.83136641575132,
+            147.20763568544882,
+            169.40862501611156
+          ],
+          "T2b/2": [
+            83.40435943026976,
+            146.08359117563154,
+            169.37142680591006
+          ]
+        },
+        "mass_ratio": {
+          "T2a": [
+            0.2266751246670819,
+            0.6319288560129253,
+            0.9547118237824557
+          ],
+          "T2b/0": [
+            0.2245795721777031,
+            0.6360206356137328,
+            0.9561225644184072
+          ],
+          "T2b/1": [
+            0.21453670938467168,
+            0.645204583090975,
+            0.9512679548834121
+          ],
+          "T2b/2": [
+            0.2524274272012119,
+            0.602593486203628,
+            0.9511270151277499
+          ]
+        },
+        "a_1": {
+          "T2a": [
+            0.04185836587469195,
+            0.44232759910035596,
+            0.9239352825304894
+          ],
+          "T2b/0": [
+            0.04304445013187985,
+            0.4514328525695477,
+            0.9295774146494956
+          ],
+          "T2b/1": [
+            0.04208610637540782,
+            0.4530733756863951,
+            0.9171334072412265
+          ],
+          "T2b/2": [
+            0.04793262800188572,
+            0.5016171552660174,
+            0.9712096648513769
+          ]
+        },
+        "a_2": {
+          "T2a": [
+            0.04830901686730224,
+            0.4779804262800388,
+            0.9387160013699692
+          ],
+          "T2b/0": [
+            0.04563360936054437,
+            0.4847570615155313,
+            0.9357824985837956
+          ],
+          "T2b/1": [
+            0.05194958676460757,
+            0.5133009334321924,
+            0.9404487586351754
+          ],
+          "T2b/2": [
+            0.05217991770889327,
+            0.443493056513426,
+            0.9314380596408267
+          ]
+        },
+        "tilt_1": {
+          "T2a": [
+            0.48760614170915245,
+            1.6252849102020264,
+            2.690041614072487
+          ],
+          "T2b/0": [
+            0.5185148140869079,
+            1.6211266073698538,
+            2.683381360223917
+          ],
+          "T2b/1": [
+            0.5007038114366271,
+            1.6002498198486461,
+            2.6139787217977712
+          ],
+          "T2b/2": [
+            0.52055124046842,
+            1.6730236320444953,
+            2.6344742169501174
+          ]
+        },
+        "tilt_2": {
+          "T2a": [
+            0.4735805243138408,
+            1.5881787080490628,
+            2.670616095764298
+          ],
+          "T2b/0": [
+            0.49769666150382524,
+            1.5823697009181725,
+            2.6745399517758663
+          ],
+          "T2b/1": [
+            0.48614048794376685,
+            1.6161466772481414,
+            2.6688514163471355
+          ],
+          "T2b/2": [
+            0.5226943186635716,
+            1.6733414939464677,
+            2.6607124675811997
+          ]
+        },
+        "phi_12": {
+          "T2a": [
+            0.33500982127433687,
+            3.05659465744946,
+            5.949419430259341
+          ],
+          "T2b/0": [
+            0.3108684089932091,
+            3.176945161779116,
+            5.948372661125627
+          ],
+          "T2b/1": [
+            0.3040417678943635,
+            3.063863591359908,
+            5.971436676678723
+          ],
+          "T2b/2": [
+            0.36110842379725666,
+            2.921981309006754,
+            6.006301710226557
+          ]
+        },
+        "phi_jl": {
+          "T2a": [
+            0.34667172242821803,
+            2.867216589374733,
+            5.927267536097721
+          ],
+          "T2b/0": [
+            0.3631162032798933,
+            2.9887481088313295,
+            5.919623103175767
+          ],
+          "T2b/1": [
+            0.3679956631929231,
+            2.816582731389445,
+            5.918074386746851
+          ],
+          "T2b/2": [
+            0.37035843676799296,
+            2.6870546205965957,
+            5.87870914440241
+          ]
+        },
+        "theta_jn": {
+          "T2a": [
+            0.2848009106703047,
+            1.1505848532614813,
+            2.815955197817088
+          ],
+          "T2b/0": [
+            0.2749110786984203,
+            1.1725670865769897,
+            2.8017546390709014
+          ],
+          "T2b/1": [
+            0.28284193444724287,
+            1.2225890804265331,
+            2.794037060632042
+          ],
+          "T2b/2": [
+            0.28879407517498484,
+            1.1014817121992113,
+            2.7882147765507383
+          ]
+        },
+        "dec": {
+          "T2a": [
+            -1.2747317578691357,
+            0.11198987021265326,
+            0.7821048066126765
+          ],
+          "T2b/0": [
+            -1.267425922319795,
+            0.10910305151332028,
+            0.7818449857205183
+          ],
+          "T2b/1": [
+            -1.2622544839604517,
+            0.1363602405273873,
+            0.7792202747696524
+          ],
+          "T2b/2": [
+            -1.2265135701878638,
+            0.05467971931095358,
+            0.7910289244505662
+          ]
+        },
+        "ra": {
+          "T2a": [
+            2.5883267955485034,
+            3.3801558673172902,
+            5.507616001440677
+          ],
+          "T2b/0": [
+            2.5970494049223998,
+            3.388588852365233,
+            5.506852926105366
+          ],
+          "T2b/1": [
+            2.624555982809899,
+            3.4147554215592653,
+            5.500492193471798
+          ],
+          "T2b/2": [
+            2.6401159335121207,
+            3.3244672663911166,
+            5.4873496024441
+          ]
+        },
+        "geocent_time": {
+          "T2a": [
+            -0.021335439858030075,
+            0.0076423608691953155,
+            0.0218861128779999
+          ],
+          "T2b/0": [
+            -0.02152403008871069,
+            0.007826677034444219,
+            0.022183267972261566
+          ],
+          "T2b/1": [
+            -0.021403705610897102,
+            0.0070845824202389555,
+            0.022200558369571934
+          ],
+          "T2b/2": [
+            -0.02048499821047796,
+            0.009321315645632539,
+            0.023289760899970705
+          ]
+        },
+        "luminosity_distance": {
+          "T2a": [
+            2066.7081488235235,
+            5343.648562896728,
+            8971.139869586184
+          ],
+          "T2b/0": [
+            2104.291499832873,
+            5371.0123895914,
+            8974.541994009682
+          ],
+          "T2b/1": [
+            2137.2963759452377,
+            5260.171042618692,
+            9037.299399016474
+          ],
+          "T2b/2": [
+            2200.39980254065,
+            5213.2599278950465,
+            8966.214182547837
+          ]
+        },
+        "psi": {
+          "T2a": [
+            0.15236037603944635,
+            1.5593343320097741,
+            3.0063670260594137
+          ],
+          "T2b/0": [
+            0.1529723255420665,
+            1.5565049337029306,
+            3.0072121364650823
+          ],
+          "T2b/1": [
+            0.10318024115913889,
+            1.4789361777327363,
+            2.975923748499899
+          ],
+          "T2b/2": [
+            0.15865728198276066,
+            1.7123786143579938,
+            2.9676314872906024
+          ]
+        },
+        "lensing_delta_t": {
+          "T2a": [
+            0.0041867030582691785,
+            0.09671848562907188,
+            0.09952560515395836
+          ],
+          "T2b/0": [
+            0.004508601025124555,
+            0.09670821440804292,
+            0.09957014834271498
+          ],
+          "T2b/1": [
+            0.004548412227489215,
+            0.09634757142488354,
+            0.09956887580255085
+          ],
+          "T2b/2": [
+            0.004915020768751468,
+            0.0959445450750864,
+            0.09949949902108876
+          ]
+        },
+        "mu_rel": {
+          "T2a": [
+            0.023966552654649025,
+            0.1486593812930802,
+            0.8506317602214362
+          ],
+          "T2b/0": [
+            0.026093291727831005,
+            0.14164357021007745,
+            0.839089451275675
+          ],
+          "T2b/1": [
+            0.02386160672450061,
+            0.1504416526164874,
+            0.8336469108105486
+          ],
+          "T2b/2": [
+            0.026828396832255245,
+            0.1603858571746681,
+            0.855396660398759
+          ]
+        },
+        "phase": {
+          "T2a": [
+            0.27638967280914745,
+            2.5501304286928055,
+            6.019714124312169
+          ],
+          "T2b/0": [
+            0.29551806752164017,
+            2.5865265048072934,
+            6.053344742076521
+          ],
+          "T2b/1": [
+            0.26481086067638876,
+            2.5534538232119974,
+            5.990720935302549
+          ],
+          "T2b/2": [
+            0.3218010401493809,
+            2.3690626328904005,
+            5.964371185573682
+          ]
+        }
+      },
+      "reference": {
+        "name": "Exercise 3",
+        "log_evidence": -5829.945,
+        "log_evidence_std": 0.014,
+        "sample_efficiency": 0.094
+      },
+      "network_ks_with_reference": {
+        "runs": [
+          "T2a",
+          "T2b/0",
+          "T2b/1",
+          "T2b/2",
+          "reference"
+        ],
+        "parameters": [
+          "chirp_mass",
+          "mass_ratio",
+          "a_1",
+          "a_2",
+          "tilt_1",
+          "tilt_2",
+          "phi_12",
+          "phi_jl",
+          "theta_jn",
+          "dec",
+          "ra",
+          "geocent_time",
+          "luminosity_distance",
+          "psi",
+          "lensing_delta_t",
+          "mu_rel"
+        ],
+        "tests": 160,
+        "alpha": 0.01,
+        "threshold": 6.25e-05,
+        "worst": {
+          "pair": [
+            "T2a",
+            "reference"
+          ],
+          "parameter": "phi_jl",
+          "statistic": 0.008879999999999999,
+          "p_value": 0.03856021841543855
+        },
+        "passed": true,
+        "identical_pairs": [],
+        "rows": [
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.0039000000000000146,
+            "p_value": 0.840022849787458
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0035199999999999676,
+            "p_value": 0.9149700525923528
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.005320000000000019,
+            "p_value": 0.47721740321234085
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0046399999999999775,
+            "p_value": 0.6529601030662224
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.005120000000000013,
+            "p_value": 0.527004901129307
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.0052400000000000085,
+            "p_value": 0.4968672681128189
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.0049799999999999844,
+            "p_value": 0.5630295973864953
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.00552000000000008,
+            "p_value": 0.4298431522293946
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.0032999999999999696,
+            "p_value": 0.9474444444687117
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "dec",
+            "statistic": 0.005659999999999998,
+            "p_value": 0.3983092785621598
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "ra",
+            "statistic": 0.0034399999999999986,
+            "p_value": 0.9277872175372158
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.006500000000000061,
+            "p_value": 0.2404040502773772
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0036599999999999966,
+            "p_value": 0.8899111024410605
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "psi",
+            "statistic": 0.007040000000000046,
+            "p_value": 0.16692446477334544
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0036199999999999566,
+            "p_value": 0.8973996854278651
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/0"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.005699999999999983,
+            "p_value": 0.3895606742630373
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.006800000000000028,
+            "p_value": 0.19703998127701916
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.003960000000000005,
+            "p_value": 0.8263800493256797
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.003960000000000019,
+            "p_value": 0.8263800493256763
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0041200000000000125,
+            "p_value": 0.7881626114615253
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.007120000000000015,
+            "p_value": 0.1577384732704784
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.005380000000000051,
+            "p_value": 0.46273310056857553
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.0043600000000000305,
+            "p_value": 0.7271067289207698
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.007099999999999995,
+            "p_value": 0.15999627222810486
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.008500000000000008,
+            "p_value": 0.05366121545391567
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0028400000000000647,
+            "p_value": 0.9873819480508271
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "ra",
+            "statistic": 0.00713999999999998,
+            "p_value": 0.15550618400752414
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0041400000000000325,
+            "p_value": 0.7832226944512868
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.004740000000000022,
+            "p_value": 0.6263068851623916
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "psi",
+            "statistic": 0.00649999999999995,
+            "p_value": 0.24040405027739453
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.006940000000000057,
+            "p_value": 0.1789976869944121
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/1"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.005180000000000018,
+            "p_value": 0.51184195721681
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.005400000000000071,
+            "p_value": 0.45795538753009724
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.00537999999999994,
+            "p_value": 0.46273310056860195
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.0048399999999999554,
+            "p_value": 0.5997710035187096
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0029400000000000537,
+            "p_value": 0.9816993227919981
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.0043400000000000105,
+            "p_value": 0.7323179467578325
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.00608000000000003,
+            "p_value": 0.3125185939367554
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.0039799999999999836,
+            "p_value": 0.8217424912265029
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.003920000000000035,
+            "p_value": 0.8355215988696746
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.004980000000000012,
+            "p_value": 0.563029597386488
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0031600000000000517,
+            "p_value": 0.963503059351908
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "ra",
+            "statistic": 0.0048799999999999955,
+            "p_value": 0.5892150994807934
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.006300000000000028,
+            "p_value": 0.27304473456231093
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0031200000000000117,
+            "p_value": 0.9674357226570611
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "psi",
+            "statistic": 0.0042200000000000015,
+            "p_value": 0.7631618593486247
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0042600000000000415,
+            "p_value": 0.7529700555236011
+          },
+          {
+            "pair": [
+              "T2a",
+              "T2b/2"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.0033000000000000806,
+            "p_value": 0.9474444444686976
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.00546000000000002,
+            "p_value": 0.4437785559441111
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0038799999999999946,
+            "p_value": 0.8444759423146997
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.0050200000000000244,
+            "p_value": 0.5526531116608315
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.004060000000000008,
+            "p_value": 0.8027793720659009
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.0044600000000000195,
+            "p_value": 0.7008259648982293
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.005280000000000007,
+            "p_value": 0.4869955658235424
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.006260000000000043,
+            "p_value": 0.2799416288631965
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.008879999999999999,
+            "p_value": 0.03856021841543855
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.0069200000000000095,
+            "p_value": 0.1814927742843424
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0029200000000000337,
+            "p_value": 0.9829559361820991
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "ra",
+            "statistic": 0.003200000000000036,
+            "p_value": 0.9592812871609913
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.004819999999999991,
+            "p_value": 0.6050632197071624
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.006699999999999928,
+            "p_value": 0.21076808615576303
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "psi",
+            "statistic": 0.006500000000000006,
+            "p_value": 0.24040405027738576
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.003620000000000012,
+            "p_value": 0.8973996854278549
+          },
+          {
+            "pair": [
+              "T2a",
+              "reference"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.0030999999999999917,
+            "p_value": 0.9692949469194698
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.006979999999999986,
+            "p_value": 0.17408845143225593
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.005079999999999994,
+            "p_value": 0.5372107095965561
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.0028799999999999937,
+            "p_value": 0.9852862572943257
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0032200000000000006,
+            "p_value": 0.9570609608946361
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.004299999999999998,
+            "p_value": 0.7426851862704706
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.006859999999999977,
+            "p_value": 0.18914185590918875
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.007539999999999991,
+            "p_value": 0.115942016119709
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.005659999999999998,
+            "p_value": 0.3983092785621598
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.006699999999999984,
+            "p_value": 0.21076808615575526
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "dec",
+            "statistic": 0.006979999999999986,
+            "p_value": 0.17408845143225593
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "ra",
+            "statistic": 0.006240000000000023,
+            "p_value": 0.2834366110962706
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0043199999999999905,
+            "p_value": 0.7375112015123291
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0030400000000000427,
+            "p_value": 0.9744522814612239
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "psi",
+            "statistic": 0.007460000000000022,
+            "p_value": 0.12311341804279952
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.006440000000000001,
+            "p_value": 0.24987610122097703
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/1"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.0033000000000000806,
+            "p_value": 0.9474444444686976
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.005340000000000011,
+            "p_value": 0.47236449791610347
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0034200000000000896,
+            "p_value": 0.9308137128090149
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.004620000000000013,
+            "p_value": 0.6582940689498242
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0041400000000000325,
+            "p_value": 0.7832226944512868
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.0035600000000000076,
+            "p_value": 0.9081437720613811
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.0040999999999999925,
+            "p_value": 0.7930696291258396
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.004740000000000022,
+            "p_value": 0.6263068851623916
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.005620000000000069,
+            "p_value": 0.4071753360318179
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.0035800000000000276,
+            "p_value": 0.9046288361286801
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "dec",
+            "statistic": 0.007079999999999975,
+            "p_value": 0.1622797551718399
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "ra",
+            "statistic": 0.007520000000000082,
+            "p_value": 0.11770185425612911
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.007380000000000053,
+            "p_value": 0.13064382760601279
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0029600000000000737,
+            "p_value": 0.9803800081310359
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "psi",
+            "statistic": 0.007620000000000016,
+            "p_value": 0.10911782978888618
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0034800000000000386,
+            "p_value": 0.9215196958308662
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "T2b/2"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.007539999999999991,
+            "p_value": 0.115942016119709
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.0031600000000000517,
+            "p_value": 0.963503059351908
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0026199999999999973,
+            "p_value": 0.9952758954849069
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.00408,
+            "p_value": 0.7979423493458226
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.0034600000000000186,
+            "p_value": 0.924689030310373
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.004239999999999994,
+            "p_value": 0.7580782658245523
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.004500000000000004,
+            "p_value": 0.6902320574079138
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.005780000000000007,
+            "p_value": 0.37242146239414053
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.005740000000000023,
+            "p_value": 0.3809309757703421
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.006239999999999968,
+            "p_value": 0.2834366110962805
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "dec",
+            "statistic": 0.007120000000000015,
+            "p_value": 0.1577384732704784
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "ra",
+            "statistic": 0.0034199999999999786,
+            "p_value": 0.9308137128090315
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.006240000000000023,
+            "p_value": 0.2834366110962706
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.005960000000000076,
+            "p_value": 0.33564215136044206
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "psi",
+            "statistic": 0.005179999999999962,
+            "p_value": 0.5118419572168238
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.005139999999999978,
+            "p_value": 0.5219305734232933
+          },
+          {
+            "pair": [
+              "T2b/0",
+              "reference"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.006059999999999954,
+            "p_value": 0.31629443907033783
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.005060000000000009,
+            "p_value": 0.5423409826506655
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.006280000000000063,
+            "p_value": 0.27647768803848927
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.005079999999999973,
+            "p_value": 0.5372107095965613
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.003459999999999991,
+            "p_value": 0.9246890303103773
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.006319999999999992,
+            "p_value": 0.26964270913306043
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.006420000000000009,
+            "p_value": 0.2530940787847572
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.006259999999999988,
+            "p_value": 0.27994162886320606
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.005680000000000018,
+            "p_value": 0.39392019982710413
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.00608000000000003,
+            "p_value": 0.3125185939367554
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0037600000000000966,
+            "p_value": 0.8701092292159127
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "ra",
+            "statistic": 0.005980000000000041,
+            "p_value": 0.33171022847665343
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0037000000000000366,
+            "p_value": 0.8821711875387847
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.0030200000000000227,
+            "p_value": 0.976033962340499
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "psi",
+            "statistic": 0.0049400000000000555,
+            "p_value": 0.5734648739518806
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.00550000000000006,
+            "p_value": 0.4344609431540868
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "T2b/2"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.005759999999999987,
+            "p_value": 0.3766611225543809
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.0049400000000000555,
+            "p_value": 0.5734648739518806
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.004680000000000004,
+            "p_value": 0.6422924421567787
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.0026000000000000467,
+            "p_value": 0.9957363057176276
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.005699999999999983,
+            "p_value": 0.3895606742630373
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.0040999999999999925,
+            "p_value": 0.7930696291258396
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.005160000000000053,
+            "p_value": 0.5168760722241492
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.00550000000000006,
+            "p_value": 0.4344609431540868
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.0047399999999999665,
+            "p_value": 0.6263068851624063
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.0030200000000000227,
+            "p_value": 0.976033962340499
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "dec",
+            "statistic": 0.003620000000000012,
+            "p_value": 0.8973996854278549
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "ra",
+            "statistic": 0.00818000000000002,
+            "p_value": 0.0700890099969177
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.0032799999999999496,
+            "p_value": 0.9499591129886342
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.006759999999999988,
+            "p_value": 0.2024458014143714
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "psi",
+            "statistic": 0.00782000000000005,
+            "p_value": 0.09349916585544793
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.006300000000000028,
+            "p_value": 0.27304473456231093
+          },
+          {
+            "pair": [
+              "T2b/1",
+              "reference"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.005539999999999989,
+            "p_value": 0.4252530882663843
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "chirp_mass",
+            "statistic": 0.0033600000000000296,
+            "p_value": 0.9394585117553366
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "mass_ratio",
+            "statistic": 0.0032400000000000206,
+            "p_value": 0.9547672792582147
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "a_1",
+            "statistic": 0.006780000000000008,
+            "p_value": 0.19972875117940625
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "a_2",
+            "statistic": 0.003960000000000075,
+            "p_value": 0.8263800493256634
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "tilt_1",
+            "statistic": 0.006340000000000012,
+            "p_value": 0.2662715473566568
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "tilt_2",
+            "statistic": 0.0041800000000000725,
+            "p_value": 0.7732497377116984
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "phi_12",
+            "statistic": 0.005819999999999992,
+            "p_value": 0.36403324746856713
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "phi_jl",
+            "statistic": 0.007560000000000011,
+            "p_value": 0.11420387894398787
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "theta_jn",
+            "statistic": 0.006360000000000032,
+            "p_value": 0.26293117989300685
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "dec",
+            "statistic": 0.0032400000000000206,
+            "p_value": 0.9547672792582147
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "ra",
+            "statistic": 0.007460000000000022,
+            "p_value": 0.12311341804279952
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "geocent_time",
+            "statistic": 0.004080000000000028,
+            "p_value": 0.7979423493458161
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "luminosity_distance",
+            "statistic": 0.005120000000000013,
+            "p_value": 0.527004901129307
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "psi",
+            "statistic": 0.006319999999999992,
+            "p_value": 0.26964270913306043
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "lensing_delta_t",
+            "statistic": 0.0037800000000000056,
+            "p_value": 0.8659726587393721
+          },
+          {
+            "pair": [
+              "T2b/2",
+              "reference"
+            ],
+            "parameter": "mu_rel",
+            "statistic": 0.003379999999999994,
+            "p_value": 0.9366497508056502
+          }
+        ]
+      }
+    }
+  },
+  "verdicts": [
+    {
+      "criterion": "T1.1 T1b builds two complete chains, and every job finishes",
+      "passed": true,
+      "check": false,
+      "evidence": "T1a 4 of 4 nodes done, T1b 8 of 8 nodes done; every event has its sampling and importance-sampling results and corner plot"
+    },
+    {
+      "criterion": "T1.2 No output file is written by more than one chain",
+      "passed": false,
+      "check": false,
+      "evidence": "T1b: Every event's jobs write data/H1_psd.txt, data/L1_psd.txt under the same name, so the last to finish wins"
+    },
+    {
+      "criterion": "T1.3 The T1b copies agree with each other and with T1a",
+      "passed": true,
+      "check": false,
+      "evidence": "Network samples: smallest KS p-value 0.119 (ra, T1a vs T1b/1) against a threshold of 0.000256 over 39 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data bit-identical across runs"
+    },
+    {
+      "criterion": "T2.1 T2b builds three complete chains, and every job finishes",
+      "passed": true,
+      "check": false,
+      "evidence": "T2a 4 of 4 nodes done, T2b 12 of 12 nodes done; every event has its sampling and importance-sampling results and corner plot"
+    },
+    {
+      "criterion": "T2.2 All four runs agree with the Exercise 3 reference",
+      "passed": true,
+      "check": true,
+      "evidence": "Network samples: smallest KS p-value 0.0537 (theta_jn, T2a vs T2b/1) against a threshold of 0.000104 over 96 tests; log evidence: largest disagreement 1.18 sigma (limit 3); event data bit-identical across runs; log evidence compared with Exercise 3's -5829.945 +- 0.014 too; sample efficiencies T2a 10.42%, T2b/0 9.02%, T2b/1 1.54%, T2b/2 0.27% (reference 9.40%); CHECK: T2b/1, T2b/2 outside a factor of 2 of the reference's efficiency (see Weights)"
+    },
+    {
+      "criterion": "T2.3 Timing recorded for every job",
+      "passed": true,
+      "check": false,
+      "evidence": "Every job's queue wait, transfers, run time and CPU read from its Condor log"
+    },
+    {
+      "criterion": "Also: No output file is written by more than one chain (T1.2's check on T2b)",
+      "passed": false,
+      "check": false,
+      "evidence": "T2b: Every event's jobs write data/H1_psd.txt, data/L1_psd.txt under the same name, so the last to finish wins"
+    }
+  ]
+}
