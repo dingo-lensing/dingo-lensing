@@ -235,13 +235,39 @@ number) and the corner plots.
 
 All four workflows finished on 2026-10-08 (DAG status 0, every node done),
 about 8 min after submission for T1a and T1b, 2 h 46 min for T2a and 3 h 2 min
-for T2b. The first analysis (2026-10-09, analysis `6e865f5`):
+for T2b. Full analysis: `results/option_a/summary.md` (analysis `4f46c13`,
+results `cead9f4`). A first analysis (`6e865f5`) gave the same verdicts but did
+not test the sample efficiency, which the T2.2 criterion names; the weight and
+event-data diagnostics were added to explain it.
 
 | Criterion | Verdict |
 |---|---|
-| T1.1 Complete chains | PASS: T1a 4 of 4 nodes, T1b 8 of 8, every event's results present |
+| T1.1 Complete chains | PASS: T1a 4 of 4 nodes, T1b 8 of 8, every event's results present. |
 | T1.2 No shared files | FAIL, as expected from DINGO's code: Every T1b data-generation job writes `data/H1_psd.txt` and `data/L1_psd.txt` (finding 15). The same holds for T2b. |
-| T1.3 Agreement | PASS: Smallest KS p-value 0.119 (ra, T1a vs T1b/1) over 39 tests (threshold 0.000256). Log evidence not compared: Some run had fewer than 100 effective samples, as the toy model gives on real GW150914 data. |
-| T2.1 Complete chains | PASS: T2a 4 of 4 nodes, T2b 12 of 12 |
-| T2.2 Agreement with Exercise 3 | Open. Network samples agree (smallest KS p-value 0.0537, theta_jn, T2a vs T2b/1, over 96 tests; threshold 0.000104) and every log evidence agrees within 1.18 sigma, including with -5829.945 +- 0.014. But the sample efficiencies are T2a 10.42%, T2b/0 9.02%, T2b/1 1.54%, T2b/2 0.27%, against the reference's 9.40%, and that first analysis did not test efficiency. The weight and event-data diagnostics above were added to find out why. |
-| T2.3 Timing recorded | PASS |
+| T1.3 Agreement | PASS: Network samples agree (smallest KS p-value 0.119, ra, T1a vs T1b/1, over 39 tests; threshold 0.000256), and the event data are bit-identical. Log evidence not comparable: In every T1 run a single sample carries all the weight (about 1 effective sample of 10,000, with 60% of samples at zero weight), as expected of Exercise 2's toy model on real data. T1 tests the machinery, not the science. |
+| T2.1 Complete chains | PASS: T2a 4 of 4 nodes, T2b 12 of 12. |
+| T2.2 Agreement with Exercise 3 | PASS on review (the analysis flags CHECK). Network samples agree (smallest KS p-value 0.0537, theta_jn, T2a vs T2b/1, over 96 tests; threshold 0.000104; 0.0386 including Exercise 3's own network samples), the event data are bit-identical, and every log evidence agrees within 1.18 sigma, including with -5829.945 +- 0.014. Sample efficiencies: T2a 10.42%, T2b/0 9.02%, T2b/1 1.54%, T2b/2 0.27% (reference 9.40%). The two low ones each come from a single sample, with 1,666 and 4,204 times the mean weight; without it they are 9.83% and 7.91% (T2a 11.27%, T2b/0 10.26%). Those samples have ordinary likelihoods but low network density (log_prob -16.2 and -12.0): The network under-covers part of this posterior (finding 16), a property of the model rather than of option A. |
+| T2.3 Timing recorded | PASS: See below. |
+
+**Timing** (one run each; queue waits depend on the cluster's load at the time):
+
+- Option A ran three events side by side for little extra wall time: T2b took
+  3 h 2 min for three events against T2a's 2 h 46 min for one (per-event chains
+  2 h 46 min, 2 h 58 min and 2 h 42 min); T1b took 7 min 36 s for two events
+  against T1a's 7 min 38 s.
+- Waiting dominated. All four T2 sampling jobs (32 CPUs, 32 GB) waited 2 h 22 min
+  to 2 h 24 min for a slot, about 86% of T2's wall time; one T2b
+  importance-sampling job (32 CPUs) waited another 15 min.
+- Running took about 19 min per T2 event: Data generation about 1 min, plus up
+  to 1 min receiving the 4.5 GB model and 0.8 GB image (5.4 GB in 17 to 55 s);
+  sampling 1 min 9 s to 1 min 32 s; importance sampling 15 to 16 min; plot
+  about 30 s.
+- Importance sampling is the compute: 7.1 to 7.9 CPU-hours per event, on 28 to
+  30 of its 32 cores (the synthetic-phase step). Sampling used only 11 to 19 of
+  its 32 cores, for about 1.5 min, so bilby_pipe's `OMP_NUM_THREADS=1` (finding
+  10) does not make it single-threaded. CPU in all: T2a 8.1 h, T2b 23.4 h.
+- Requests far exceed use: Sampling asks for 32 GB (HTCondor recorded under
+  0.5 GB, though its periodic sampling can miss a short job's peak: The model
+  alone is 4.5 GB), plot jobs for 32 GB (used about 0.5 GB), importance
+  sampling for 8 GB (used 2.5 to 3.2 GB). Disk: 5 GB used of 12 by the jobs that
+  receive the model, as estimated. No job was evicted or retried.
