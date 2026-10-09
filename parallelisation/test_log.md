@@ -200,7 +200,12 @@ number) and the corner plots.
   event index (`dingo/pipe/data_generation.py`), and every job sends its whole
   output folder back, so T1b and T2b are expected to fail this check: Harmless
   here, as the copies analyse identical data, but in a run of different events
-  those files would hold only the last-finished event's PSDs (finding 15).
+  those files would hold only the last-finished event's PSDs (finding 15). The
+  inference itself is unaffected: Sampling and importance sampling take each
+  event's strain and ASDs from its own event data file
+  (`dingo/pipe/sampling.py`, `importance_sampling.py`). The only reader of the
+  shared files is DINGO's PESummary job (`create-summary`, off here), which
+  would give every event's summary page the same PSDs.
 - Agreement (T1.3, T2.2): "Within statistical uncertainty" is tested three ways.
   1. Network samples: Every run of a test analyses identical data with the same
      network, so all its runs draw independently from one distribution. A
