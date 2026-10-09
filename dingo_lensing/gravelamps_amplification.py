@@ -1,6 +1,6 @@
 import importlib
 import logging
-from typing import Dict, List, Optional
+from typing import Dict
 
 import numpy as np
 
@@ -134,7 +134,8 @@ class GravelampsBaseModel:
         frequency_array: np.ndarray,
         resolved: Dict[str, float],
     ) -> np.ndarray:
-        # Convert source-frame lens mass to detector-frame/redshifted lens mass.
+        # Convert source-frame lens mass to
+        # detector-frame/redshifted lens mass.
         redshifted_lens_mass = lens_mass_source_to_lens_mass(
             resolved["lens_mass"],
             resolved["lens_fractional_distance"],
@@ -276,12 +277,18 @@ class GravelampsPhenom:
 
         # Keep the mapping explicit and inspectable. These are the native
         # parameter names expected by Gravelamps' phenomenological module.
-        self.PARAMETER_NAMES = {"num_images": "num_images", 
+        self.PARAMETER_NAMES = {"num_images": "num_images",
                                 "morse_index_0": "n0"}
         for image in range(1, self.max_num_images):
-            self.PARAMETER_NAMES[f"relative_magnification_{image}"] = f"mu_rel{image}"
-            self.PARAMETER_NAMES[f"time_delay_{image}"] = f"dt{image}"
-            self.PARAMETER_NAMES[f"morse_index_{image}"] = f"n{image}"
+            self.PARAMETER_NAMES[f"relative_magnification_{image}"] = (
+                f"mu_rel{image}"
+                )
+            self.PARAMETER_NAMES[f"time_delay_{image}"] = (
+                f"dt{image}"
+                )
+            self.PARAMETER_NAMES[f"morse_index_{image}"] = (
+                f"n{image}"
+                )
 
     def resolve(
         self,
@@ -391,7 +398,7 @@ class GravelampsPhenom:
             )
         # ------------------------------------------------------------
         # Remove inactive image parameters from the input dictionary.
-        # These parameters are still present in the sampled parameter dictionary,
+        # These parameters are still present in the dictionary,
         # but they must not be passed to the unlensed waveform generator.
         # ------------------------------------------------------------
         for image in range(num_images, self.max_num_images):
@@ -407,7 +414,7 @@ class GravelampsPhenom:
         frequency_array: np.ndarray,
         resolved: Dict[str, object],
     ) -> np.ndarray:
-        # Unlike the physical point-mass/SIS models, 
+        # Unlike the physical point-mass/SIS models,
         # the phenomenological model takes physical frequencies directly.
         amplification_function = getattr(
             self.lens_module,
