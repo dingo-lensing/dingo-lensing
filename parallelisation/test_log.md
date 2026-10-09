@@ -183,6 +183,44 @@ work for software in `/home`; see the launch attempts above.)
 - Models: Sent by Condor from their `/home` paths for now, because DINGO's grid
   mode requests a different token type for models on OSDF (finding 13).
 
+### Analysis
+
+`bash option_a/analyse.sh` on the cluster, once all four workflows have
+finished. It runs `analyse_results.py` inside the image, reads only the run
+folder, and writes `results/option_a/` in this branch: `summary.md` (a verdict
+on each pass criterion, with the numbers behind it), `summary.json` (every
+number) and the corner plots.
+
+- Completion (T1.1, T2.1): Each DAG's own log (`dagman.out`) shows success with
+  every node done, and each event has one sampling result, one
+  importance-sampling result and one corner plot.
+- Shared files (T1.2, also run on T2b): Every file the jobs write must name its
+  event (`_data<i>_`), or the chains overwrite each other's. DINGO 0.9.8's data
+  generation writes each detector's PSD to `data/<detector>_psd.txt` without the
+  event index (`dingo/pipe/data_generation.py`), and every job sends its whole
+  output folder back, so T1b and T2b are expected to fail this check: Harmless
+  here, as the copies analyse identical data, but in a run of different events
+  those files would hold only the last-finished event's PSDs (finding 15).
+- Agreement (T1.3, T2.2): "Within statistical uncertainty" is tested three ways.
+  1. Network samples: Every run of a test analyses identical data with the same
+     network, so all its runs draw independently from one distribution. A
+     two-sample KS test compares each parameter for every pair of runs (T1: 3
+     pairs, T2: 6), with a Bonferroni correction holding the chance of any false
+     alarm in a test at 1%. If the tutorial run's own results are on the
+     cluster, T2's runs are also compared with its network samples.
+  2. Log evidence: Every pair of runs, and for T2 the Exercise 3 reference, must
+     agree within 3 sigma combined, using DINGO's error
+     (sqrt((N - n_eff) / (N n_eff))), provided every run has at least 100
+     effective samples; below that the error estimate is too rough. Sample
+     efficiencies are reported next to the reference's 9.40%.
+  3. The weighted median and 90% interval of every parameter, side by side, for
+     reading.
+- Timing (T2.3): From each job's Condor event log: Queue wait (first submission
+  to the start of the successful run), input transfer, run time, output
+  transfer, CPU used and cores used against requested, memory and disk used
+  against requested, bytes received, attempts and CPU wasted on failed ones;
+  and each workflow's wall time, overall and per event.
+
 ### Results
 
 Not run yet.
