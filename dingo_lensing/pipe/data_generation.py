@@ -1,3 +1,4 @@
+import glob
 import os
 import sys
 
@@ -12,17 +13,47 @@ from dingo.pipe.data_generation import (
     create_generation_parser
 )
 
-from .multi_event import psd_file_name
+from .multi_event import frame_span, frames_overlapping, psd_file_name
 
 logger.name = "dingo_lensing_pipe"
 
 class LensedDataGenerationInput(DataGenerationInput):
     """DINGO's data generation, made safe for one config listing several events.
 
-    Each job writes its PSDs to its own text files, named after the job like
-    its event data file. DINGO writes <outdir>/data/<detector>_psd.txt for
-    every event, so the last job to finish would overwrite the others'.
+    - Each job writes its PSDs to its own text files, named after the job like
+      its event data file. DINGO writes <outdir>/data/<detector>_psd.txt for
+      every event, so the last job to finish would overwrite the others'.
+    - When data-dict lists several frame files for a detector (as a list or a
+      glob), each read uses only the files that overlap the data it needs.
+      bilby_pipe reads every listed file and joins them, which fails for the
+      frames of events far apart in time. This needs frame file names in the
+      standard <observatory>-<tag>-<GPS start>-<duration>.gwf form
+      (LIGO-T010150); otherwise every file is read, as before.
     """
+
+    def _gwpy_read(self, det, channel, start_time, end_time, dtype="float64"):
+        source = self.data_dict.get(det) if self.data_dict else None
+        if isinstance(source, str) and "*" in source:
+            frames = sorted(glob.glob(source))
+        elif isinstance(source, (list, tuple)):
+            frames = list(source)
+        else:
+            frames = []
+        if len(frames) < 2:
+            return super()._gwpy_read(det, channel, start_time, end_time, dtype=dtype)
+        if any(frame_span(frame) is None for frame in frames):
+            logger.warning(
+                f"Not every {det} frame file name gives its time span, so all {len(frames)} are read: {frames}"
+            )
+        needed = frames_overlapping(frames, start_time, end_time)
+        if not needed:
+            raise ValueError(f"None of the {det} frame files {frames} overlaps GPS {start_time} to {end_time}")
+        logger.info(f"Reading {det} from {needed}, of {len(frames)} frame files, for GPS {start_time} to {end_time}")
+        self.data_dict[det] = needed
+        try:
+            return super()._gwpy_read(det, channel, start_time, end_time, dtype=dtype)
+        finally:
+            self.data_dict[det] = source
 
     def save_hdf5(self):
         """
