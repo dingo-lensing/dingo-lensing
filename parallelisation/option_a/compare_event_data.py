@@ -13,6 +13,7 @@ Run inside the image (it needs h5py):
 from __future__ import annotations
 
 import argparse
+import ast
 from typing import Dict, Optional
 
 import numpy as np
@@ -80,6 +81,22 @@ def read_file(path) -> Dict[str, object]:
     return values
 
 
+def segment_duration(values: Dict[str, object]) -> Optional[float]:
+    """The segment duration T: A dataset in some versions, inside the settings
+    attribute (a dict written as text) in DINGO 0.9.8's event data files."""
+    if "settings/T" in values:
+        return float(values["settings/T"])
+    settings = values.get("@settings")
+    if isinstance(settings, bytes):
+        settings = settings.decode()
+    if isinstance(settings, str):
+        try:
+            return float(ast.literal_eval(settings)["T"])
+        except (ValueError, SyntaxError, KeyError, TypeError):
+            return None
+    return None
+
+
 def same(first, second) -> bool:
     try:
         return bool(np.array_equal(np.asarray(first), np.asarray(second)))
@@ -93,8 +110,8 @@ def main(argv=None) -> None:
     parser.add_argument("second", help="Another, of the same event.")
     args = parser.parse_args(argv)
     first, second = read_file(args.first), read_file(args.second)
-    duration = first.get("settings/T")
-    delta_f = 1.0 / float(duration) if duration is not None else None
+    duration = segment_duration(first)
+    delta_f = 1.0 / duration if duration else None
     print(f"First:  {args.first}\nSecond: {args.second}\n")
     print("Stored values that differ, other than the data arrays:")
     differing = False

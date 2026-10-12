@@ -60,6 +60,12 @@ MIN_N_EFF = 100.0
 # An efficiency outside this factor of the reference's is flagged CHECK. Not a
 # test: When a few weights dominate, the efficiency has no reliable error.
 EFFICIENCY_FACTOR = 2.0
+# Copies of an event must have the same event data and PSDs to within
+# floating-point round-off. Execute nodes of different CPU types can differ in
+# the last bit (numpy picks its maths routines for the CPU), so bit-identity is
+# reported but not required; a real difference (another frame file, data window
+# or PSD) is of order 1e-3 or more.
+ROUND_OFF = 1e-12
 NOT_PARAMETERS = {"log_prob", "log_likelihood", "log_prior", "delta_log_prob_target", "weights"}
 RESULT_FILE = re.compile(
     r"^(?P<label>.+)_data(?P<event>\d+)_[0-9-]+_(?P<kind>sampling|importance_sampling)\.hdf5$"
@@ -113,17 +119,58 @@ def weight_diagnostics(weights) -> dict:
     }
 
 
-def event_data_comparison(digests: Dict[str, Dict[str, str]]) -> dict:
-    """Whether every run's event data are bit-identical, and which datasets differ."""
-    names = list(digests)
-    first = digests[names[0]]
-    differing = {
-        key
-        for name in names[1:]
-        for key in set(first) | set(digests[name])
-        if first.get(key) != digests[name].get(key)
+def relative_difference(first, second) -> float:
+    """||first - second|| / ||first||, or infinity if the shapes differ."""
+    first, second = np.asarray(first), np.asarray(second)
+    if first.shape != second.shape:
+        return math.inf
+    scale = float(np.linalg.norm(first))
+    difference = float(np.linalg.norm(first - second))
+    if scale == 0:
+        return 0.0 if difference == 0 else math.inf
+    return difference / scale
+
+
+def event_data_comparison(arrays: Dict[str, Dict[str, np.ndarray]], tolerance: float = ROUND_OFF) -> dict:
+    """Whether every run's arrays match the first run's to within round-off.
+
+    identical: Every dataset within the tolerance; bit_identical: Every dataset
+    exactly equal; differing: The datasets beyond the tolerance.
+    """
+    names = list(arrays)
+    first = arrays[names[0]]
+    differing, largest, bit_identical = set(), 0.0, True
+    for name in names[1:]:
+        for key in set(first) | set(arrays[name]):
+            if key not in first or key not in arrays[name]:
+                differing.add(key)
+                bit_identical, largest = False, math.inf
+                continue
+            ours, theirs = np.asarray(first[key]), np.asarray(arrays[name][key])
+            if ours.shape == theirs.shape and np.array_equal(ours, theirs):
+                continue
+            bit_identical = False
+            relative = relative_difference(ours, theirs)
+            largest = max(largest, relative)
+            if relative > tolerance:
+                differing.add(key)
+    return {
+        "runs": names,
+        "identical": not differing,
+        "bit_identical": bit_identical,
+        "largest_relative_difference": largest,
+        "differing": sorted(differing),
     }
-    return {"runs": names, "identical": not differing, "differing": sorted(differing)}
+
+
+def agreement_text(comparison: dict, what: str) -> str:
+    """'<what> bit-identical' or '<what> equal to within round-off (...)'."""
+    if comparison["bit_identical"]:
+        return f"{what} bit-identical"
+    return (
+        f"{what} equal to within round-off (largest relative difference "
+        f"{comparison['largest_relative_difference']:.1e}, limit {ROUND_OFF:g})"
+    )
 
 
 def weighted_quantiles(values, weights, quantiles) -> np.ndarray:
@@ -223,23 +270,21 @@ def load_result(path: Path) -> dict:
     return {"samples": samples, "log_evidence": log_evidence}
 
 
-def event_data_digests(path: Path) -> Dict[str, str]:
-    """SHA-256 of every dataset in an event data file's 'data' group: The strain
-    and ASDs that both the network and the likelihood see."""
-    import hashlib
-
+def event_data_arrays(path: Path) -> Dict[str, np.ndarray]:
+    """Every dataset in an event data file's 'data' group: The strain and ASDs
+    that both the network and the likelihood see."""
     import h5py
 
-    digests = {}
+    arrays = {}
     with h5py.File(path, "r") as file:
         group = file["data"] if "data" in file else file
 
         def visit(name, item):
             if isinstance(item, h5py.Dataset):
-                digests[name] = hashlib.sha256(np.ascontiguousarray(item[()]).tobytes()).hexdigest()
+                arrays[name] = np.asarray(item[()])
 
         group.visititems(visit)
-    return digests
+    return arrays
 
 
 def event_data_files(data_dir: Path, label: str) -> Dict[int, List[Path]]:
@@ -265,10 +310,17 @@ def psd_files(data_dir: Path, label: str) -> Dict[int, Dict[str, Path]]:
     return files
 
 
-def file_digest(path: Path) -> str:
-    import hashlib
+def psd_arrays(files: Dict[str, Path]) -> Dict[str, np.ndarray]:
+    """{"<detector>/frequency" and "<detector>/psd": column} from a run's PSD text files.
 
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    The columns are kept apart: Frequencies (up to ~1e3) would otherwise swamp
+    any difference in the PSD (~1e-46) when the two are compared.
+    """
+    arrays = {}
+    for detector, path in files.items():
+        table = np.loadtxt(path, ndmin=2)
+        arrays[f"{detector}/frequency"], arrays[f"{detector}/psd"] = table[:, 0], table[:, 1]
+    return arrays
 
 
 def result_files(result_dir: Path, label: str) -> Dict[int, Dict[str, List[Path]]]:
@@ -443,14 +495,12 @@ def compare_test(runs: Dict[str, dict], reference: Optional[dict], reference_sam
         weights[name] = diagnostics
     psds = {name: run.get("psd_files") or {} for name, run in runs.items()}
     if all(psds.values()):
-        psd_comparison = event_data_comparison(
-            {name: {det: file_digest(p) for det, p in files.items()} for name, files in psds.items()}
-        )
+        psd_comparison = event_data_comparison({name: psd_arrays(files) for name, files in psds.items()})
     else:
         psd_comparison = {"identical": None, "missing": [name for name, files in psds.items() if not files]}
     data_files = {name: run.get("event_data") for name, run in runs.items()}
     if all(path is not None for path in data_files.values()):
-        event_data = event_data_comparison({name: event_data_digests(path) for name, path in data_files.items()})
+        event_data = event_data_comparison({name: event_data_arrays(path) for name, path in data_files.items()})
     else:
         event_data = {"identical": None, "missing": [name for name, path in data_files.items() if path is None]}
     outside = []
@@ -573,12 +623,14 @@ def different_events(first: dict, second: dict) -> dict:
     """Whether two events' event data and PSD files really differ."""
     data_differ = None
     if first["event_data"] is not None and second["event_data"] is not None:
-        data_differ = event_data_digests(first["event_data"]) != event_data_digests(second["event_data"])
+        data_differ = not event_data_comparison(
+            {first["name"]: event_data_arrays(first["event_data"]), second["name"]: event_data_arrays(second["event_data"])}
+        )["identical"]
     psds_differ = None
     if first["psd_files"] and second["psd_files"]:
-        psds_differ = {det: file_digest(p) for det, p in first["psd_files"].items()} != {
-            det: file_digest(p) for det, p in second["psd_files"].items()
-        }
+        psds_differ = not event_data_comparison(
+            {first["name"]: psd_arrays(first["psd_files"]), second["name"]: psd_arrays(second["psd_files"])}
+        )["identical"]
     return {"runs": [first["name"], second["name"]], "event_data_differ": data_differ, "psd_files_differ": psds_differ}
 
 
@@ -590,7 +642,7 @@ def earlier_event_data(run: Optional[dict], earlier_run_root: Optional[Path]) ->
     if len(earlier) != 1:
         return {"identical": None, "earlier": str(earlier_run_root)}
     comparison = event_data_comparison(
-        {run["name"]: event_data_digests(run["event_data"]), "T1a (first launch)": event_data_digests(earlier[0])}
+        {run["name"]: event_data_arrays(run["event_data"]), "T1a (first launch)": event_data_arrays(earlier[0])}
     )
     comparison["earlier"] = str(earlier[0])
     return comparison
@@ -632,11 +684,14 @@ def agreement_verdict(comparison: Optional[dict]) -> Tuple[bool, str, bool]:
     else:
         evidence_text = f"log evidence not compared, since a run has fewer than {MIN_N_EFF:g} effective samples"
     if data["identical"]:
-        data_text = "event data bit-identical across runs"
+        data_text = agreement_text(data, "event data")
     elif data["identical"] is None:
         data_text = f"event data not compared: No single event data file for {', '.join(data['missing'])}"
     else:
-        data_text = f"event data DIFFER between runs in {', '.join(data['differing'])}"
+        data_text = (
+            f"event data DIFFER between runs in {', '.join(data['differing'])} (largest relative "
+            f"difference {data['largest_relative_difference']:.1e}, limit {ROUND_OFF:g})"
+        )
     passed = (
         ks["passed"]
         and (evidence["passed"] or not comparison["evidence_meaningful"])
@@ -712,7 +767,7 @@ def verdicts_t3(report: dict) -> List[dict]:
         if comparison is not None:
             psd = comparison["psd_files"]
             if psd["identical"]:
-                text += "; PSD files byte-identical"
+                text += "; " + agreement_text(psd, "PSD files")
             elif psd["identical"] is None:
                 text += f"; PSD files not compared: None found for {', '.join(psd['missing'])}"
                 check = True
@@ -742,7 +797,7 @@ def verdicts_t3(report: dict) -> List[dict]:
         if earlier["identical"] is None:
             add(criterion, True, f"Not compared: No T1a event data under {earlier['earlier']}", check=True)
         elif earlier["identical"]:
-            add(criterion, True, "Bit-identical, so the fixes leave data handling unchanged")
+            add(criterion, True, agreement_text(earlier, "Event data") + ", so the fixes leave data handling unchanged")
         else:
             add(criterion, False, f"DIFFER in {', '.join(earlier['differing'])}")
     return rows
@@ -837,14 +892,14 @@ def render_markdown(report: dict) -> str:
             )
         data = comparison["event_data"]
         if data["identical"]:
-            data_text = "bit-identical across " + ", ".join(data["runs"])
+            data_text = agreement_text(data, "the same across " + ", ".join(data["runs"]) + ":")
         elif data["identical"] is None:
             data_text = "not compared, as there's no single event data file for " + ", ".join(data["missing"])
         else:
             data_text = "DIFFERENT between runs, in " + ", ".join(data["differing"])
         lines += [
             "",
-            f"Event data (SHA-256 of every dataset in each event data file's data group): {data_text}.",
+            f"Event data (every dataset in each event data file's data group): {data_text}.",
             "",
             "### Weights",
             "",

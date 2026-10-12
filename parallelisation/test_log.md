@@ -41,7 +41,7 @@ importance sampling, plot), and Condor runs the chains side by side.
 
 1. If `trigger-time` is set, `--gps-file` is ignored and only one event runs.
 2. `--gps-file` takes segment start times, not trigger times:
-   start = trigger time âˆ’ (duration âˆ’ post-trigger duration).
+   start = trigger time Ã¢Ë†â€™ (duration Ã¢Ë†â€™ post-trigger duration).
 3. `psd-dict` and `data-dict` apply to every event in a config.
 4. Later events' data-generation jobs wait for event 0's.
 5. `conda-env` decides which code the jobs run, on Condor as well as locally.
@@ -68,7 +68,7 @@ agree with each other and with the event run alone?
   (fetched by the launch script). GWOSC serves the original O1 release
   (`H-H1_LOSC_4_V1-1126256640-4096.gwf` and the L1 equivalent), whose strain
   channel is `LOSC-STRAIN`. Each event's PSD is estimated from its own data:
-  128 Ã— 4 s immediately before the segment.
+  128 Ãƒâ€” 4 s immediately before the segment.
 - Settings: 4 s duration, 2 s post-trigger, 10,000 samples, importance sampling
   on (the model infers the phase, so no synthetic-phase step), 8 CPUs per job.
 
@@ -109,7 +109,7 @@ reference, and how does the wall time of three events compare with one?
 **Pass criteria**
 1. T2b builds three complete chains, and every job finishes.
 2. All four results agree with the Exercise 3 reference (your local tutorial
-   run: log evidence âˆ’5829.945 Â± 0.014, sample efficiency 9.40%) within
+   run: log evidence Ã¢Ë†â€™5829.945 Ã‚Â± 0.014, sample efficiency 9.40%) within
    combined uncertainty.
 3. Timing recorded for every job: Queue wait, input transfer, run time and CPU
    used, plus each workflow's total wall time, so T2b can be compared with T2a.
@@ -160,13 +160,16 @@ Launch with `bash option_a/launch.sh T3` (run folder
 **Pass criteria**
 1. Every chain of T3a, T3b and T3c finishes.
 2. No output file is written by more than one chain (T3c).
-3. Each event in T3c matches its single-event run: Bit-identical event data,
-   byte-identical PSD files, and network samples that pass the KS tests.
+3. Each event in T3c matches its single-event run: Event data and PSD files
+   equal to within floating-point round-off (relative difference at most
+   1e-12; whether they are bit-identical is reported too), and network samples
+   that pass the KS tests. This was "bit-identical" until the first analysis
+   showed why that is too strict (finding 18).
 4. The two events' event data and PSD files differ (so 3 is not trivial).
 5. Timing recorded for every job.
 
-Also: GW150914's event data should be bit-identical to T1a's from the first
-launch, showing the fixes leave data handling unchanged.
+Also: GW150914's event data should match T1a's from the first launch (within
+round-off), showing the fixes leave data handling unchanged.
 
 ### Launch attempts
 
@@ -180,6 +183,7 @@ launch, showing the fixes leave data handling unchanged.
 | 2026-10-08, after the smoke test | First launch inside the image (tests `ac977f5`). Stopped at the inputs check, because the EPNFS attempt's run folder was still at `option_a`; nothing was created or submitted. Every earlier check passed: 83 unit tests, code `a4de31e`, the staged image (same commit), all six inputs. |
 | 2026-10-08 15:32 | Launched inside the image (tests `00a1914`, code `a4de31e`), after moving the EPNFS attempt's run folder to `option_a_held_epnfs_20261008`. Every check passed. Inside the image, gwpy read GWF with LALFrame: T1's GWOSC frames hold GPS 1126256640 to 1126260736 at 4096 Hz (the jobs need the 516 s from 1126258948.4), T2's injection frames hold 1384782874.63 to 1384782890.63 at 1024 Hz (the jobs need the 8 s segment from 1384782882.63), all finite. The image rebuilt both models' waveform generators. Every job of every workflow passed `check_workflow.py`: T1a 4 jobs, T1b 8, T2a 4, T2b 12. Submitted 15:39 UTC; DAGMan clusters T1a 569441103, T1b 569441104, T2a 569441115, T2b 569441121. At 15:46 UTC the first nodes had finished (T1a 1 of 4, T1b 3 of 8, T2a 1 of 4, T2b 1 of 12) and released their sampling jobs; nothing held. |
 | 2026-10-09 08:30 | T3, first try (tests `1410a65`, code `1d7c477`, new image `dingo-lensing_1d7c4771b4_recipe-ff6622d_cpu.sif` built and staged; all 166 unit tests passed on the cluster, including the 7 that need DINGO). Both events' GWOSC frames fetched; inside the image each event read only its own frame file. Stopped at the workflow checks, nothing submitted: T3a's data-generation job received none of the frame files, because the `data-dict` glob was never expanded at build time (finding 17). The configs now list the files. |
+| 2026-10-09 08:41 | T3 relaunched with the frame files listed (tests `c7ea309`, code `1d7c477`, the same image). Every check passed, including every job of every workflow receiving both events' frames, and all three DAGs finished: T3a and T3b in about 8 min 40 s, T3c (both events) in 9 min 22 s. Every job ran once. |
 
 ### Running jobs without `/home`: The container
 
@@ -292,6 +296,33 @@ number) and the corner plots.
   and each workflow's wall time, overall and per event.
 
 ### Results
+
+#### T3 (two different events)
+
+Analysis `cccf96c` (verdicts as first computed, with bit-identity required):
+
+| Criterion | Verdict |
+|---|---|
+| T3.1 Every chain completes | PASS: T3a 4 of 4 nodes, T3b 4 of 4, T3c 8 of 8. |
+| T3.2 No shared files | PASS: Every T3c output names its event; the PSD fix works. |
+| T3.3 GW151012 matches its single run | PASS: Event data and PSD files bit-identical, network samples agree (smallest KS p-value 0.0076 over 13 tests). |
+| T3.3 GW150914 matches its single run | FAILED on bit-identity only: PSD files byte-identical and network samples agree (smallest KS p-value 0.028), but the strain differed from T3a's in 3366 of 4097 (H1) and 2335 of 4097 (L1) frequency bins, by at most 3e-36 against values near 1e-23: A relative difference of 2.8e-16 (H1) and 1.3e-16 (L1), the size of double-precision round-off and about 1e13 times smaller than a one-step time offset would give. `compare_event_data.py` found no other difference: The settings differ only in `generation_seed`, which bilby_pipe draws at random and uses only for simulated noise, and the two jobs' logs differ only in that seed and the GPS-file argument. |
+| T3.4 The two events differ | PASS |
+| T3.5 Timing recorded | PASS |
+| Also: GW150914 against T1a | PASS: Bit-identical to T1a's event data from the first launch. |
+
+Finding 18: Bit-identity is too strict a test across execute nodes. The one pair
+that ran on the same node (T3b and T3c's GW151012, both on node2407) is
+bit-identical; T3a (node2266) and T3c's GW150914 (node2259) differ only in
+round-off, and T1a (node2145) matched T3a exactly. The likely mechanism is numpy
+choosing its maths routines (`exp`, `sin`, `cos`) for each CPU, which DINGO's
+strain time shift uses and the PSD path does not; not yet confirmed against the
+nodes' CPU types. The analysis now compares event data and PSD files to within
+1e-12 relative difference, reports bit-identity separately, and compares a PSD
+file's frequency and PSD columns separately (as one table, the frequencies would
+swamp a PSD difference). T3 is being re-analysed with it.
+
+#### T1 and T2
 
 All four workflows finished on 2026-10-08 (DAG status 0, every node done),
 about 8 min after submission for T1a and T1b, 2 h 46 min for T2a and 3 h 2 min

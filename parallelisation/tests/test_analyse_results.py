@@ -161,25 +161,30 @@ def fake_result(path) -> dict:
     return {"samples": samples, "log_evidence": None}
 
 
-def fake_digests(path) -> dict:
+def fake_arrays(path) -> dict:
     """Every copy of an event has the same data, as in the real tests."""
-    return {"waveform/H1": "w1", "waveform/L1": "w2", "asds/H1": "a1", "asds/L1": "a2"}
+    return {
+        "waveform/H1": np.array([1.0 + 2.0j, 3.0 - 1.0j]),
+        "waveform/L1": np.array([2.0 + 0.5j, -1.0 + 1.0j]),
+        "asds/H1": np.array([1.0, 2.0]),
+        "asds/L1": np.array([1.5, 2.5]),
+    }
 
 
-def patched(load=fake_result, digests=fake_digests):
+def patched(load=fake_result, arrays=fake_arrays):
     """Stand-ins for the two functions that read HDF5 files."""
-    stack = mock.patch.multiple(analyse_results, load_result=mock.DEFAULT, event_data_digests=mock.DEFAULT)
-    return _Patched(stack, load, digests)
+    stack = mock.patch.multiple(analyse_results, load_result=mock.DEFAULT, event_data_arrays=mock.DEFAULT)
+    return _Patched(stack, load, arrays)
 
 
 class _Patched:
-    def __init__(self, stack, load, digests):
-        self.stack, self.load, self.digests = stack, load, digests
+    def __init__(self, stack, load, arrays):
+        self.stack, self.load, self.arrays = stack, load, arrays
 
     def __enter__(self):
         mocks = self.stack.__enter__()
         mocks["load_result"].side_effect = self.load
-        mocks["event_data_digests"].side_effect = self.digests
+        mocks["event_data_arrays"].side_effect = self.arrays
         return mocks
 
     def __exit__(self, *exc):
@@ -238,13 +243,33 @@ class TestStatistics(unittest.TestCase):
         self.assertEqual(analyse_results.weight_diagnostics([0.0, 1.0, 1.0])["zero_weights"], 1)
 
     def test_event_data_comparison(self):
-        same = {"waveform/H1": "x", "asds/H1": "y"}
-        self.assertTrue(analyse_results.event_data_comparison({"r1": same, "r2": dict(same)})["identical"])
+        same = {"waveform/H1": np.array([1.0 + 1.0j, 2.0]), "asds/H1": np.array([3.0, 4.0])}
+        result = analyse_results.event_data_comparison({"r1": same, "r2": {k: v.copy() for k, v in same.items()}})
+        self.assertTrue(result["identical"])
+        self.assertTrue(result["bit_identical"])
         result = analyse_results.event_data_comparison(
-            {"r1": same, "r2": {"waveform/H1": "x", "asds/H1": "z"}, "r3": {"waveform/H1": "x"}}
+            {
+                "r1": same,
+                "r2": {"waveform/H1": same["waveform/H1"], "asds/H1": same["asds/H1"] * 1.001},
+                "r3": {"waveform/H1": same["waveform/H1"]},
+            }
         )
         self.assertFalse(result["identical"])
         self.assertEqual(result["differing"], ["asds/H1"])
+
+    def test_event_data_comparison_allows_round_off_only(self):
+        first = {"waveform/H1": np.array([1e-23 + 2e-23j, -3e-23j])}
+        for factor, identical in ((1 + 3e-16, True), (1 + 1e-13, True), (1 + 1e-11, False), (1.001, False)):
+            with self.subTest(factor=factor):
+                result = analyse_results.event_data_comparison(
+                    {"r1": first, "r2": {"waveform/H1": first["waveform/H1"] * factor}}
+                )
+                self.assertEqual(result["identical"], identical)
+                self.assertFalse(result["bit_identical"])
+                # Within one rounding step (2.2e-16) of the factor applied.
+                self.assertAlmostEqual(result["largest_relative_difference"], factor - 1, delta=1e-16 + (factor - 1) * 1e-3)
+        shapes = analyse_results.event_data_comparison({"r1": first, "r2": {"waveform/H1": np.zeros(3)}})
+        self.assertFalse(shapes["identical"])
 
     def runs(self, shift=0.0, n=5000):
         rng = np.random.default_rng(7)
@@ -388,7 +413,7 @@ class TestAnalyse(TempDir):
         self.assertIn("data/H1_psd.txt, data/L1_psd.txt", verdicts["T1.2"]["evidence"])
         self.assertIn("T1a 4 of 4 nodes done, T1b 8 of 8 nodes done", verdicts["T1.1"]["evidence"])
         self.assertIn("-5829.945", verdicts["T2.2"]["evidence"])
-        self.assertIn("event data bit-identical across runs", verdicts["T2.2"]["evidence"])
+        self.assertIn("event data bit-identical", verdicts["T2.2"]["evidence"])
         self.assertFalse(any(row["check"] for row in report["verdicts"]))
         for name, summary in report["tests"]["T2"]["importance"].items():
             self.assertAlmostEqual(summary["sample_efficiency"], 0.094, places=6, msg=name)
@@ -418,14 +443,14 @@ class TestAnalyse(TempDir):
 
     def test_event_data_that_differ_between_copies_fail_the_agreement(self):
         def different(path):
-            digests = fake_digests(path)
+            arrays = fake_arrays(path)
             if Path(path).name.startswith("T2b_data2_"):
-                digests["asds/H1"] = "changed"
-            return digests
+                arrays["asds/H1"] = arrays["asds/H1"] * 1.001
+            return arrays
 
         root = self.tempdir()
         RunRoot(root)
-        with patched(digests=different):
+        with patched(arrays=different):
             report = analyse_results.analyse(root)
         verdict = self.verdicts(report)["T2.2"]
         self.assertFalse(verdict["passed"])

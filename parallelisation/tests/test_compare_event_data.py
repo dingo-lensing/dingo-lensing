@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "option_a"))
 try:
     import numpy as np
 
-    from compare_event_data import compare_arrays, time_shift
+    from compare_event_data import compare_arrays, segment_duration, time_shift
 
     HAVE_NUMPY = True
 except ImportError:
@@ -47,6 +47,14 @@ class TestCompareEventData(unittest.TestCase):
         self.assertFalse(result["identical"])
         self.assertGreater(result["time_shift"]["phase_residual_rms"], 0.5)
         self.assertGreater(result["relative_difference"], 0.5)
+
+    def test_segment_duration_from_the_settings_attribute(self):
+        settings = "{'time_event': 1126259462.4, 'T': 4.0, 'f_s': 4096.0}"
+        self.assertEqual(segment_duration({"@settings": settings}), 4.0)
+        self.assertEqual(segment_duration({"@settings": settings.encode()}), 4.0)
+        self.assertEqual(segment_duration({"settings/T": 8.0}), 8.0)
+        self.assertIsNone(segment_duration({}))
+        self.assertIsNone(segment_duration({"@settings": "not a dict"}))
 
     def test_real_arrays_have_no_time_shift(self):
         a = np.abs(self.strain())

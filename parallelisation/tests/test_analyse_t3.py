@@ -5,6 +5,7 @@ per-job PSD files, and replaces the two HDF5 readers. Needs numpy and scipy.
 """
 from __future__ import annotations
 
+import hashlib
 import sys
 import tempfile
 import unittest
@@ -16,6 +17,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "option_a"))
 
 try:
+    import numpy as np
+
     import analyse_results
     from test_analyse_results import BASE, KINDS, dagman_out, fake_result, job_log
 
@@ -56,7 +59,7 @@ def build(root: Path, shared_psds=False, earlier=True):
             job = f"{label}_data{event}_{gps}_generation"
             (outdir / "data" / f"{job}_event_data.hdf5").write_text(EVENTS[(label, event)])
             for ifo in ("H1", "L1"):
-                (outdir / "data" / f"{job}_{ifo}_psd.txt").write_text(f"{EVENTS[(label, event)]} {ifo}")
+                write_psd(outdir / "data" / f"{job}_{ifo}_psd.txt", EVENTS[(label, event)], ifo)
         if shared_psds:
             (outdir / "data" / "H1_psd.txt").write_text("")
         (outdir / "submit" / f"dag_{label}.submit").write_text("\n".join(dag) + "\n")
@@ -67,9 +70,20 @@ def build(root: Path, shared_psds=False, earlier=True):
     return run_dir.parent
 
 
-def digests_by_content(path):
+def values_for(text: str, size: int = 8) -> "np.ndarray":
+    """Numbers that depend only on text: The same for copies of an event, different between events."""
+    digest = hashlib.sha256(text.encode()).digest()
+    return np.frombuffer(digest[:size], dtype=np.uint8).astype(float) + 1.0
+
+
+def write_psd(path: Path, event: str, ifo: str):
+    np.savetxt(path, np.column_stack([np.arange(8) * 0.25, values_for(f"{event} {ifo}") * 1e-46]))
+
+
+def arrays_by_content(path):
     """Event data that differ only by event, as the real files should."""
-    return {"waveform/H1": Path(path).read_text(), "asds/H1": Path(path).read_text() + " asd"}
+    text = Path(path).read_text()
+    return {"waveform/H1": values_for(text) * (1 + 1j), "asds/H1": values_for(text + " asd")}
 
 
 def results_by_event(path):
@@ -79,13 +93,13 @@ def results_by_event(path):
 
 @unittest.skipUnless(HAVE_NUMPY, "needs numpy and scipy")
 class TestT3Analysis(unittest.TestCase):
-    def analyse(self, digests=digests_by_content, results=results_by_event, **build_options):
+    def analyse(self, arrays=arrays_by_content, results=results_by_event, **build_options):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         root = build(Path(directory.name), **build_options)
-        with mock.patch.multiple(analyse_results, load_result=mock.DEFAULT, event_data_digests=mock.DEFAULT) as mocks:
+        with mock.patch.multiple(analyse_results, load_result=mock.DEFAULT, event_data_arrays=mock.DEFAULT) as mocks:
             mocks["load_result"].side_effect = results
-            mocks["event_data_digests"].side_effect = digests
+            mocks["event_data_arrays"].side_effect = arrays
             return analyse_results.analyse(root, suite="T3", earlier_run_root=root / "earlier")
 
     def verdicts(self, report):
@@ -110,12 +124,12 @@ class TestT3Analysis(unittest.TestCase):
 
     def test_event_data_that_differ_from_the_single_run_fail_t3_3(self):
         def changed(path):
-            digests = digests_by_content(path)
+            arrays = arrays_by_content(path)
             if Path(path).name.startswith("T3c_data1_"):
-                digests["asds/H1"] = "changed"
-            return digests
+                arrays["asds/H1"] = arrays["asds/H1"] * 1.001
+            return arrays
 
-        verdicts = self.verdicts(self.analyse(digests=changed))
+        verdicts = self.verdicts(self.analyse(arrays=changed))
         self.assertFalse(verdicts["T3.3 GW151012 in T3c matches its single-event run"]["passed"])
         self.assertTrue(verdicts["T3.3 GW150914 in T3c matches its single-event run"]["passed"])
 
@@ -124,17 +138,17 @@ class TestT3Analysis(unittest.TestCase):
         self.addCleanup(directory.cleanup)
         root = build(Path(directory.name))
         # As if the last job's PSDs had overwritten event 0's.
-        (root / "T3" / "T3c" / "data" / "T3c_data0_1126259462-4_generation_H1_psd.txt").write_text("GW151012 H1")
-        with mock.patch.multiple(analyse_results, load_result=mock.DEFAULT, event_data_digests=mock.DEFAULT) as mocks:
+        write_psd(root / "T3" / "T3c" / "data" / "T3c_data0_1126259462-4_generation_H1_psd.txt", "GW151012", "H1")
+        with mock.patch.multiple(analyse_results, load_result=mock.DEFAULT, event_data_arrays=mock.DEFAULT) as mocks:
             mocks["load_result"].side_effect = results_by_event
-            mocks["event_data_digests"].side_effect = digests_by_content
+            mocks["event_data_arrays"].side_effect = arrays_by_content
             report = analyse_results.analyse(root, suite="T3")
         row = self.verdicts(report)["T3.3 GW150914 in T3c matches its single-event run"]
         self.assertFalse(row["passed"])
         self.assertIn("PSD files DIFFER for H1", row["evidence"])
 
     def test_two_events_with_identical_data_fail_t3_4(self):
-        verdicts = self.verdicts(self.analyse(digests=lambda path: {"waveform/H1": "same"}))
+        verdicts = self.verdicts(self.analyse(arrays=lambda path: {"waveform/H1": np.ones(4)}))
         self.assertFalse(verdicts["T3.4 The two events' data really differ"]["passed"])
 
     def test_a_shifted_network_for_one_event_fails_its_comparison(self):
@@ -150,21 +164,38 @@ class TestT3Analysis(unittest.TestCase):
 
     def test_the_earlier_t1a_comparison(self):
         verdicts = self.verdicts(self.analyse())
-        self.assertIn("Bit-identical", verdicts["Also: GW150914's event data match T1a's from the first launch"]["evidence"])
+        self.assertIn("bit-identical", verdicts["Also: GW150914's event data match T1a's from the first launch"]["evidence"])
         report = self.analyse(earlier=False)
         row = self.verdicts(report)["Also: GW150914's event data match T1a's from the first launch"]
         self.assertTrue(row["check"])
 
     def test_event_data_that_differ_from_t1as_fail_the_earlier_check(self):
         def changed(path):
-            digests = digests_by_content(path)
+            arrays = arrays_by_content(path)
             if Path(path).name.startswith("T1a_"):
-                digests["waveform/H1"] = "changed"
-            return digests
+                arrays["waveform/H1"] = arrays["waveform/H1"] * 1.001
+            return arrays
 
-        row = self.verdicts(self.analyse(digests=changed))["Also: GW150914's event data match T1a's from the first launch"]
+        row = self.verdicts(self.analyse(arrays=changed))["Also: GW150914's event data match T1a's from the first launch"]
         self.assertFalse(row["passed"])
         self.assertIn("DIFFER in waveform/H1", row["evidence"])
+
+    def test_round_off_between_copies_passes_but_is_reported(self):
+        # As on the cluster: GW150914's strain differed from T3a's by 2.8e-16.
+        def rounded(path):
+            arrays = arrays_by_content(path)
+            if Path(path).name.startswith("T3c_data0_"):
+                arrays["waveform/H1"] = arrays["waveform/H1"] * (1 + 3e-16)
+            return arrays
+
+        report = self.analyse(arrays=rounded)
+        row = self.verdicts(report)["T3.3 GW150914 in T3c matches its single-event run"]
+        self.assertTrue(row["passed"], row["evidence"])
+        self.assertIn("event data equal to within round-off", row["evidence"])
+        data = report["tests"]["GW150914"]["event_data"]
+        self.assertFalse(data["bit_identical"])
+        self.assertLess(data["largest_relative_difference"], 1e-12)
+        self.assertTrue(report["tests"]["GW151012"]["event_data"]["bit_identical"])
 
     def test_the_t3_report_renders(self):
         report = self.analyse()
