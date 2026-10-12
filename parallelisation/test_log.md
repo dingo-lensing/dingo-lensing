@@ -334,10 +334,14 @@ Every job finished at its first attempt, and every criterion passes (analysis
   disagreement. The comparison rests on identical inputs and agreeing network
   samples; as in T1, this tests the machinery, not the science (GW151012's
   distance is also above the prior's limit).
-- Timing: Both events took 9 min 22 s together, against 8 min 42 s and
-  8 min 41 s alone. GW151012's chain started 3 min 10 s in, once GW150914's data
-  generation had finished (trap 4), then took 6 min 12 s, its jobs queueing for
-  less time than in T3b.
+- Timing (table below): Both events took 9 min 22 s together, against
+  8 min 42 s and 8 min 41 s alone. GW151012's chain started 3 min 10 s in, once
+  GW150914's data generation had finished (trap 4), then took 6 min 12 s, its
+  jobs queueing for less time than in T3b. So one config was 40 s slower than
+  the two separate runs submitted side by side (as they were), and about half
+  the 17 min 23 s of running them one after the other, for the same CPU. These
+  are single runs of a few minutes, mostly queue waits, so the 40 s is within
+  the cluster's noise.
 - Still open: Every data-generation job receives every listed frame file
   (1.44 GB per job here, against 1.18 GB in T1a, which listed only GW150914's),
   so many events need a node-side filter. `data-dict`, `channel-dict` and
@@ -345,6 +349,16 @@ Every job finished at its first attempt, and every criterion passes (analysis
   strain channel names. DINGO's PESummary job (off in every test) still reads
   `data/<detector>_psd.txt`, which the generation jobs no longer write; it does
   not run in this setup anyway (pesummary is not in the image).
+
+T3 timing, from each job's Condor log (wall time from the workflow's first
+submission to its last job's end; a chain is one event's jobs, from the
+submission of its data-generation job):
+
+| Run | Events | Wall time | Chain per event | Chain starts | CPU (h) | Attempts |
+|---|---|---|---|---|---|---|
+| T3a | GW150914 | 8 min 42 s | 8 min 42 s | 0 s | 0.03 | 1 per job |
+| T3b | GW151012 | 8 min 41 s | 8 min 41 s | 0 s | 0.03 | 1 per job |
+| T3c | Both | 9 min 22 s | GW150914 8 min 43 s, GW151012 6 min 12 s | 0 s, 3 min 10 s | 0.06 | 1 per job |
 
 **How the verdicts were reached.** The first analysis (results `cccf96c`)
 required event data and PSD files to be bit-identical:
