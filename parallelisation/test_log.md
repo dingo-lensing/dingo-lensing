@@ -161,8 +161,9 @@ Launch with `bash option_a/launch.sh T3` (run folder
 1. Every chain of T3a, T3b and T3c finishes.
 2. No output file is written by more than one chain (T3c).
 3. Each event in T3c matches its single-event run: Event data and PSD files
-   equal to within floating-point round-off (relative difference at most
-   1e-12; whether they are bit-identical is reported too), and network samples
+   equal to within floating-point round-off (compared element by element, each
+   relative to its own size, at most 1e-8; whether they are bit-identical is
+   reported too), and network samples
    that pass the KS tests. This was "bit-identical" until the first analysis
    showed why that is too strict (finding 18).
 4. The two events' event data and PSD files differ (so 3 is not trivial).
@@ -317,10 +318,16 @@ bit-identical; T3a (node2266) and T3c's GW150914 (node2259) differ only in
 round-off, and T1a (node2145) matched T3a exactly. The likely mechanism is numpy
 choosing its maths routines (`exp`, `sin`, `cos`) for each CPU, which DINGO's
 strain time shift uses and the PSD path does not; not yet confirmed against the
-nodes' CPU types. The analysis now compares event data and PSD files to within
-1e-12 relative difference, reports bit-identity separately, and compares a PSD
-file's frequency and PSD columns separately (as one table, the frequencies would
-swamp a PSD difference). T3 is being re-analysed with it.
+nodes' CPU types. The analysis now compares event data and PSD files element by element, each
+relative to its own size, with a limit of 1e-8: Round-off is ~1e-16 per element
+(at most ~1e-13 for the faintest strain bins), while another event, frame file
+or PSD differs by order 1, and an event time one floating-point step out by
+~1e-3. Bit-identity is reported separately. The first version of this used one
+relative norm per array (limit 1e-12): It passed GW150914, but then judged the
+two events' PSD files equal (T3.4 FAILED), because DINGO's placeholder ASD of 1
+below 20 Hz dominated the norm and hid the real values (~1e-23); comparing a PSD
+file as one table had the same flaw with its frequency column. Both are now
+unit-tested with DINGO-like placeholders. T3 is being re-analysed again.
 
 #### T1 and T2
 
