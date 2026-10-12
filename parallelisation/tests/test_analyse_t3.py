@@ -77,13 +77,16 @@ def values_for(text: str, size: int = 8) -> "np.ndarray":
 
 
 def write_psd(path: Path, event: str, ifo: str):
-    np.savetxt(path, np.column_stack([np.arange(8) * 0.25, values_for(f"{event} {ifo}") * 1e-46]))
+    """Like DINGO's: A placeholder PSD of 1 below the minimum frequency, then ~1e-46."""
+    psd = np.concatenate([np.ones(80), values_for(f"{event} {ifo}") * 1e-46])
+    np.savetxt(path, np.column_stack([np.arange(len(psd)) * 0.25, psd]))
 
 
 def arrays_by_content(path):
     """Event data that differ only by event, as the real files should."""
     text = Path(path).read_text()
-    return {"waveform/H1": values_for(text) * (1 + 1j), "asds/H1": values_for(text + " asd")}
+    asd = np.concatenate([np.ones(80), values_for(text + " asd") * 1e-23])
+    return {"waveform/H1": values_for(text) * (1 + 1j) * 1e-23, "asds/H1": asd}
 
 
 def results_by_event(path):

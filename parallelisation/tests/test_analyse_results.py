@@ -259,7 +259,7 @@ class TestStatistics(unittest.TestCase):
 
     def test_event_data_comparison_allows_round_off_only(self):
         first = {"waveform/H1": np.array([1e-23 + 2e-23j, -3e-23j])}
-        for factor, identical in ((1 + 3e-16, True), (1 + 1e-13, True), (1 + 1e-11, False), (1.001, False)):
+        for factor, identical in ((1 + 3e-16, True), (1 + 1e-13, True), (1 + 1e-9, True), (1 + 1e-7, False), (1.001, False)):
             with self.subTest(factor=factor):
                 result = analyse_results.event_data_comparison(
                     {"r1": first, "r2": {"waveform/H1": first["waveform/H1"] * factor}}
@@ -270,6 +270,29 @@ class TestStatistics(unittest.TestCase):
                 self.assertAlmostEqual(result["largest_relative_difference"], factor - 1, delta=1e-16 + (factor - 1) * 1e-3)
         shapes = analyse_results.event_data_comparison({"r1": first, "r2": {"waveform/H1": np.zeros(3)}})
         self.assertFalse(shapes["identical"])
+
+    def test_large_placeholders_do_not_hide_differences_in_small_values(self):
+        # An ASD: 1 below the minimum frequency, ~1e-23 above it. Two events'
+        # ASDs differ only in the small values; one overall norm would miss it.
+        below = np.ones(80)
+        first = {"asds/H1": np.concatenate([below, np.full(100, 2e-23)])}
+        other_event = {"asds/H1": np.concatenate([below, np.full(100, 3e-23)])}
+        result = analyse_results.event_data_comparison({"a": first, "b": other_event})
+        self.assertFalse(result["identical"])
+        self.assertAlmostEqual(result["largest_relative_difference"], 1 / 3)
+        rounded = {"asds/H1": first["asds/H1"] * np.concatenate([np.ones(80), np.full(100, 1 + 2.2e-16)])}
+        self.assertTrue(analyse_results.event_data_comparison({"a": first, "b": rounded})["identical"])
+
+    def test_missing_values(self):
+        with_nan = {"x": np.array([1.0, np.nan, 3.0])}
+        same = analyse_results.event_data_comparison({"a": with_nan, "b": {"x": np.array([1.0, np.nan, 3.0])}})
+        self.assertTrue(same["identical"])
+        self.assertTrue(same["bit_identical"])
+        moved = analyse_results.event_data_comparison({"a": with_nan, "b": {"x": np.array([np.nan, 2.0, 3.0])}})
+        self.assertFalse(moved["identical"])
+        self.assertEqual(analyse_results.relative_difference([1.0, np.nan], [1.0, 2.0]), math.inf)
+        self.assertEqual(analyse_results.relative_difference([0.0, 0.0], [0.0, 0.0]), 0.0)
+        self.assertEqual(analyse_results.relative_difference([0.0], [1e-30]), 1.0)
 
     def runs(self, shift=0.0, n=5000):
         rng = np.random.default_rng(7)

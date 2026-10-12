@@ -61,11 +61,13 @@ MIN_N_EFF = 100.0
 # test: When a few weights dominate, the efficiency has no reliable error.
 EFFICIENCY_FACTOR = 2.0
 # Copies of an event must have the same event data and PSDs to within
-# floating-point round-off. Execute nodes of different CPU types can differ in
-# the last bit (numpy picks its maths routines for the CPU), so bit-identity is
-# reported but not required; a real difference (another frame file, data window
-# or PSD) is of order 1e-3 or more.
-ROUND_OFF = 1e-12
+# floating-point round-off, compared element by element (each relative to its
+# own size; see relative_difference). Execute nodes of different CPU types can
+# differ in the last bits (numpy picks its maths routines for the CPU): ~1e-16
+# per element, at most ~1e-13 for the faintest strain bins. A real difference
+# (another event, frame file or PSD) is of order 1, and an event time one
+# floating-point step out gives ~1e-3. Bit-identity is reported, not required.
+ROUND_OFF = 1e-8
 NOT_PARAMETERS = {"log_prob", "log_likelihood", "log_prior", "delta_log_prob_target", "weights"}
 RESULT_FILE = re.compile(
     r"^(?P<label>.+)_data(?P<event>\d+)_[0-9-]+_(?P<kind>sampling|importance_sampling)\.hdf5$"
@@ -120,15 +122,27 @@ def weight_diagnostics(weights) -> dict:
 
 
 def relative_difference(first, second) -> float:
-    """||first - second|| / ||first||, or infinity if the shapes differ."""
+    """The largest difference between corresponding elements, each relative to
+    the larger of the two (0 where they are equal), or infinity if the shapes
+    or the positions of missing values (NaN) differ.
+
+    Element by element, so that large entries cannot hide differences in small
+    ones: An ASD is a placeholder 1 below the minimum frequency and ~1e-23 above
+    it, and one overall norm would see only the placeholders.
+    """
     first, second = np.asarray(first), np.asarray(second)
     if first.shape != second.shape:
         return math.inf
-    scale = float(np.linalg.norm(first))
-    difference = float(np.linalg.norm(first - second))
-    if scale == 0:
-        return 0.0 if difference == 0 else math.inf
-    return difference / scale
+    missing_first, missing_second = np.isnan(first), np.isnan(second)
+    if np.any(missing_first != missing_second):
+        return math.inf
+    if first.size == 0:
+        return 0.0
+    with np.errstate(invalid="ignore", divide="ignore"):
+        difference = np.abs(first - second)
+        scale = np.maximum(np.abs(first), np.abs(second))
+        relative = np.where((difference == 0) | missing_first, 0.0, difference / scale)
+    return float(np.max(relative))
 
 
 def event_data_comparison(arrays: Dict[str, Dict[str, np.ndarray]], tolerance: float = ROUND_OFF) -> dict:
@@ -147,7 +161,7 @@ def event_data_comparison(arrays: Dict[str, Dict[str, np.ndarray]], tolerance: f
                 bit_identical, largest = False, math.inf
                 continue
             ours, theirs = np.asarray(first[key]), np.asarray(arrays[name][key])
-            if ours.shape == theirs.shape and np.array_equal(ours, theirs):
+            if ours.shape == theirs.shape and np.array_equal(ours, theirs, equal_nan=ours.dtype.kind in "fc"):
                 continue
             bit_identical = False
             relative = relative_difference(ours, theirs)
