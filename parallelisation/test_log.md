@@ -41,7 +41,7 @@ importance sampling, plot), and Condor runs the chains side by side.
 
 1. If `trigger-time` is set, `--gps-file` is ignored and only one event runs.
 2. `--gps-file` takes segment start times, not trigger times:
-   start = trigger time Ã¢Ë†â€™ (duration Ã¢Ë†â€™ post-trigger duration).
+   start = trigger time − (duration − post-trigger duration).
 3. `psd-dict` and `data-dict` apply to every event in a config.
 4. Later events' data-generation jobs wait for event 0's.
 5. `conda-env` decides which code the jobs run, on Condor as well as locally.
@@ -68,7 +68,7 @@ agree with each other and with the event run alone?
   (fetched by the launch script). GWOSC serves the original O1 release
   (`H-H1_LOSC_4_V1-1126256640-4096.gwf` and the L1 equivalent), whose strain
   channel is `LOSC-STRAIN`. Each event's PSD is estimated from its own data:
-  128 Ãƒâ€” 4 s immediately before the segment.
+  128 × 4 s immediately before the segment.
 - Settings: 4 s duration, 2 s post-trigger, 10,000 samples, importance sampling
   on (the model infers the phase, so no synthetic-phase step), 8 CPUs per job.
 
@@ -109,7 +109,7 @@ reference, and how does the wall time of three events compare with one?
 **Pass criteria**
 1. T2b builds three complete chains, and every job finishes.
 2. All four results agree with the Exercise 3 reference (your local tutorial
-   run: log evidence Ã¢Ë†â€™5829.945 Ã‚Â± 0.014, sample efficiency 9.40%) within
+   run: log evidence −5829.945 ± 0.014, sample efficiency 9.40%) within
    combined uncertainty.
 3. Timing recorded for every job: Queue wait, input transfer, run time and CPU
    used, plus each workflow's total wall time, so T2b can be compared with T2a.
