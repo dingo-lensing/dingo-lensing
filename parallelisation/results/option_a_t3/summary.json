@@ -1,7 +1,7 @@
 {
   "run_root": "/home/kailibryan.doney/dingo-lensing-runs/option_a_t3",
   "suite": "T3",
-  "analysed": "2026-10-09T03:52:39",
+  "analysed": "2026-10-12T08:24:59",
   "run_metadata": "date: 2026-10-09T08:41:38Z\nhost: ldas-grid\nsuite: T3\ncode: kailib-parallelisation at 1d7c4771b49fd0ce10ab1c7542ed4c5fecbbe73c\ntests: local-tests-sync at c7ea3099f4c00b6a8eff350838cac8b64b444696\nimage: osdf:///igwn/cit/staging/kailibryan.doney/containers/dingo-lensing_1d7c4771b4_recipe-ff6622d_cpu.sif\nworkflows built with: /home/kailibryan.doney/.conda/envs/dingo_env\nin the image: dingo 0.9.8, bilby_pipe 1.8.0, torch 2.13.0+cpu\n",
   "workflows": {
     "T3a": {
@@ -744,11 +744,10 @@
           "T3a",
           "T3c/0"
         ],
-        "identical": false,
-        "differing": [
-          "waveform/H1",
-          "waveform/L1"
-        ]
+        "identical": true,
+        "bit_identical": false,
+        "largest_relative_difference": 3.229915617254774e-12,
+        "differing": []
       },
       "psd_files": {
         "runs": [
@@ -756,6 +755,8 @@
           "T3c/0"
         ],
         "identical": true,
+        "bit_identical": true,
+        "largest_relative_difference": 0.0,
         "differing": []
       },
       "evidence": {
@@ -1165,6 +1166,8 @@
           "T3c/1"
         ],
         "identical": true,
+        "bit_identical": true,
+        "largest_relative_difference": 0.0,
         "differing": []
       },
       "psd_files": {
@@ -1173,6 +1176,8 @@
           "T3c/1"
         ],
         "identical": true,
+        "bit_identical": true,
+        "largest_relative_difference": 0.0,
         "differing": []
       },
       "evidence": {
@@ -1367,6 +1372,8 @@
       "T1a (first launch)"
     ],
     "identical": true,
+    "bit_identical": true,
+    "largest_relative_difference": 0.0,
     "differing": [],
     "earlier": "/home/kailibryan.doney/dingo-lensing-runs/option_a/T1/T1a/data/T1a_data0_1126259462-4_generation_event_data.hdf5"
   },
@@ -1385,15 +1392,15 @@
     },
     {
       "criterion": "T3.3 GW150914 in T3c matches its single-event run",
-      "passed": false,
+      "passed": true,
       "check": false,
-      "evidence": "Network samples: smallest KS p-value 0.0275 (luminosity_distance, T3a vs T3c/0) against a threshold of 0.000769 over 13 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data DIFFER between runs in waveform/H1, waveform/L1; PSD files byte-identical"
+      "evidence": "Network samples: smallest KS p-value 0.0275 (luminosity_distance, T3a vs T3c/0) against a threshold of 0.000769 over 13 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data equal to within round-off (largest relative difference 3.2e-12, limit 1e-08); PSD files bit-identical"
     },
     {
       "criterion": "T3.3 GW151012 in T3c matches its single-event run",
       "passed": true,
       "check": false,
-      "evidence": "Network samples: smallest KS p-value 0.00762 (theta_jn, T3b vs T3c/1) against a threshold of 0.000769 over 13 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data bit-identical across runs; PSD files byte-identical"
+      "evidence": "Network samples: smallest KS p-value 0.00762 (theta_jn, T3b vs T3c/1) against a threshold of 0.000769 over 13 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data bit-identical; PSD files bit-identical"
     },
     {
       "criterion": "T3.4 The two events' data really differ",
@@ -1411,7 +1418,7 @@
       "criterion": "Also: GW150914's event data match T1a's from the first launch",
       "passed": true,
       "check": false,
-      "evidence": "Bit-identical, so the fixes leave data handling unchanged"
+      "evidence": "Event data bit-identical, so the fixes leave data handling unchanged"
     }
   ]
 }

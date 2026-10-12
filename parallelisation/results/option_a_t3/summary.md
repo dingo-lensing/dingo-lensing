@@ -1,6 +1,6 @@
 # Option A results
 
-Analysed 2026-10-09T03:52:39 from `/home/kailibryan.doney/dingo-lensing-runs/option_a_t3`.
+Analysed 2026-10-12T08:24:59 from `/home/kailibryan.doney/dingo-lensing-runs/option_a_t3`.
 
 ```
 date: 2026-10-09T08:41:38Z
@@ -21,11 +21,11 @@ CHECK means the test passed but something needs a look before calling it a pass.
 |---|---|---|
 | T3.1 Every chain completes | PASS | T3a 4 of 4 nodes done, T3b 4 of 4 nodes done, T3c 8 of 8 nodes done; every event has its sampling and importance-sampling results and corner plot |
 | T3.2 No output file is written by more than one chain | PASS | T3c: Every output names its event |
-| T3.3 GW150914 in T3c matches its single-event run | FAIL | Network samples: smallest KS p-value 0.0275 (luminosity_distance, T3a vs T3c/0) against a threshold of 0.000769 over 13 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data DIFFER between runs in waveform/H1, waveform/L1; PSD files byte-identical |
-| T3.3 GW151012 in T3c matches its single-event run | PASS | Network samples: smallest KS p-value 0.00762 (theta_jn, T3b vs T3c/1) against a threshold of 0.000769 over 13 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data bit-identical across runs; PSD files byte-identical |
+| T3.3 GW150914 in T3c matches its single-event run | PASS | Network samples: smallest KS p-value 0.0275 (luminosity_distance, T3a vs T3c/0) against a threshold of 0.000769 over 13 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data equal to within round-off (largest relative difference 3.2e-12, limit 1e-08); PSD files bit-identical |
+| T3.3 GW151012 in T3c matches its single-event run | PASS | Network samples: smallest KS p-value 0.00762 (theta_jn, T3b vs T3c/1) against a threshold of 0.000769 over 13 tests; log evidence not compared, since a run has fewer than 100 effective samples; event data bit-identical; PSD files bit-identical |
 | T3.4 The two events' data really differ | PASS | T3c/0 vs T3c/1: event data differ: True, PSD files differ: True |
 | T3.5 Timing recorded for every job | PASS | From each job's Condor log |
-| Also: GW150914's event data match T1a's from the first launch | PASS | Bit-identical, so the fixes leave data handling unchanged |
+| Also: GW150914's event data match T1a's from the first launch | PASS | Event data bit-identical, so the fixes leave data handling unchanged |
 
 ## GW150914: Agreement between runs
 
@@ -44,7 +44,7 @@ Network samples, two-sample KS per parameter: 13 tests over 2 runs, Bonferroni t
 |---|---|---|---|
 | T3a vs T3c/0 | +27.628 | 1.414 | 19.54 |
 
-Event data (SHA-256 of every dataset in each event data file's data group): DIFFERENT between runs, in waveform/H1, waveform/L1.
+Event data (every dataset in each event data file's data group): the same across T3a, T3c/0: equal to within round-off (largest relative difference 3.2e-12, limit 1e-08).
 
 ### Weights
 
@@ -112,7 +112,7 @@ Network samples, two-sample KS per parameter: 13 tests over 2 runs, Bonferroni t
 |---|---|---|---|
 | T3b vs T3c/1 | -0.776 | 1.018 | 0.76 |
 
-Event data (SHA-256 of every dataset in each event data file's data group): bit-identical across T3b, T3c/1.
+Event data (every dataset in each event data file's data group): the same across T3b, T3c/1: bit-identical.
 
 ### Weights
 
