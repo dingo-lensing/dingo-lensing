@@ -317,17 +317,40 @@ that ran on the same node (T3b and T3c's GW151012, both on node2407) is
 bit-identical; T3a (node2266) and T3c's GW150914 (node2259) differ only in
 round-off, and T1a (node2145) matched T3a exactly. The likely mechanism is numpy
 choosing its maths routines (`exp`, `sin`, `cos`) for each CPU, which DINGO's
-strain time shift uses and the PSD path does not; not yet confirmed against the
-nodes' CPU types. The analysis now compares event data and PSD files element by element, each
+strain time shift uses and the PSD path does not. The nodes' advertised CPU
+features fit this: node2145 (T1a) has AVX2 and AVX-512, node2266 (T3a) and
+node2407 (T3b, T3c's GW151012) AVX2, and node2259 (T3c's GW150914), the only node
+whose result differs, advertises neither. So the AVX-512 and AVX2-only nodes agree
+bit for bit, and the odd one out is the node without (advertised) AVX2, which
+points to numpy's AVX2/FMA code paths against its baseline ones. Not advertising
+AVX2 does not prove a node lacks it, so this supports the explanation rather than
+confirming it. The analysis now compares event data and PSD files element by element, each
 relative to its own size, with a limit of 1e-8: Round-off is ~1e-16 per element
-(at most ~1e-13 for the faintest strain bins), while another event, frame file
+(the largest in T3, in a faint strain bin, was 3.2e-12), while another event, frame file
 or PSD differs by order 1, and an event time one floating-point step out by
 ~1e-3. Bit-identity is reported separately. The first version of this used one
 relative norm per array (limit 1e-12): It passed GW150914, but then judged the
 two events' PSD files equal (T3.4 FAILED), because DINGO's placeholder ASD of 1
 below 20 Hz dominated the norm and hid the real values (~1e-23); comparing a PSD
 file as one table had the same flaw with its frequency column. Both are now
-unit-tested with DINGO-like placeholders. T3 is being re-analysed again.
+unit-tested with DINGO-like placeholders.
+
+Final analysis (`376def4`), every criterion PASS:
+
+| Criterion | Verdict |
+|---|---|
+| T3.1 Every chain completes | PASS |
+| T3.2 No shared files | PASS: Every T3c output names its event. |
+| T3.3 GW150914 matches its single run | PASS: Event data equal to within round-off (largest relative difference 3.2e-12, limit 1e-8), PSD files bit-identical, network samples agree (smallest KS p-value 0.0275 over 13 tests; threshold 0.000769). |
+| T3.3 GW151012 matches its single run | PASS: Event data and PSD files bit-identical, network samples agree (smallest KS p-value 0.0076). |
+| T3.4 The two events differ | PASS: Event data and PSD files both differ. |
+| T3.5 Timing recorded | PASS |
+| Also: GW150914 against T1a | PASS: Event data bit-identical. |
+
+So option A analyses different events correctly with the two fixes: Each event in
+the shared workflow gets the same analysis as on its own, no file is shared
+between chains, and the fixes leave data handling unchanged. Two events took
+9 min 22 s together against about 8 min 40 s each alone.
 
 #### T1 and T2
 

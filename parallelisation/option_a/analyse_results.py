@@ -64,7 +64,7 @@ EFFICIENCY_FACTOR = 2.0
 # floating-point round-off, compared element by element (each relative to its
 # own size; see relative_difference). Execute nodes of different CPU types can
 # differ in the last bits (numpy picks its maths routines for the CPU): ~1e-16
-# per element, at most ~1e-13 for the faintest strain bins. A real difference
+# per element, up to 3.2e-12 in T3's faintest strain bin. A real difference
 # (another event, frame file or PSD) is of order 1, and an event time one
 # floating-point step out gives ~1e-3. Bit-identity is reported, not required.
 ROUND_OFF = 1e-8
