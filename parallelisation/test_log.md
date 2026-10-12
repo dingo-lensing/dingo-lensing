@@ -281,8 +281,10 @@ number) and the corner plots.
   3. The weighted median and 90% interval of every parameter, side by side, for
      reading.
   4. Event data: The copies' event data files (the strain and ASDs that both the
-     network and the likelihood see) must be bit-identical, since identical
-     inputs are what the comparisons above assume.
+     network and the likelihood see) must be equal to within round-off, since
+     identical inputs are what the comparisons above assume. They are compared
+     element by element, and bit-identity is reported separately (finding 18).
+     T1 and T2's analysis (`4f46c13`) still required bit-identity, which they met.
 - Weights: For each run, how far the heaviest samples dominate (largest weight,
   share of the 10 largest, efficiency without the heaviest sample) and the
   heaviest sample itself. A proposal missing part of the posterior gives a few
@@ -300,7 +302,52 @@ number) and the corner plots.
 
 #### T3 (two different events)
 
-Analysis `cccf96c` (verdicts as first computed, with bit-identity required):
+**Summary.** One config listing two different events gives each event the same
+analysis as running it alone, once two DINGO-Lensing fixes are in. T3 ran
+GW150914 and GW151012 with Exercise 2's toy model as T3a (GW150914 alone), T3b
+(GW151012 alone) and T3c (both in one config), launched 2026-10-09 08:41 UTC.
+Every job finished at its first attempt, and every criterion passes (analysis
+`376def4`, results `bb528a7`):
+
+| Criterion | Verdict |
+|---|---|
+| T3.1 Every chain completes | PASS: T3a 4 of 4 nodes, T3b 4 of 4, T3c 8 of 8. |
+| T3.2 No shared files | PASS: Every T3c output names its event, so the PSD fix works. |
+| T3.3 GW150914 matches its single run | PASS: Event data equal to within round-off (largest relative difference 3.2e-12, limit 1e-8; the two jobs ran on nodes with different CPU features, finding 18), PSD files bit-identical, network samples agree (smallest KS p-value 0.0275 over 13 tests; threshold 0.000769). |
+| T3.3 GW151012 matches its single run | PASS: Event data and PSD files bit-identical, network samples agree (smallest KS p-value 0.0076 over 13 tests). |
+| T3.4 The two events differ | PASS: Event data and PSD files both differ. |
+| T3.5 Timing recorded | PASS |
+| Also: GW150914 against T1a | PASS: Event data bit-identical to T1a's, from before the fixes, so the fixes leave data handling unchanged. |
+
+- Fixes it needed (branch `kailib-parallelisation`): `67e1f26` gives each
+  data-generation job its own PSD files (finding 15), and `1d7c477` makes each
+  read only the frame files that overlap its event (bilby_pipe reads every
+  listed file, with no time range, as one stream). The configs must also list
+  the frame files rather than give a glob, which DINGO leaves unexpanded at
+  build time (finding 17); the launch checks caught that, so the first try
+  submitted nothing.
+- What it cannot show: In every run the toy model gives one sample nearly all
+  the importance weight (1 to 6 effective samples of 10,000), so the log
+  evidences and importance-sampled posteriors are each set by a single sample
+  and are not compared. The 19.5 sigma between GW150914's two log evidences in
+  `summary.md` is DINGO's error formula failing at one effective sample, not a
+  disagreement. The comparison rests on identical inputs and agreeing network
+  samples; as in T1, this tests the machinery, not the science (GW151012's
+  distance is also above the prior's limit).
+- Timing: Both events took 9 min 22 s together, against 8 min 42 s and
+  8 min 41 s alone. GW151012's chain started 3 min 10 s in, once GW150914's data
+  generation had finished (trap 4), then took 6 min 12 s, its jobs queueing for
+  less time than in T3b.
+- Still open: Every data-generation job receives every listed frame file
+  (1.44 GB per job here, against 1.18 GB in T1a, which listed only GW150914's),
+  so many events need a node-side filter. `data-dict`, `channel-dict` and
+  `psd-dict` apply to every event (trap 3), so a config's events must share
+  strain channel names. DINGO's PESummary job (off in every test) still reads
+  `data/<detector>_psd.txt`, which the generation jobs no longer write; it does
+  not run in this setup anyway (pesummary is not in the image).
+
+**How the verdicts were reached.** The first analysis (results `cccf96c`)
+required event data and PSD files to be bit-identical:
 
 | Criterion | Verdict |
 |---|---|
@@ -333,24 +380,8 @@ relative norm per array (limit 1e-12): It passed GW150914, but then judged the
 two events' PSD files equal (T3.4 FAILED), because DINGO's placeholder ASD of 1
 below 20 Hz dominated the norm and hid the real values (~1e-23); comparing a PSD
 file as one table had the same flaw with its frequency column. Both are now
-unit-tested with DINGO-like placeholders.
-
-Final analysis (`376def4`), every criterion PASS:
-
-| Criterion | Verdict |
-|---|---|
-| T3.1 Every chain completes | PASS |
-| T3.2 No shared files | PASS: Every T3c output names its event. |
-| T3.3 GW150914 matches its single run | PASS: Event data equal to within round-off (largest relative difference 3.2e-12, limit 1e-8), PSD files bit-identical, network samples agree (smallest KS p-value 0.0275 over 13 tests; threshold 0.000769). |
-| T3.3 GW151012 matches its single run | PASS: Event data and PSD files bit-identical, network samples agree (smallest KS p-value 0.0076). |
-| T3.4 The two events differ | PASS: Event data and PSD files both differ. |
-| T3.5 Timing recorded | PASS |
-| Also: GW150914 against T1a | PASS: Event data bit-identical. |
-
-So option A analyses different events correctly with the two fixes: Each event in
-the shared workflow gets the same analysis as on its own, no file is shared
-between chains, and the fixes leave data handling unchanged. Two events took
-9 min 22 s together against about 8 min 40 s each alone.
+unit-tested with DINGO-like placeholders. The final analysis (`376def4`) gave
+the verdicts in the summary above.
 
 #### T1 and T2
 
