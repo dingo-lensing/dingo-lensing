@@ -38,13 +38,23 @@ EXECUTABLES = {
     "importance sampling": "dingo_lensing_pipe_importance_sampling",
     "plot": "dingo_pipe_plot",
 }
+# What plain dingo_pipe writes, for the unlensed models (DINGO 0.9.8's job classes).
+DINGO_EXECUTABLES = {
+    "generation": "dingo_pipe_generation",
+    "sampling": "dingo_pipe_sampling",
+    "importance sampling": "dingo_pipe_importance_sampling",
+    "plot": "dingo_pipe_plot",
+}
 GiB = 1024**3
 
 
 class Workflow:
     """A run folder with a config and the workflow dingo_lensing_pipe builds from it."""
 
-    def __init__(self, root: Path, events: int = 1, psd_files: bool = True, gps_file: bool = False):
+    def __init__(
+        self, root: Path, events: int = 1, psd_files: bool = True, gps_file: bool = False, executables=None
+    ):
+        self.executables = EXECUTABLES if executables is None else executables
         self.run_dir = root / "run"
         self.osdf = root / "osdf"
         self.events = events
@@ -79,7 +89,7 @@ class Workflow:
         self.submit_dir = self.run_dir / "T" / "submit"
         self.jobs = {}
         for idx in range(events):
-            for kind in EXECUTABLES:
+            for kind in self.executables:
                 self.jobs[(kind, idx)] = self.submit_lines(kind, idx)
 
     def name(self, kind, idx):
@@ -100,7 +110,7 @@ class Workflow:
         log = (self.run_dir / "T" / "log" / self.name(kind, idx)).as_posix()
         return [
             "universe = vanilla",
-            f"executable = /opt/dingo_env/bin/{EXECUTABLES[kind]}",
+            f"executable = /opt/dingo_env/bin/{self.executables[kind]}",
             "request_memory = 8GB",
             "request_disk = 5.0GB",
             "request_cpus = 1",
@@ -152,11 +162,15 @@ class Workflow:
         dag.append("# END NODES AND EDGES")
         (self.submit_dir / "dag_T.submit").write_text("\n".join(dag) + "\n")
 
-    def check(self, events=None, write=True):
+    def check(self, events=None, write=True, builder="dingo_lensing_pipe"):
         if write:
             self.write()
         return check_workflow.check_workflow(
-            self.run_dir, "T.ini", self.events if events is None else events, osdf_root=self.osdf.as_posix()
+            self.run_dir,
+            "T.ini",
+            self.events if events is None else events,
+            osdf_root=self.osdf.as_posix(),
+            builder=builder,
         )
 
 
@@ -351,6 +365,31 @@ class TestCheckWorkflow(unittest.TestCase):
         workflow = self.workflow()
         workflow.image.unlink()
         self.assertCaught(workflow, "Cannot work out what to expect")
+
+    def test_a_good_dingo_pipe_workflow_passes_as_one(self):
+        # T4's unlensed runs: Plain dingo_pipe builds them (finding 11).
+        problems, counts = self.workflow(executables=DINGO_EXECUTABLES).check(builder="dingo_pipe")
+        self.assertEqual(problems, [])
+        self.assertEqual(counts, dict.fromkeys(DINGO_EXECUTABLES, 1))
+
+    def test_a_workflow_checked_against_the_wrong_builder(self):
+        # A lensed config built with dingo_pipe, or an unlensed one with dingo_lensing_pipe.
+        problems, counts = self.workflow().check(builder="dingo_pipe")
+        self.assertTrue(any("Unexpected executable" in problem and "dingo_pipe built" in problem for problem in problems))
+        self.assertEqual(counts["generation"], 0)
+        self.assertEqual(counts["plot"], 1)  # Both builders' plot jobs run dingo_pipe_plot.
+        problems, _ = self.workflow(executables=DINGO_EXECUTABLES).check()
+        self.assertTrue(any("'/opt/dingo_env/bin/dingo_pipe_sampling'" in problem for problem in problems), problems)
+
+    def test_job_kind_knows_both_builders(self):
+        for builder, executables in (("dingo_lensing_pipe", EXECUTABLES), ("dingo_pipe", DINGO_EXECUTABLES)):
+            for kind, name in executables.items():
+                with self.subTest(builder=builder, kind=kind):
+                    self.assertEqual(check_workflow.job_kind(f"/opt/dingo_env/bin/{name}"), kind)
+                    self.assertEqual(check_workflow.job_kind(f"/opt/dingo_env/bin/{name}", builder), kind)
+        self.assertIsNone(check_workflow.job_kind("/opt/dingo_env/bin/dingo_pipe_sampling", "dingo_lensing_pipe"))
+        self.assertEqual(check_workflow.BUILDERS["dingo_lensing_pipe"], EXECUTABLES)
+        self.assertEqual(check_workflow.BUILDERS["dingo_pipe"], DINGO_EXECUTABLES)
 
 
 class TestSubmitFileHelpers(unittest.TestCase):

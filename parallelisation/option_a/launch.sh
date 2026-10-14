@@ -4,6 +4,7 @@
 # Run on the cluster, from anywhere:
 #     bash ~/dingo-lensing-sync/parallelisation/option_a/launch.sh        # T1 and T2
 #     bash ~/dingo-lensing-sync/parallelisation/option_a/launch.sh T3     # T3
+#     bash ~/dingo-lensing-sync/parallelisation/option_a/launch.sh T4     # T4
 #
 # Every job runs inside the container image the configs name (../container/).
 # Nothing is submitted unless every check passes: The unit tests, the checks on
@@ -24,7 +25,8 @@ PYTHON="$ENV_PATH/bin/python"
 fail() { echo "ERROR: $*" >&2; exit 1; }
 step() { printf '\n== %s\n' "$*"; }
 
-# Label, run folder, config, number of events.
+# Label, run folder, config, number of events, and the program that builds the
+# workflow if not dingo_lensing_pipe.
 case "$SUITE" in
     T1T2)
         RUN_ROOT="${RUN_ROOT:-$HOME/dingo-lensing-runs/option_a}"
@@ -48,7 +50,31 @@ case "$SUITE" in
         EXTRA_INPUTS=()
         copy_extras() { :; }
         ;;
-    *) fail "Unknown suite '$SUITE': Use T1T2 or T3" ;;
+    T4)
+        # Written by make_t4_configs.py from t4_events.py; the unit tests check
+        # this list against both.
+        RUN_ROOT="${RUN_ROOT:-$HOME/dingo-lensing-runs/option_a_t4}"
+        TESTS=(
+            "T4a T4 T4a_gw230628_231200.ini 1"
+            "T4b T4 T4b_gw230708_230935.ini 1"
+            "T4c T4 T4c_gw230914_111401.ini 1"
+            "T4d T4 T4d_gw230927_153832.ini 1"
+            "T4e T4 T4e_gw231102_071736.ini 1"
+            "T4f T4 T4f_gw231206_233134.ini 1"
+            "T4g T4 T4g_gw231206_233901.ini 1"
+            "T4m T4 T4m_all.ini 7"
+            "T4ua T4 T4ua_gw230628_231200.ini 1 dingo_pipe"
+            "T4ub T4 T4ub_gw230708_230935.ini 1 dingo_pipe"
+            "T4uc T4 T4uc_gw230914_111401.ini 1 dingo_pipe"
+            "T4ud T4 T4ud_gw230927_153832.ini 1 dingo_pipe"
+            "T4ue T4 T4ue_gw231102_071736.ini 1 dingo_pipe"
+            "T4uf T4 T4uf_gw231206_233134.ini 1 dingo_pipe"
+            "T4ug T4 T4ug_gw231206_233901.ini 1 dingo_pipe"
+        )
+        EXTRA_INPUTS=()
+        copy_extras() { :; }
+        ;;
+    *) fail "Unknown suite '$SUITE': Use T1T2, T3 or T4" ;;
 esac
 
 # Ask a config for a value, or for its data-dict, psd-dict or gps-file paths.
@@ -84,6 +110,12 @@ trap on_exit EXIT
 
 echo "Suite $SUITE: ${#TESTS[@]} workflows, run folder $RUN_ROOT"
 
+# T4's trigger times and prior checks come from the LVK's release files
+# (lvk_posteriors.py); the unit tests compare them with the configs.
+if [[ "$SUITE" == T4 && ! -f "$HERE/t4_lvk.json" ]]; then
+    fail "No $HERE/t4_lvk.json: Run lvk_posteriors.py first (see its docstring)"
+fi
+
 step "Unit tests"
 (cd "$HERE/.." && "$PYTHON" -m unittest discover -s tests) || fail "Unit tests failed"
 
@@ -94,11 +126,19 @@ command -v apptainer > /dev/null || fail "apptainer not found"
 # conda-env (/opt/dingo_env) is not a folder here, so bilby_pipe runs
 # 'conda env list' before accepting it as the container's environment.
 command -v conda > /dev/null || fail "conda not found, and bilby_pipe needs it to accept conda-env"
-path="$ENV_PATH/bin/dingo_lensing_pipe"
-[[ -x "$path" ]] || fail "$path is missing"
-# A cloned env can keep scripts whose first line names the original env's python.
-head -n 1 "$path" | grep -q "^#!$ENV_PATH/" \
-    || fail "$path starts with '$(head -n 1 "$path")', not $ENV_PATH's python"
+BUILDERS=()
+for entry in "${TESTS[@]}"; do
+    read -r label folder config events builder <<< "$entry"
+    builder="${builder:-dingo_lensing_pipe}"
+    [[ " ${BUILDERS[*]+"${BUILDERS[*]}"} " == *" $builder "* ]] || BUILDERS+=("$builder")
+done
+for builder in "${BUILDERS[@]}"; do
+    path="$ENV_PATH/bin/$builder"
+    [[ -x "$path" ]] || fail "$path is missing"
+    # A cloned env can keep scripts whose first line names the original env's python.
+    head -n 1 "$path" | grep -q "^#!$ENV_PATH/" \
+        || fail "$path starts with '$(head -n 1 "$path")', not $ENV_PATH's python"
+done
 installed="$(cd / && "$PYTHON" -c 'import dingo_lensing, os; print(os.path.dirname(os.path.dirname(os.path.realpath(dingo_lensing.__file__))))')"
 [[ "$installed" == "$(cd "$REPO" && pwd -P)" ]] \
     || fail "dingo_env imports dingo_lensing from $installed, not $REPO"
@@ -114,7 +154,7 @@ step "Image"
 read -r _ _ FIRST_CONFIG _ <<< "${TESTS[0]}"
 IMAGE_URL="$(config_value "$FIRST_CONFIG" container)"
 for entry in "${TESTS[@]}"; do
-    read -r label folder config events <<< "$entry"
+    read -r label folder config events builder <<< "$entry"
     [[ "$(config_value "$config" container)" == "$IMAGE_URL" ]] \
         || fail "$config names a different image from $FIRST_CONFIG"
 done
@@ -136,7 +176,7 @@ step "Inputs"
 MODELS=()
 INPUTS=("${EXTRA_INPUTS[@]+"${EXTRA_INPUTS[@]}"}")
 for entry in "${TESTS[@]}"; do
-    read -r label folder config events <<< "$entry"
+    read -r label folder config events builder <<< "$entry"
     model="$(config_value "$config" model)"
     [[ " ${MODELS[*]+"${MODELS[*]}"} " == *" $model "* ]] || MODELS+=("$model")
     while read -r psd; do
@@ -153,7 +193,7 @@ step "Run folder $RUN_ROOT"
 mkdir -p "$RUN_ROOT"
 CREATED_RUN_ROOT=1
 for entry in "${TESTS[@]}"; do
-    read -r label folder config events <<< "$entry"
+    read -r label folder config events builder <<< "$entry"
     mkdir -p "$RUN_ROOT/$folder"
     cp "$HERE/$config" "$RUN_ROOT/$folder/"
     while read -r gps; do
@@ -176,40 +216,43 @@ cat "$RUN_ROOT/run_metadata.txt"
 
 # Single-event configs carry the trigger times: They fetch GWOSC data and
 # check frames for the multi-event configs too (unit-tested to share events).
+# A file another config already fetched in this launch is read back, not
+# downloaded again.
 step "GWOSC data"
 for entry in "${TESTS[@]}"; do
-    read -r label folder config events <<< "$entry"
+    read -r label folder config events builder <<< "$entry"
     [[ "$events" -eq 1 ]] || continue
     if config_paths "$config" data-dict | grep -qv '^gwosc/'; then
         echo "$label: Data not from GWOSC, nothing to fetch"
         continue
     fi
-    (cd "$HERE" && "$PYTHON" fetch_gwosc_frames.py "$RUN_ROOT/$folder/$config" --run-dir "$RUN_ROOT/$folder")
+    (cd "$HERE" && "$PYTHON" fetch_gwosc_frames.py "$RUN_ROOT/$folder/$config" --run-dir "$RUN_ROOT/$folder" --skip-existing)
 done
 
 step "Frames, read inside the image as the data-generation jobs will"
 for entry in "${TESTS[@]}"; do
-    read -r label folder config events <<< "$entry"
+    read -r label folder config events builder <<< "$entry"
     [[ "$events" -eq 1 ]] || continue
     (cd "$HERE" && "${IN_IMAGE[@]}" check_frames.py "$RUN_ROOT/$folder/$config" --run-dir "$RUN_ROOT/$folder")
 done
 
-step "Models: Can the image rebuild their lensed waveform generators?"
+step "Models: Can the image rebuild their waveform generators?"
 (cd "$HERE" && "${IN_IMAGE[@]}" check_models.py "${MODELS[@]}")
 
 step "Build and check workflows"
 for entry in "${TESTS[@]}"; do
-    read -r label folder config events <<< "$entry"
+    read -r label folder config events builder <<< "$entry"
+    builder="${builder:-dingo_lensing_pipe}"
     dir="$RUN_ROOT/$folder"
-    (cd "$dir" && "$ENV_PATH/bin/dingo_lensing_pipe" "$config" > "$label.build.log" 2>&1) \
-        || fail "Building $label failed; see $dir/$label.build.log"
-    (cd "$HERE" && "$PYTHON" check_workflow.py "$dir" "$config" "$events") \
+    (cd "$dir" && "$ENV_PATH/bin/$builder" "$config" > "$label.build.log" 2>&1) \
+        || fail "Building $label with $builder failed; see $dir/$label.build.log"
+    (cd "$HERE" && "$PYTHON" check_workflow.py "$dir" "$config" "$events" --builder "$builder") \
         || fail "$label's workflow failed the checks above"
 done
 
 step "Submit"
 for entry in "${TESTS[@]}"; do
-    read -r label folder config events <<< "$entry"
+    read -r label folder config events builder <<< "$entry"
     dir="$RUN_ROOT/$folder"
     dag="$(cd "$dir" && ls "$label"/submit/dag_*.submit)"
     (cd "$dir" && condor_submit_dag "$dag") | tee -a "$RUN_ROOT/submissions.txt"

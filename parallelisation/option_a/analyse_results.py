@@ -33,7 +33,11 @@ import numpy as np
 
 from check_workflow import dag_jobs, job_kind, last_value, read_submit_file
 from condor_logs import dag_outcome, dag_succeeded, job_timing, read_events
+from make_t4_configs import MULTI_CONFIG as T4_MULTI_CONFIG
+from make_t4_configs import label as t4_label
+from make_t4_configs import single_name as t4_single_name
 from pipe_config import read_pipe_ini
+from t4_events import EVENTS as T4_EVENTS
 
 # Label, run folder, config, number of events: As in launch.sh.
 WORKFLOWS = [
@@ -50,6 +54,19 @@ T3_WORKFLOWS = [
     ("T3c", "T3", "T3c_both.ini", 2),
 ]
 T3_GROUPS = {"GW150914": [("T3a", 0), ("T3c", 0)], "GW151012": [("T3b", 0), ("T3c", 1)]}
+# T4: Seven O4a events, each alone with the lensed model (T4a to T4g), together
+# (T4m) and alone with the unlensed model (T4ua to T4ug); see t4_events.py.
+T4_WORKFLOWS = (
+    [(t4_label(event), "T4", t4_single_name(event), 1) for event in T4_EVENTS]
+    + [("T4m", "T4", T4_MULTI_CONFIG, len(T4_EVENTS))]
+    + [(t4_label(event, True), "T4", t4_single_name(event, True), 1) for event in T4_EVENTS]
+)
+T4_GROUPS = {event.name: [(t4_label(event), 0), ("T4m", index)] for index, event in enumerate(T4_EVENTS)}
+# The LVK's results for T4's events (lvk_posteriors.py).
+T4_LVK = Path(__file__).resolve().parent / "t4_lvk.json"
+# A lensing Bayes factor above this (log10) is flagged CHECK: The LVK found no
+# lensing in these events, so support for it needs a look (noise, waveform, model).
+LENSING_LOG10_B = 1.0
 # Kaili's local Exercise 3 run (tutorial_reference/ex3_dingo_lensing_application/ex3_local.log).
 REFERENCES = {
     "T2": {"name": "Exercise 3", "log_evidence": -5829.945, "log_evidence_std": 0.014, "sample_efficiency": 0.0940}
@@ -472,8 +489,13 @@ def run_name(label: str, event: int, events: int) -> str:
     return label if events == 1 else f"{label}/{event}"
 
 
-def compare_test(runs: Dict[str, dict], reference: Optional[dict], reference_samples: Optional[dict]) -> dict:
-    """Agreement between a test's runs: {name: {"network": samples, "posterior": result}}."""
+def compare_test(
+    runs: Dict[str, dict], reference: Optional[dict], reference_samples: Optional[dict], alpha: float = ALPHA
+) -> dict:
+    """Agreement between a test's runs: {name: {"network": samples, "posterior": result}}.
+
+    alpha is the chance of any false alarm among this test's KS tests.
+    """
     network = {name: run["network"]["samples"] for name, run in runs.items()}
     importance = {}
     for name, run in runs.items():
@@ -523,7 +545,7 @@ def compare_test(runs: Dict[str, dict], reference: Optional[dict], reference_sam
         high = reference["sample_efficiency"] * EFFICIENCY_FACTOR
         outside = [name for name, s in importance.items() if not low <= s["sample_efficiency"] <= high]
     comparison = {
-        "network_ks": ks_comparison(network),
+        "network_ks": ks_comparison(network, alpha),
         "importance": importance,
         "weights": weights,
         "efficiency_outside_reference_factor": outside,
@@ -594,6 +616,7 @@ def analyse(
     reference_results: Optional[Path] = None,
     suite: str = "T1T2",
     earlier_run_root: Optional[Path] = None,
+    lvk_summary: Optional[Path] = T4_LVK,
 ) -> dict:
     report = {"run_root": str(run_root), "suite": suite, "analysed": datetime.now().isoformat(timespec="seconds")}
     metadata = run_root / "run_metadata.txt"
@@ -603,6 +626,8 @@ def analyse(
         groups = {test: [(label, None) for label in labels] for test, labels in TESTS.items()}
     elif suite == "T3":
         workflow_list, groups = T3_WORKFLOWS, T3_GROUPS
+    elif suite == "T4":
+        workflow_list, groups = T4_WORKFLOWS, T4_GROUPS
     else:
         raise ValueError(f"Unknown suite {suite!r}")
     workflows, runs = load_workflows(run_root, workflow_list)
@@ -616,11 +641,14 @@ def analyse(
             reference_samples = load_result(sampling[0])["samples"]
             report["reference_network_samples"] = str(sampling[0])
     tests = {}
+    # T4 compares seven events: Its 1% chance of any false alarm covers all of
+    # them, not each one (which would give about 7% for the suite).
+    alpha = ALPHA / len(groups) if suite == "T4" else ALPHA
     for test, members in groups.items():
         test_runs = group_runs(runs, members, workflows)
         if len(test_runs) >= 2:
             tests[test] = compare_test(
-                test_runs, REFERENCES.get(test), reference_samples if test in REFERENCES else None
+                test_runs, REFERENCES.get(test), reference_samples if test in REFERENCES else None, alpha
             )
     report["tests"] = tests
     if suite == "T3":
@@ -628,6 +656,16 @@ def analyse(
         report["different_events"] = different_events(runs[("T3c", 0)], runs[("T3c", 1)]) if both else None
         report["earlier_gw150914"] = earlier_event_data(runs.get(("T3a", 0)), earlier_run_root)
         report["verdicts"] = verdicts_t3(report)
+    elif suite == "T4":
+        report["different_events"] = t4_different_events(runs)
+        report["lensed_unlensed_data"] = t4_lensed_unlensed_data(runs)
+        report["n_eff"] = {
+            run["name"]: importance_summary(run["posterior"]["samples"]["weights"])["n_eff"] for run in runs.values()
+        }
+        report["bayes_factors"] = bayes_factors(runs)
+        lvk = json.loads(lvk_summary.read_text()) if lvk_summary is not None and lvk_summary.is_file() else {}
+        report["lvk"] = lvk_comparison(runs, lvk)
+        report["verdicts"] = verdicts_t4(report)
     else:
         report["verdicts"] = verdicts(report)
     return report
@@ -660,6 +698,146 @@ def earlier_event_data(run: Optional[dict], earlier_run_root: Optional[Path]) ->
     )
     comparison["earlier"] = str(earlier[0])
     return comparison
+
+
+def t4_different_events(runs: Dict[Tuple[str, int], dict]) -> dict:
+    """Whether every pair of T4m's events has different event data and PSD files.
+
+    Two of the events share a frame file, so this also shows each job cut its
+    own event's stretch from it.
+    """
+    names, data, psds = [], {}, {}
+    for index in range(len(T4_EVENTS)):
+        run = runs.get(("T4m", index))
+        if run is None:
+            continue
+        names.append(run["name"])
+        if run["event_data"] is not None:
+            data[run["name"]] = event_data_arrays(run["event_data"])
+        if run["psd_files"]:
+            psds[run["name"]] = psd_arrays(run["psd_files"])
+    same_data, same_psds = [], []
+    for first, second in itertools.combinations(names, 2):
+        if first in data and second in data and event_data_comparison({first: data[first], second: data[second]})["identical"]:
+            same_data.append([first, second])
+        if first in psds and second in psds and event_data_comparison({first: psds[first], second: psds[second]})["identical"]:
+            same_psds.append([first, second])
+    return {
+        "runs": names,
+        "missing_event_data": [name for name in names if name not in data],
+        "missing_psd_files": [name for name in names if name not in psds],
+        "pairs": len(names) * (len(names) - 1) // 2,
+        "same_event_data": same_data,
+        "same_psd_files": same_psds,
+    }
+
+
+def t4_lensed_unlensed_data(runs: Dict[Tuple[str, int], dict]) -> Dict[str, dict]:
+    """Whether each event's lensed and unlensed runs analysed the same strain and ASDs,
+    which their Bayes factor assumes."""
+    rows = {}
+    for event in T4_EVENTS:
+        lensed, unlensed = runs.get((t4_label(event), 0)), runs.get((t4_label(event, True), 0))
+        missing = [
+            name
+            for name, run in ((t4_label(event), lensed), (t4_label(event, True), unlensed))
+            if run is None or run["event_data"] is None
+        ]
+        if missing:
+            rows[event.name] = {"identical": None, "missing": missing}
+            continue
+        rows[event.name] = event_data_comparison(
+            {
+                lensed["name"]: event_data_arrays(lensed["event_data"]),
+                unlensed["name"]: event_data_arrays(unlensed["event_data"]),
+            }
+        )
+    return rows
+
+
+def bayes_factors(runs: Dict[Tuple[str, int], dict]) -> Dict[str, Optional[dict]]:
+    """Each event's lensed-versus-unlensed Bayes factor, from its two single-event runs.
+
+    The models share noise spectra, data settings and priors; the lensed one
+    adds the delay and relative magnification of a second image, so the
+    unlensed model is the lensed one with no second image. Meaningful only if
+    both runs have at least MIN_N_EFF effective samples, as for any log evidence.
+    """
+    rows: Dict[str, Optional[dict]] = {}
+    for event in T4_EVENTS:
+        lensed, unlensed = runs.get((t4_label(event), 0)), runs.get((t4_label(event, True), 0))
+        if lensed is None or unlensed is None:
+            rows[event.name] = None
+            continue
+        summaries = {}
+        for run in (lensed, unlensed):
+            summary = importance_summary(run["posterior"]["samples"]["weights"])
+            summary["log_evidence"] = run["posterior"]["log_evidence"]
+            summaries[run["name"]] = summary
+        first, second = summaries[lensed["name"]], summaries[unlensed["name"]]
+        ln_b = first["log_evidence"] - second["log_evidence"]
+        std = math.hypot(first["log_evidence_std"], second["log_evidence_std"])
+        rows[event.name] = {
+            "lensed": lensed["name"],
+            "unlensed": unlensed["name"],
+            "log_evidence": {name: summary["log_evidence"] for name, summary in summaries.items()},
+            "n_eff": {name: summary["n_eff"] for name, summary in summaries.items()},
+            "ln_B": ln_b,
+            "ln_B_std": std,
+            "log10_B": ln_b / math.log(10),
+            "log10_B_std": std / math.log(10),
+            "reliable": all(summary["n_eff"] >= MIN_N_EFF for summary in summaries.values()),
+        }
+    return rows
+
+
+LVK_COMPARED = ("chirp_mass", "mass_ratio", "luminosity_distance", "chi_eff")
+
+
+def with_chi_eff(samples: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+    """The samples plus chi_eff, from DINGO's spin magnitudes and tilts."""
+    needed = ("mass_ratio", "a_1", "a_2", "tilt_1", "tilt_2")
+    if not all(name in samples for name in needed):
+        return samples
+    q = samples["mass_ratio"]
+    chi_eff = (samples["a_1"] * np.cos(samples["tilt_1"]) + q * samples["a_2"] * np.cos(samples["tilt_2"])) / (1 + q)
+    return {**samples, "chi_eff": chi_eff}
+
+
+def lvk_comparison(runs: Dict[Tuple[str, int], dict], lvk: dict) -> Dict[str, Optional[dict]]:
+    """Each event's posteriors from the lensed and unlensed runs beside the LVK's.
+
+    The priors differ (the LVK's distance prior is uniform in comoving volume,
+    the models' uniform in distance), so this is for reading, plus one flag:
+    The LVK's median detector-frame chirp mass outside a run's 90% interval.
+    """
+    rows: Dict[str, Optional[dict]] = {}
+    for event in T4_EVENTS:
+        entry = lvk.get(event.name)
+        if entry is None:
+            rows[event.name] = None
+            continue
+        row = {
+            "lvk": {name: entry["quantiles"][name] for name in LVK_COMPARED if name in entry["quantiles"]},
+            "lvk_minimum_frequency": entry.get("minimum_frequency"),
+            "runs": {},
+            "chirp_mass_median_outside": [],
+        }
+        for unlensed in (False, True):
+            run = runs.get((t4_label(event, unlensed), 0))
+            if run is None:
+                continue
+            samples = with_chi_eff(run["posterior"]["samples"])
+            row["runs"][run["name"]] = {
+                name: [float(q) for q in weighted_quantiles(samples[name], samples["weights"], [0.05, 0.5, 0.95])]
+                for name in LVK_COMPARED
+                if name in samples
+            }
+            low, _, high = row["runs"][run["name"]].get("chirp_mass", [math.nan] * 3)
+            if not low <= row["lvk"]["chirp_mass"][1] <= high:
+                row["chirp_mass_median_outside"].append(run["name"])
+        rows[event.name] = row
+    return rows
 
 
 def complete_verdict(workflows: dict, labels) -> Tuple[bool, str]:
@@ -719,6 +897,23 @@ def agreement_verdict(comparison: Optional[dict]) -> Tuple[bool, str, bool]:
     ), check
 
 
+def single_run_verdict(comparison: Optional[dict]) -> Tuple[bool, str, bool]:
+    """(passed, evidence, needs a check) for an event in a multi-event workflow
+    against its single-event run: The agreement criterion plus the PSD files."""
+    passed, text, check = agreement_verdict(comparison)
+    if comparison is not None:
+        psd = comparison["psd_files"]
+        if psd["identical"]:
+            text += "; " + agreement_text(psd, "PSD files")
+        elif psd["identical"] is None:
+            text += f"; PSD files not compared: None found for {', '.join(psd['missing'])}"
+            check = True
+        else:
+            text += f"; PSD files DIFFER for {', '.join(psd['differing'])}"
+            passed = False
+    return passed, text, check
+
+
 def verdicts(report: dict) -> List[dict]:
     """A verdict on each pass criterion in test_log.md, numbered as there."""
     workflows, tests = report["workflows"], report["tests"]
@@ -776,19 +971,7 @@ def verdicts_t3(report: dict) -> List[dict]:
     add("T3.1 Every chain completes", *complete_verdict(workflows, ("T3a", "T3b", "T3c")))
     add("T3.2 No output file is written by more than one chain", *shared_verdict(workflows, "T3c"))
     for test in T3_GROUPS:
-        comparison = tests.get(test)
-        passed, text, check = agreement_verdict(comparison)
-        if comparison is not None:
-            psd = comparison["psd_files"]
-            if psd["identical"]:
-                text += "; " + agreement_text(psd, "PSD files")
-            elif psd["identical"] is None:
-                text += f"; PSD files not compared: None found for {', '.join(psd['missing'])}"
-                check = True
-            else:
-                text += f"; PSD files DIFFER for {', '.join(psd['differing'])}"
-                passed = False
-        add(f"T3.3 {test} in T3c matches its single-event run", passed, text, check)
+        add(f"T3.3 {test} in T3c matches its single-event run", *single_run_verdict(tests.get(test)))
     different = report.get("different_events")
     if different is None:
         add("T3.4 The two events' data really differ", False, "T3c lacks a run for one of its events")
@@ -817,6 +1000,104 @@ def verdicts_t3(report: dict) -> List[dict]:
     return rows
 
 
+def verdicts_t4(report: dict) -> List[dict]:
+    """A verdict on each T4 criterion in test_log.md."""
+    workflows, tests = report["workflows"], report["tests"]
+    labels = [label for label, _, _, _ in T4_WORKFLOWS]
+    rows = []
+
+    def add(criterion, passed, evidence, check=False):
+        rows.append({"criterion": criterion, "passed": passed, "check": check, "evidence": evidence})
+
+    add("T4.1 Every chain completes", *complete_verdict(workflows, labels))
+    add("T4.2 No output file is written by more than one chain", *shared_verdict(workflows, "T4m"))
+    for event in T4_EVENTS:
+        add(f"T4.3 {event.name} in T4m matches its single-event run", *single_run_verdict(tests.get(event.name)))
+
+    different = report["different_events"]
+    missing = sorted(set(different["missing_event_data"]) | set(different["missing_psd_files"]))
+    if len(different["runs"]) != len(T4_EVENTS) or missing:
+        add(
+            "T4.4 The seven events' data really differ",
+            False,
+            f"T4m has runs for {len(different['runs'])} of {len(T4_EVENTS)} events; no event data or PSD files "
+            f"for {', '.join(missing) or 'none'}",
+        )
+    else:
+        same = different["same_event_data"] + different["same_psd_files"]
+        add(
+            "T4.4 The seven events' data really differ",
+            not same,
+            f"Every one of the {different['pairs']} pairs of T4m's events has different event data and PSD files"
+            if not same
+            else f"The same data for {'; '.join(' and '.join(pair) for pair in same)}",
+        )
+
+    texts, passed, check = [], True, False
+    for name, comparison in report["lensed_unlensed_data"].items():
+        if comparison["identical"] is None:
+            texts.append(f"{name}: not compared, no event data for {', '.join(comparison['missing'])}")
+            check = True
+        elif comparison["identical"]:
+            texts.append(f"{name}: " + agreement_text(comparison, "event data"))
+        else:
+            texts.append(f"{name}: event data DIFFER in {', '.join(comparison['differing'])}")
+            passed = False
+    add("T4.5 Each event's lensed and unlensed runs analyse the same data", passed, "; ".join(texts), check)
+
+    timing_complete = all(workflows[label]["timing"]["complete"] for label in labels)
+    add(
+        "T4.6 Timing recorded for every job",
+        timing_complete,
+        "From each job's Condor log" if timing_complete else "Some job has no successful run in its Condor log",
+    )
+
+    low = {name: n_eff for name, n_eff in report["n_eff"].items() if n_eff < MIN_N_EFF}
+    lowest = min(report["n_eff"].items(), key=lambda item: item[1], default=None)
+    add(
+        f"T4.7 Importance sampling gives at least {MIN_N_EFF:g} effective samples in every run",
+        True,
+        (
+            f"Fewer in {', '.join(f'{name} ({n_eff:.1f})' for name, n_eff in low.items())}: The model fits those "
+            "events' data poorly, and their log evidences and Bayes factors are not reliable"
+            if low
+            else f"Lowest: {lowest[0]} with {lowest[1]:.1f}" if lowest else "No runs"
+        ),
+        check=bool(low) or lowest is None,
+    )
+
+    texts, check = [], False
+    for name, row in report["bayes_factors"].items():
+        if row is None:
+            texts.append(f"{name}: not computed (a run is missing)")
+            check = True
+            continue
+        texts.append(f"{name} {row['log10_B']:+.2f} +- {row['log10_B_std']:.2f}" + ("" if row["reliable"] else " (unreliable)"))
+        check |= not row["reliable"] or row["log10_B"] > LENSING_LOG10_B
+    add(
+        "Also: Lensing Bayes factors, log10 B (lensed vs unlensed)",
+        True,
+        "; ".join(texts) + f". CHECK if any is unreliable or above {LENSING_LOG10_B:g}",
+        check,
+    )
+
+    texts, check = [], False
+    for name, row in report["lvk"].items():
+        if row is None:
+            texts.append(f"{name}: no LVK summary")
+            check = True
+        elif row["chirp_mass_median_outside"]:
+            texts.append(f"{name}: LVK median chirp mass outside the 90% interval of {', '.join(row['chirp_mass_median_outside'])}")
+            check = True
+    add(
+        "Also: Detector-frame chirp mass agrees with the LVK's GWTC-4.0 results",
+        True,
+        "; ".join(texts) if texts else "The LVK's median lies inside every run's 90% interval for every event",
+        check,
+    )
+    return rows
+
+
 # -- Report -------------------------------------------------------------------
 
 
@@ -841,6 +1122,62 @@ def verdict_word(row: dict) -> str:
     return "CHECK" if row.get("check") else "PASS"
 
 
+def t4_sections(report: dict) -> List[str]:
+    """T4's Bayes factors and comparison with the LVK, for the summary."""
+    lines = [
+        "",
+        "## Lensing Bayes factors",
+        "",
+        "From each event's single-event runs with the lensed model (T4a to T4g) and the unlensed model (T4ua to "
+        "T4ug): ln B = ln Z(lensed) - ln Z(unlensed), with DINGO's log-evidence errors combined. Reliable only if "
+        f"both runs have at least {MIN_N_EFF:g} effective samples.",
+        "",
+        "| Event | ln Z lensed | ln Z unlensed | log10 B | Effective samples (lensed / unlensed) | Reliable |",
+        "|---|---|---|---|---|---|",
+    ]
+    for name, row in report["bayes_factors"].items():
+        if row is None:
+            lines.append(f"| {name} | n/a | n/a | n/a | n/a | no |")
+            continue
+        evidences = [row["log_evidence"][row["lensed"]], row["log_evidence"][row["unlensed"]]]
+        n_eff = [row["n_eff"][row["lensed"]], row["n_eff"][row["unlensed"]]]
+        lines.append(
+            f"| {name} | {evidences[0]:.3f} | {evidences[1]:.3f} | {row['log10_B']:+.3f} +- {row['log10_B_std']:.3f} | "
+            f"{n_eff[0]:.1f} / {n_eff[1]:.1f} | {'yes' if row['reliable'] else 'no'} |"
+        )
+    lines += [
+        "",
+        "## Comparison with GWTC-4.0",
+        "",
+        "Median [5%, 95%] from the LVK's IMRPhenomXPHM-SpinTaylor analysis (t4_lvk.json) and from each event's "
+        "single-event runs. The LVK's distance prior is uniform in comoving volume and the models' uniform in "
+        "distance, so distances differ by design. The models always start at 20 Hz; the LVK's lowest frequency "
+        "per detector is listed for each event.",
+        "",
+    ]
+    for name, row in report["lvk"].items():
+        if row is None:
+            lines += [f"**{name}**: No LVK summary.", ""]
+            continue
+        runs = list(row["runs"])
+        minimum = row["lvk_minimum_frequency"] or {}
+        lowest = ", ".join(f"{key} {value:g} Hz" for key, value in minimum.items() if key in ("H1", "L1"))
+        lines += [
+            f"**{name}** (LVK's lowest frequency: {lowest or 'n/a'})",
+            "",
+            "| Parameter | LVK | " + " | ".join(runs) + " |",
+            "|---" * (len(runs) + 2) + "|",
+        ]
+        for parameter, values in row["lvk"].items():
+            cells = [
+                f"{number(q[1], 4)} [{number(q[0], 4)}, {number(q[2], 4)}]"
+                for q in [values, *(row["runs"][run].get(parameter, [math.nan] * 3) for run in runs)]
+            ]
+            lines.append(f"| {parameter} | " + " | ".join(cells) + " |")
+        lines.append("")
+    return lines
+
+
 def render_markdown(report: dict) -> str:
     lines = ["# Option A results", "", f"Analysed {report['analysed']} from `{report['run_root']}`.", ""]
     if report.get("run_metadata"):
@@ -855,6 +1192,8 @@ def render_markdown(report: dict) -> str:
     ]
     for row in report["verdicts"]:
         lines.append(f"| {row['criterion']} | {verdict_word(row)} | {row['evidence']} |")
+    if report.get("bayes_factors") is not None:
+        lines += t4_sections(report)
     for test, comparison in report["tests"].items():
         ks = comparison["network_ks"]
         lines += [
@@ -1012,14 +1351,20 @@ def main(argv=None) -> None:
         type=Path,
         help="Exercise 3's result folder, to compare its network samples with T2's as well.",
     )
-    parser.add_argument("--suite", default="T1T2", choices=["T1T2", "T3"], help="Which tests the run folder holds.")
+    parser.add_argument("--suite", default="T1T2", choices=["T1T2", "T3", "T4"], help="Which tests the run folder holds.")
     parser.add_argument(
         "--earlier-run-root",
         type=Path,
         help="For T3: The first launch's run folder, to compare GW150914's event data with T1a's.",
     )
+    parser.add_argument(
+        "--lvk-summary",
+        type=Path,
+        default=T4_LVK,
+        help="For T4: The LVK's results for its events (lvk_posteriors.py).",
+    )
     args = parser.parse_args(argv)
-    report = analyse(args.run_root, args.reference_results, args.suite, args.earlier_run_root)
+    report = analyse(args.run_root, args.reference_results, args.suite, args.earlier_run_root, args.lvk_summary)
     args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "summary.json").write_text(json.dumps(to_json(report), indent=2) + "\n")
     (args.output / "summary.md").write_text(render_markdown(report))

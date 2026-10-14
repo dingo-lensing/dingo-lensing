@@ -1,0 +1,16 @@
+# T4m's events: Segment start times (trigger time - (duration - post-trigger
+# duration)), not trigger times. Written by make_t4_configs.py.
+# GW230628_231200: Trigger time 1372029138.4
+# GW230708_230935: Trigger time 1372892993.5
+# GW230914_111401: Trigger time 1378725259.7
+# GW230927_153832: Trigger time 1379864330.9
+# GW231102_071736: Trigger time 1382944674.4
+# GW231206_233134: Trigger time 1385940712.527832
+# GW231206_233901: Trigger time 1385941159.5
+1372029132.4
+1372892987.5
+1378725253.7
+1379864324.9
+1382944668.4
+1385940706.527832
+1385941153.5

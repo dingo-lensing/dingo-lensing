@@ -4,9 +4,11 @@
 # Run on the cluster, from anywhere, once all four workflows have finished:
 #     bash ~/dingo-lensing-sync/parallelisation/option_a/analyse.sh        # T1 and T2
 #     bash ~/dingo-lensing-sync/parallelisation/option_a/analyse.sh T3     # T3
+#     bash ~/dingo-lensing-sync/parallelisation/option_a/analyse.sh T4     # T4
 #
-# Only reads the run folders. Writes ../results/option_a/ (or option_a_t3/) in
-# this branch (summary.md, summary.json and the corner plots), ready to push.
+# Only reads the run folders. Writes ../results/option_a/ (or option_a_t3/,
+# option_a_t4/) in this branch (summary.md, summary.json and the corner plots),
+# ready to push.
 set -euo pipefail
 
 SUITE="${1:-T1T2}"
@@ -15,7 +17,8 @@ FIRST_RUN_ROOT="$HOME/dingo-lensing-runs/option_a"
 case "$SUITE" in
     T1T2) DEFAULT_RUN_ROOT="$FIRST_RUN_ROOT"; RESULTS=option_a; CONFIG=T1a_single.ini ;;
     T3) DEFAULT_RUN_ROOT="$HOME/dingo-lensing-runs/option_a_t3"; RESULTS=option_a_t3; CONFIG=T3a_gw150914.ini ;;
-    *) echo "ERROR: Unknown suite '$SUITE': Use T1T2 or T3" >&2; exit 1 ;;
+    T4) DEFAULT_RUN_ROOT="$HOME/dingo-lensing-runs/option_a_t4"; RESULTS=option_a_t4; CONFIG=T4a_gw230628_231200.ini ;;
+    *) echo "ERROR: Unknown suite '$SUITE': Use T1T2, T3 or T4" >&2; exit 1 ;;
 esac
 RUN_ROOT="${RUN_ROOT:-$DEFAULT_RUN_ROOT}"
 OUTPUT="${OUTPUT:-$(cd "$HERE/.." && pwd)/results/$RESULTS}"
@@ -32,6 +35,9 @@ REFERENCE_ARGS=(--suite "$SUITE")
 if [[ "$SUITE" == T3 ]]; then
     # GW150914's event data are also compared with T1a's from the first launch.
     REFERENCE_ARGS+=(--earlier-run-root "$FIRST_RUN_ROOT")
+elif [[ "$SUITE" == T4 ]]; then
+    # T4 compares its events with the LVK's results in t4_lvk.json (the default).
+    :
 elif [[ -d "$REFERENCE" ]]; then
     REFERENCE_ARGS+=(--reference-results "$REFERENCE")
 else

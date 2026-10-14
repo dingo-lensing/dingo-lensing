@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check a workflow dingo_lensing_pipe built, before launch.sh submits it.
+"""Check a workflow dingo_lensing_pipe (or dingo_pipe) built, before launch.sh submits it.
 
 Everything expected comes from the test's config, so a config change can't
 leave a check behind. Every job must run its executable from the image's
@@ -21,13 +21,25 @@ from typing import Dict, List, Optional, Tuple
 from pipe_config import data_dict_files, is_unset, parse_dict, read_pipe_ini
 
 IMAGE_ENV = "/opt/dingo_env"
-# The executable of each kind of job DINGO-Lensing builds: One of each per event.
-EXECUTABLES = {
-    "generation": "dingo_lensing_pipe_generation",
-    "sampling": "dingo_lensing_pipe_sampling",
-    "importance sampling": "dingo_lensing_pipe_importance_sampling",
-    "plot": "dingo_pipe_plot",
+# The executable of each kind of job, for each program that builds workflows:
+# One job of each kind per event.
+BUILDERS = {
+    "dingo_lensing_pipe": {
+        "generation": "dingo_lensing_pipe_generation",
+        "sampling": "dingo_lensing_pipe_sampling",
+        "importance sampling": "dingo_lensing_pipe_importance_sampling",
+        "plot": "dingo_pipe_plot",
+    },
+    # Plain DINGO, for unlensed models: dingo_lensing_pipe can't run them (finding 11).
+    "dingo_pipe": {
+        "generation": "dingo_pipe_generation",
+        "sampling": "dingo_pipe_sampling",
+        "importance sampling": "dingo_pipe_importance_sampling",
+        "plot": "dingo_pipe_plot",
+    },
 }
+DEFAULT_BUILDER = "dingo_lensing_pipe"
+EXECUTABLES = BUILDERS[DEFAULT_BUILDER]
 # Disk beyond the files a job receives, for its outputs.
 DISK_HEADROOM_GB = 2.0
 GB = 1024**3  # Condor's GB
@@ -118,23 +130,28 @@ def file_sizes(expected: dict, run_dir: Path, osdf_root: str = "/osdf") -> Dict[
     return {name: path.stat().st_size for name, path in paths.items()}
 
 
-def job_kind(executable: str) -> Optional[str]:
+def job_kind(executable: str, builder: Optional[str] = None) -> Optional[str]:
+    """The kind of job an executable runs: For one builder's jobs, or for any builder's."""
     name = executable.rsplit("/", 1)[-1]
-    for kind, expected_name in EXECUTABLES.items():
-        if name == expected_name:
-            return kind
+    for builder_name in [builder] if builder else BUILDERS:
+        for kind, expected_name in BUILDERS[builder_name].items():
+            if name == expected_name:
+                return kind
     return None
 
 
-def check_job(pairs, expected: dict, sizes: Dict[str, int]) -> Tuple[Optional[str], List[str]]:
+def check_job(
+    pairs, expected: dict, sizes: Dict[str, int], builder: str = DEFAULT_BUILDER
+) -> Tuple[Optional[str], List[str]]:
     """A job's kind and its problems, if any."""
     problems = []
+    executables = BUILDERS[builder]
     executable = last_value(pairs, "executable") or ""
-    kind = job_kind(executable)
+    kind = job_kind(executable, builder)
     if kind is None:
-        problems.append(f"Unexpected executable {executable!r}")
-    elif executable != f"{IMAGE_ENV}/bin/{EXECUTABLES[kind]}":
-        problems.append(f"Executable {executable!r} is not the image's {IMAGE_ENV}/bin/{EXECUTABLES[kind]}")
+        problems.append(f"Unexpected executable {executable!r} for a workflow {builder} built")
+    elif executable != f"{IMAGE_ENV}/bin/{executables[kind]}":
+        problems.append(f"Executable {executable!r} is not the image's {IMAGE_ENV}/bin/{executables[kind]}")
 
     image = last_value(pairs, "my.singularityimage")
     if image != f'"./{expected["image_name"]}"':
@@ -195,7 +212,7 @@ def dag_jobs(dag_path: Path, run_dir: Path) -> List[Tuple[str, Path]]:
 
 
 def check_workflow(
-    run_dir: Path, config_name: str, events: int, osdf_root: str = "/osdf"
+    run_dir: Path, config_name: str, events: int, osdf_root: str = "/osdf", builder: str = DEFAULT_BUILDER
 ) -> Tuple[List[str], Dict[str, int]]:
     """Problems with the workflow a config built in run_dir, and its jobs of each kind."""
     config = read_pipe_ini(run_dir / config_name)
@@ -210,14 +227,14 @@ def check_workflow(
         return [f"Expected exactly one DAG file in {submit_dir}, found {len(dags)}"], {}
 
     problems = []
-    counts = dict.fromkeys(EXECUTABLES, 0)
+    counts = dict.fromkeys(BUILDERS[builder], 0)
     for name, submit in dag_jobs(dags[0], run_dir):
         if "_merge" in name:
             problems.append(f"{name}: A merge job, though n-parallel is 1")
         if not submit.is_file():
             problems.append(f"{name}: Missing submit file {submit}")
             continue
-        kind, job_problems = check_job(read_submit_file(submit), expected, sizes)
+        kind, job_problems = check_job(read_submit_file(submit), expected, sizes, builder)
         problems.extend(f"{submit.name}: {problem}" for problem in job_problems)
         if kind is not None:
             counts[kind] += 1
@@ -232,9 +249,12 @@ def main(argv=None) -> None:
     parser.add_argument("run_dir", type=Path, help="Folder the workflow was built in.")
     parser.add_argument("config", help="The config's file name, in run_dir.")
     parser.add_argument("events", type=int, help="How many events the config lists.")
+    parser.add_argument(
+        "--builder", default=DEFAULT_BUILDER, choices=sorted(BUILDERS), help="The program that built the workflow."
+    )
     args = parser.parse_args(argv)
     label = read_pipe_ini(args.run_dir / args.config)["label"]
-    problems, counts = check_workflow(args.run_dir, args.config, args.events)
+    problems, counts = check_workflow(args.run_dir, args.config, args.events, builder=args.builder)
     for problem in problems:
         print(f"FAILED  {label}: {problem}")
     if problems:
