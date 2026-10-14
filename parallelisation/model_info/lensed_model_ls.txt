@@ -1,0 +1,193 @@
+Extracting information about torch model.
+
+Version: dingo=0.9.7
+
+Model epoch: 350
+
+Model metadata:
+dataset_settings:
+  domain:
+    type: FrequencyDomain
+    f_min: 20.0
+    f_max: 448.0
+    delta_f: 0.125
+  waveform_generator:
+    approximant: IMRPhenomXPHM
+    f_ref: 20.0
+    fdsm_function: two_images_BBH
+    spin_conversion_phase: 0.0
+    dev_mode: false
+    dev_plot_dir: /lustre/astro/junochan/projects/dingo/catalog/A/lensed/dev_plots
+  intrinsic_prior:
+    mass_1: bilby.core.prior.Constraint(minimum=1.0, maximum=1001.0)
+    mass_2: bilby.core.prior.Constraint(minimum=1.0, maximum=1001.0)
+    chirp_mass: bilby.gw.prior.UniformInComponentsChirpMass(minimum=10.0, maximum=180.0)
+    mass_ratio: bilby.gw.prior.UniformInComponentsMassRatio(minimum=0.125, maximum=1.0)
+    phase: default
+    a_1: bilby.core.prior.Uniform(minimum=0.0, maximum=0.99)
+    a_2: bilby.core.prior.Uniform(minimum=0.0, maximum=0.99)
+    tilt_1: default
+    tilt_2: default
+    phi_12: default
+    phi_jl: default
+    theta_jn: default
+    luminosity_distance: 100.0
+    geocent_time: 0.0
+    lensing_delta_t: bilby.gw.prior.Uniform(minimum=0.0, maximum=0.1)
+    mu_rel: bilby.gw.prior.Uniform(minimum=0., maximum=1.)
+  dev_mode: false
+  num_samples: 5000000
+  compression:
+    svd:
+      size: 300
+      num_training_samples: 50000
+      num_validation_samples: 10000
+    whitening: aLIGO_ZERO_DET_high_P_asd.txt
+train_settings:
+  data:
+    waveform_dataset_path: training_data/waveform_dataset_xphm_prod.hdf5
+    train_fraction: 0.98
+    domain_update:
+      f_min: 20.0
+      f_max: 448.0
+    svd_size_update: 200
+    detectors:
+    - H1
+    - L1
+    extrinsic_prior:
+      dec: default
+      ra: default
+      geocent_time: bilby.core.prior.Uniform(minimum=-0.10, maximum=0.10)
+      psi: default
+      luminosity_distance: bilby.core.prior.Uniform(minimum=500.0, maximum=10000.0)
+    ref_time: 1384782888.63
+    inference_parameters:
+    - chirp_mass
+    - mass_ratio
+    - a_1
+    - a_2
+    - tilt_1
+    - tilt_2
+    - phi_12
+    - phi_jl
+    - theta_jn
+    - dec
+    - ra
+    - geocent_time
+    - luminosity_distance
+    - psi
+    - lensing_delta_t
+    - mu_rel
+    context_parameters: []
+    standardization:
+      mean:
+        chirp_mass: 120.33397674560547
+        mass_ratio: 0.40867140889167786
+        a_1: 0.49487000703811646
+        a_2: 0.4949738383293152
+        tilt_1: 1.5704302787780762
+        tilt_2: 1.5709048509597778
+        phi_12: 3.1435012817382812
+        phi_jl: 3.1421616077423096
+        theta_jn: 1.5709725618362427
+        dec: 0.0
+        ra: 3.141592653589793
+        geocent_time: 0.0
+        luminosity_distance: 5250.0
+        psi: 1.5707963267948966
+        lensing_delta_t: 0.04998616874217987
+        mu_rel: 0.5001220703125
+      std:
+        chirp_mass: 42.02931594848633
+        mass_ratio: 0.24246957898139954
+        a_1: 0.2857152223587036
+        a_2: 0.28574925661087036
+        tilt_1: 0.6833953857421875
+        tilt_2: 0.6837211847305298
+        phi_12: 1.813658595085144
+        phi_jl: 1.8138538599014282
+        theta_jn: 0.6837828755378723
+        dec: 0.683667390089903
+        ra: 1.8137993642342178
+        geocent_time: 0.05773502691896258
+        luminosity_distance: 2742.413778650722
+        psi: 0.9068996821171089
+        lensing_delta_t: 0.028860589489340782
+        mu_rel: 0.2886851131916046
+  model:
+    posterior_model_type: normalizing_flow
+    posterior_kwargs:
+      num_flow_steps: 30
+      base_transform_kwargs:
+        hidden_dim: 1024
+        num_transform_blocks: 5
+        activation: elu
+        dropout_probability: 0.0
+        batch_norm: true
+        num_bins: 8
+        base_transform_type: rq-coupling
+      input_dim: 16
+      context_dim: 128
+    embedding_kwargs:
+      output_dim: 128
+      hidden_dims:
+      - 1024
+      - 1024
+      - 1024
+      - 1024
+      - 1024
+      - 1024
+      - 512
+      - 512
+      - 512
+      - 512
+      - 512
+      - 512
+      - 256
+      - 256
+      - 256
+      - 256
+      - 256
+      - 256
+      - 128
+      - 128
+      - 128
+      - 128
+      - 128
+      - 128
+      activation: elu
+      dropout: 0.0
+      batch_norm: true
+      svd:
+        num_training_samples: 50000
+        num_validation_samples: 10000
+        size: 300
+      input_dims:
+      - 2
+      - 3
+      - 3425
+      added_context: false
+  training:
+    stage_0:
+      epochs: 200
+      asd_dataset_path: /lustre/astro/junochan/projects/dingo/catalog/asd/A/representative_selection_fmax448_srate1024/representative_ASD_HL_seg8_flow0.0_srate1024_fmax448_dingo.hdf5
+      freeze_rb_layer: true
+      optimizer:
+        type: adam
+        lr: 5.0e-05
+      scheduler:
+        type: cosine
+        T_max: 300
+      batch_size: 4096
+    stage_1:
+      epochs: 150
+      asd_dataset_path: /lustre/astro/junochan/projects/dingo/catalog/asd/A/representative_selection_fmax448_srate1024/representative_ASD_HL_seg8_flow0.0_srate1024_fmax448_dingo.hdf5
+      freeze_rb_layer: false
+      optimizer:
+        type: adam
+        lr: 2.0e-05
+      scheduler:
+        type: cosine
+        T_max: 150
+      batch_size: 4096
+

@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "/home/kailibryan.doney/.conda/envs/dingo_env/bin/dingo_ls", line 6, in <module>
+    sys.exit(ls())
+             ~~^^
+  File "/home/kailibryan.doney/.conda/envs/dingo_env/lib/python3.13/site-packages/dingo/gw/ls_cli.py", line 40, in ls
+    dataset_type = determine_dataset_type(args.file_name)
+  File "/home/kailibryan.doney/.conda/envs/dingo_env/lib/python3.13/site-packages/dingo/gw/ls_cli.py", line 188, in determine_dataset_type
+    with h5py.File(file_name, "r") as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/kailibryan.doney/.conda/envs/dingo_env/lib/python3.13/site-packages/h5py/_hl/files.py", line 555, in __init__
+    fid = make_fid(name, mode, userblock_size, fapl, fcpl, swmr=swmr)
+  File "/home/kailibryan.doney/.conda/envs/dingo_env/lib/python3.13/site-packages/h5py/_hl/files.py", line 232, in make_fid
+    fid = h5f.open(name, flags, fapl=fapl)
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "h5py/h5f.pyx", line 106, in h5py.h5f.open
+FileNotFoundError: [Errno 2] Unable to synchronously open file (unable to open file: name = '/lustre/astro/junochan/projects/dingo/catalog/asd/A/representative_selection_fmax448_srate1024/representative_ASD_HL_seg8_flow0.0_srate1024_fmax448_dingo.hdf5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
