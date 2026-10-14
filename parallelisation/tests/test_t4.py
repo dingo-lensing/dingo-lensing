@@ -336,11 +336,25 @@ class FakeResponse:
 class TestReleaseDownload(unittest.TestCase):
     CONTENT = bytes(range(256)) * 20
 
-    def download(self, responses, existing: bytes = None):
-        """Run lvk_posteriors.download against scripted responses; return the Range starts asked for."""
+    def patched(self, name):
+        """lvk_posteriors with this content's size and md5 in place of the real file's, and no waiting."""
         import lvk_posteriors
 
+        files = dict(lvk_posteriors.RELEASE_FILES)
+        files[name] = (len(self.CONTENT), hashlib.md5(self.CONTENT).hexdigest())
+        stack = [
+            mock.patch.object(lvk_posteriors, "RELEASE_FILES", files),
+            mock.patch.object(lvk_posteriors.time, "sleep"),
+        ]
+        for patch in stack:
+            patch.start()
+            self.addCleanup(patch.stop)
+        return lvk_posteriors
+
+    def download(self, responses, existing: bytes = None):
+        """Run lvk_posteriors.download against scripted responses; return the Range starts asked for."""
         name = EVENTS[0].name
+        lvk_posteriors = self.patched(name)
         starts = []
 
         def urlopen(request, timeout):
@@ -357,13 +371,12 @@ class TestReleaseDownload(unittest.TestCase):
         path = Path(directory.name) / lvk_posteriors.RELEASE_FILE.format(name=name)
         if existing is not None:
             path.write_bytes(existing)
-        md5s = {name: hashlib.md5(self.CONTENT).hexdigest()}
-        with mock.patch.object(lvk_posteriors, "RELEASE_MD5", md5s), mock.patch.object(
-            lvk_posteriors.urllib.request, "urlopen", urlopen
-        ), mock.patch.object(lvk_posteriors.time, "sleep"):
-            line = lvk_posteriors.download(name, Path(directory.name))
+        progress = {}
+        with mock.patch.object(lvk_posteriors.urllib.request, "urlopen", urlopen):
+            line = lvk_posteriors.download(name, Path(directory.name), progress)
         self.assertEqual(path.read_bytes(), self.CONTENT)
         self.assertIn("md5 matches", line)
+        self.assertEqual(progress[name], len(self.CONTENT))
         return starts
 
     def test_a_dropped_transfer_resumes_where_it_stopped(self):
@@ -376,22 +389,54 @@ class TestReleaseDownload(unittest.TestCase):
         )
         self.assertEqual(starts, [0, 1000])
 
-    def test_a_corrupt_copy_is_fetched_again_from_the_start(self):
+    def test_a_server_error_is_retried(self):
         content = self.CONTENT
-        corrupt = b"\0" * len(content)
         starts = self.download(
             [
-                urllib.error.HTTPError("url", 416, "Range Not Satisfiable", {}, None),
+                urllib.error.HTTPError("url", 504, "Gateway Time-out", {}, None),
                 lambda start: FakeResponse(content, 200),
-            ],
-            existing=corrupt,
+            ]
         )
-        self.assertEqual(starts, [len(content), 0])
+        self.assertEqual(starts, [0, 0])
+
+    def test_a_full_length_copy_with_the_wrong_md5_is_fetched_again(self):
+        starts = self.download([lambda start: FakeResponse(self.CONTENT, 200)], existing=b"\0" * len(self.CONTENT))
+        self.assertEqual(starts, [0])
+
+    def test_a_copy_longer_than_zenodos_is_fetched_again(self):
+        starts = self.download([lambda start: FakeResponse(self.CONTENT, 200)], existing=self.CONTENT + b"extra")
+        self.assertEqual(starts, [0])
 
     def test_a_server_ignoring_the_range_rewrites_the_file(self):
         content = self.CONTENT
         starts = self.download([lambda start: FakeResponse(content, 200)], existing=content[:500])
         self.assertEqual(starts, [500])
+
+    def test_a_complete_copy_is_not_fetched_again(self):
+        starts = self.download([], existing=self.CONTENT)
+        self.assertEqual(starts, [])
+
+    def test_download_all_reports_every_file_and_exits_on_a_failure(self):
+        import io
+        import lvk_posteriors
+
+        def fake(name, directory, progress):
+            progress[name] = lvk_posteriors.RELEASE_FILES[name][0]
+            if name == EVENTS[2].name:
+                raise RuntimeError("No copy with Zenodo's size and md5")
+            return f"{name}: Done"
+
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        output = io.StringIO()
+        with mock.patch.object(lvk_posteriors, "download", fake), mock.patch("sys.stdout", output):
+            with self.assertRaises(SystemExit) as stopped:
+                lvk_posteriors.download_all(Path(directory.name))
+        self.assertIn(f"{EVENTS[2].name}: No copy with Zenodo's size and md5", str(stopped.exception))
+        for event in EVENTS:
+            if event is not EVENTS[2]:
+                self.assertIn(f"  {event.name}: Done", output.getvalue())
+        self.assertIn("Downloading 7 files (1.42 GB)", output.getvalue())
 
 
 @unittest.skipUnless((OPTION_A / "t4_lvk.json").is_file(), "no t4_lvk.json yet (launch.sh T4 needs it)")
