@@ -82,7 +82,9 @@ class TestT4Files(unittest.TestCase):
             with self.subTest(file=name):
                 path = OPTION_A / name
                 self.assertTrue(path.is_file(), f"{name} missing: run make_t4_configs.py")
-                self.assertEqual(path.read_bytes().decode(), content, f"{name} is out of date: run make_t4_configs.py")
+                # Line endings aside: Git may write CRLF into a Windows checkout.
+                text = path.read_bytes().decode().replace("\r\n", "\n")
+                self.assertEqual(text, content, f"{name} is out of date: run make_t4_configs.py")
 
     def test_no_other_t4_files(self):
         written = set(make_t4_configs.files())

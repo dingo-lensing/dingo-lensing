@@ -210,7 +210,7 @@ def main(argv=None) -> None:
     for name, content in files().items():
         path = HERE / name
         if args.check:
-            if not path.is_file() or path.read_bytes() != content.encode():
+            if not path.is_file() or path.read_bytes().replace(b"\r\n", b"\n") != content.encode():
                 stale.append(name)
         else:
             path.write_bytes(content.encode())
