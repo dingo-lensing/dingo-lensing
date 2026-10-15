@@ -1,0 +1,513 @@
+{
+  "GW230628_231200": {
+    "file": "IGWN-GWTC4p0-38214bd95_724-GW230628_231200-combined_PEDataRelease.hdf5",
+    "md5": "34e6cd5a50ef8908a3a3c1ee3e1c6260",
+    "analysis": "C00:IMRPhenomXPHM-SpinTaylor",
+    "trigger_time": 1372029138.372559,
+    "trigger_time_text": "1372029138.372559",
+    "detectors": [
+      "H1",
+      "L1"
+    ],
+    "duration": 8.0,
+    "post_trigger_duration": 2.0,
+    "sampling_frequency": 1024.0,
+    "channel_dict": {
+      "H1": "GDS-CALIB_STRAIN_CLEAN_AR",
+      "L1": "GDS-CALIB_STRAIN_CLEAN_AR"
+    },
+    "frame_type_dict": {
+      "H1": "H1_HOFT_C00_AR",
+      "L1": "L1_HOFT_C00_AR"
+    },
+    "minimum_frequency": {
+      "H1": 20.0,
+      "L1": 20.0,
+      "waveform": 13.33
+    },
+    "maximum_frequency": {
+      "H1": 448.0,
+      "L1": 448.0
+    },
+    "samples": 12876,
+    "quantiles": {
+      "chirp_mass": [
+        33.14033885289274,
+        35.918627791179745,
+        38.84978580405262
+      ],
+      "mass_ratio": [
+        0.5891464337414349,
+        0.8424828241554643,
+        0.9843306054737523
+      ],
+      "luminosity_distance": [
+        1223.1348161732396,
+        2289.7341156415478,
+        3101.9923335139083
+      ],
+      "chi_eff": [
+        -0.16577636330719364,
+        -0.0018854476135868716,
+        0.1578492156252481
+      ],
+      "network_matched_filter_snr": [
+        15.256153657475977,
+        15.52232255727305,
+        15.681001654936328
+      ]
+    },
+    "geocent_time_offset": [
+      0.0003101229667663574,
+      0.00913083553314209,
+      0.011369287967681885
+    ],
+    "inside_prior": {
+      "chirp_mass": 1.0,
+      "mass_ratio": 1.0,
+      "luminosity_distance": 0.9996893445169307,
+      "a_1": 1.0,
+      "a_2": 1.0,
+      "geocent_time": 1.0,
+      "all": 0.9996893445169307
+    }
+  },
+  "GW230708_230935": {
+    "file": "IGWN-GWTC4p0-38214bd95_724-GW230708_230935-combined_PEDataRelease.hdf5",
+    "md5": "96e15b4b9793e73b76e4a43708833dfb",
+    "analysis": "C00:IMRPhenomXPHM-SpinTaylor",
+    "trigger_time": 1372892993.476775,
+    "trigger_time_text": "1372892993.476775",
+    "detectors": [
+      "H1",
+      "L1"
+    ],
+    "duration": 8.0,
+    "post_trigger_duration": 2.0,
+    "sampling_frequency": 1024.0,
+    "channel_dict": {
+      "H1": "GDS-CALIB_STRAIN_CLEAN_AR",
+      "L1": "GDS-CALIB_STRAIN_CLEAN_AR"
+    },
+    "frame_type_dict": {
+      "H1": "H1_HOFT_C00_AR",
+      "L1": "L1_HOFT_C00_AR"
+    },
+    "minimum_frequency": {
+      "H1": 20.0,
+      "L1": 20.0,
+      "waveform": 13.33
+    },
+    "maximum_frequency": {
+      "H1": 448.0,
+      "L1": 448.0
+    },
+    "samples": 15306,
+    "quantiles": {
+      "chirp_mass": [
+        53.18669476758147,
+        68.59569592182956,
+        82.78101113860151
+      ],
+      "mass_ratio": [
+        0.30295581022486995,
+        0.6187488231754326,
+        0.9471365046227707
+      ],
+      "luminosity_distance": [
+        1859.091194502341,
+        3482.326223945998,
+        5769.656966494368
+      ],
+      "chi_eff": [
+        -0.2687333307491775,
+        0.028541864759764793,
+        0.3167728866879066
+      ],
+      "network_matched_filter_snr": [
+        8.682692745316942,
+        9.16409073405862,
+        9.476558371135944
+      ]
+    },
+    "geocent_time_offset": [
+      -0.02921605110168457,
+      -0.02161264419555664,
+      -0.009325623512268066
+    ],
+    "inside_prior": {
+      "chirp_mass": 1.0,
+      "mass_ratio": 0.9993466614399582,
+      "luminosity_distance": 1.0,
+      "a_1": 1.0,
+      "a_2": 1.0,
+      "geocent_time": 1.0,
+      "all": 0.9993466614399582
+    }
+  },
+  "GW230914_111401": {
+    "file": "IGWN-GWTC4p0-38214bd95_724-GW230914_111401-combined_PEDataRelease.hdf5",
+    "md5": "51230a054c17048c9bed334f77e01645",
+    "analysis": "C00:IMRPhenomXPHM-SpinTaylor",
+    "trigger_time": 1378725259.728516,
+    "trigger_time_text": "1378725259.728516",
+    "detectors": [
+      "H1",
+      "L1"
+    ],
+    "duration": 8.0,
+    "post_trigger_duration": 2.0,
+    "sampling_frequency": 1024.0,
+    "channel_dict": {
+      "H1": "GDS-CALIB_STRAIN_CLEAN_AR",
+      "L1": "GDS-CALIB_STRAIN_CLEAN_AR"
+    },
+    "frame_type_dict": {
+      "H1": "H1_HOFT_C00_AR",
+      "L1": "L1_HOFT_C00_AR"
+    },
+    "minimum_frequency": {
+      "H1": 20.0,
+      "L1": 20.0,
+      "waveform": 13.33
+    },
+    "maximum_frequency": {
+      "H1": 448.0,
+      "L1": 448.0
+    },
+    "samples": 16491,
+    "quantiles": {
+      "chirp_mass": [
+        47.39344695141827,
+        59.020825784805375,
+        67.4957603240336
+      ],
+      "mass_ratio": [
+        0.3591705632232164,
+        0.6154974825470136,
+        0.9318996304548571
+      ],
+      "luminosity_distance": [
+        1442.6738112041771,
+        2647.4966186798433,
+        4315.507870543393
+      ],
+      "chi_eff": [
+        -0.06746167665777672,
+        0.13205195772165307,
+        0.3332399179483142
+      ],
+      "network_matched_filter_snr": [
+        15.879717003342616,
+        16.153408812155195,
+        16.350058297847
+      ]
+    },
+    "geocent_time_offset": [
+      -0.034560322761535645,
+      -0.030950069427490234,
+      0.0038291215896606445
+    ],
+    "inside_prior": {
+      "chirp_mass": 1.0,
+      "mass_ratio": 1.0,
+      "luminosity_distance": 0.9998180825905039,
+      "a_1": 1.0,
+      "a_2": 1.0,
+      "geocent_time": 1.0,
+      "all": 0.9998180825905039
+    }
+  },
+  "GW230927_153832": {
+    "file": "IGWN-GWTC4p0-38214bd95_724-GW230927_153832-combined_PEDataRelease.hdf5",
+    "md5": "802c1c28b6258427f7f311a870d0cf1c",
+    "analysis": "C00:IMRPhenomXPHM-SpinTaylor",
+    "trigger_time": 1379864330.918945,
+    "trigger_time_text": "1379864330.918945",
+    "detectors": [
+      "H1",
+      "L1"
+    ],
+    "duration": 8.0,
+    "post_trigger_duration": 2.0,
+    "sampling_frequency": 2048.0,
+    "channel_dict": {
+      "H1": "GDS-CALIB_STRAIN_CLEAN_AR",
+      "L1": "GDS-CALIB_STRAIN_CLEAN_AR"
+    },
+    "frame_type_dict": {
+      "H1": "H1_HOFT_C00_AR",
+      "L1": "L1_HOFT_C00_AR"
+    },
+    "minimum_frequency": {
+      "H1": 20.0,
+      "L1": 20.0,
+      "waveform": 13.33
+    },
+    "maximum_frequency": {
+      "H1": 896.0,
+      "L1": 896.0
+    },
+    "samples": 16093,
+    "quantiles": {
+      "chirp_mass": [
+        19.815052751648455,
+        20.216119823282007,
+        20.62217049081264
+      ],
+      "mass_ratio": [
+        0.5549867040411148,
+        0.7499229116897403,
+        0.965301867258622
+      ],
+      "luminosity_distance": [
+        662.271531605424,
+        1209.0225928122143,
+        1577.0190649099532
+      ],
+      "chi_eff": [
+        -0.03351192781485759,
+        0.042872415488832895,
+        0.12099613125502008
+      ],
+      "network_matched_filter_snr": [
+        19.433090565896983,
+        19.6607120102541,
+        19.805228509287804
+      ]
+    },
+    "geocent_time_offset": [
+      -0.023924827575683594,
+      -0.021600961685180664,
+      0.007623291015624997
+    ],
+    "inside_prior": {
+      "chirp_mass": 1.0,
+      "mass_ratio": 1.0,
+      "luminosity_distance": 0.9893742621015348,
+      "a_1": 1.0,
+      "a_2": 1.0,
+      "geocent_time": 1.0,
+      "all": 0.9893742621015348
+    }
+  },
+  "GW231102_071736": {
+    "file": "IGWN-GWTC4p0-38214bd95_724-GW231102_071736-combined_PEDataRelease.hdf5",
+    "md5": "68e9ff2eb83aa971bdf25311d22b2754",
+    "analysis": "C00:IMRPhenomXPHM-SpinTaylor",
+    "trigger_time": 1382944674.370605,
+    "trigger_time_text": "1382944674.370605",
+    "detectors": [
+      "H1",
+      "L1"
+    ],
+    "duration": 4.0,
+    "post_trigger_duration": 2.0,
+    "sampling_frequency": 1024.0,
+    "channel_dict": {
+      "H1": "GDS-CALIB_STRAIN_CLEAN_AR",
+      "L1": "GDS-CALIB_STRAIN_CLEAN_AR"
+    },
+    "frame_type_dict": {
+      "H1": "H1_HOFT_C00_AR",
+      "L1": "L1_HOFT_C00_AR"
+    },
+    "minimum_frequency": {
+      "H1": 20.13,
+      "L1": 20.13,
+      "waveform": 20.13
+    },
+    "maximum_frequency": {
+      "H1": 448.0,
+      "L1": 448.0
+    },
+    "samples": 13942,
+    "quantiles": {
+      "chirp_mass": [
+        61.100102609650015,
+        71.76112553766822,
+        79.64732360099181
+      ],
+      "mass_ratio": [
+        0.44002859854761733,
+        0.7139387685361553,
+        0.9633267267506168
+      ],
+      "luminosity_distance": [
+        2012.722663351381,
+        3781.5411688453714,
+        5932.294921886009
+      ],
+      "chi_eff": [
+        -0.1550306671662441,
+        0.06283352112441892,
+        0.28943715382785873
+      ],
+      "network_matched_filter_snr": [
+        13.012564925840962,
+        13.325646051840279,
+        13.532472030982836
+      ]
+    },
+    "geocent_time_offset": [
+      -0.03387451171875,
+      -0.01454317569732666,
+      0.009168982505798336
+    ],
+    "inside_prior": {
+      "chirp_mass": 1.0,
+      "mass_ratio": 1.0,
+      "luminosity_distance": 1.0,
+      "a_1": 1.0,
+      "a_2": 1.0,
+      "geocent_time": 1.0,
+      "all": 1.0
+    }
+  },
+  "GW231206_233134": {
+    "file": "IGWN-GWTC4p0-38214bd95_724-GW231206_233134-combined_PEDataRelease.hdf5",
+    "md5": "0c77f39e47b8a67bcc86ee7290fe4ec9",
+    "analysis": "C00:IMRPhenomXPHM-SpinTaylor",
+    "trigger_time": 1385940712.527832,
+    "trigger_time_text": "1385940712.527832",
+    "detectors": [
+      "H1",
+      "L1"
+    ],
+    "duration": 8.0,
+    "post_trigger_duration": 2.0,
+    "sampling_frequency": 1024.0,
+    "channel_dict": {
+      "H1": "GDS-CALIB_STRAIN_CLEAN_AR",
+      "L1": "GDS-CALIB_STRAIN_CLEAN_AR"
+    },
+    "frame_type_dict": {
+      "H1": "H1_HOFT_C00_AR",
+      "L1": "L1_HOFT_C00_AR"
+    },
+    "minimum_frequency": {
+      "H1": 40.0,
+      "L1": 30.0,
+      "waveform": 13.33
+    },
+    "maximum_frequency": {
+      "H1": 448.0,
+      "L1": 448.0
+    },
+    "samples": 13167,
+    "quantiles": {
+      "chirp_mass": [
+        37.10330984387056,
+        41.88214808415365,
+        46.214112175861786
+      ],
+      "mass_ratio": [
+        0.5351186928359782,
+        0.8059720373369558,
+        0.9807438933918428
+      ],
+      "luminosity_distance": [
+        1477.6156785046326,
+        3310.4964083474893,
+        5094.797508711522
+      ],
+      "chi_eff": [
+        -0.3200535592871826,
+        -0.07749003961402545,
+        0.13071317964127532
+      ],
+      "network_matched_filter_snr": [
+        10.598734891533622,
+        10.946320572568403,
+        11.165931427128355
+      ]
+    },
+    "geocent_time_offset": [
+      -0.029177927970886232,
+      -0.017969131469726562,
+      0.012832927703857421
+    ],
+    "inside_prior": {
+      "chirp_mass": 1.0,
+      "mass_ratio": 1.0,
+      "luminosity_distance": 0.9999240525556315,
+      "a_1": 1.0,
+      "a_2": 1.0,
+      "geocent_time": 1.0,
+      "all": 0.9999240525556315
+    }
+  },
+  "GW231206_233901": {
+    "file": "IGWN-GWTC4p0-38214bd95_724-GW231206_233901-combined_PEDataRelease.hdf5",
+    "md5": "326d94a167fea38582079d0547aac8a1",
+    "analysis": "C00:IMRPhenomXPHM-SpinTaylor",
+    "trigger_time": 1385941159.497681,
+    "trigger_time_text": "1385941159.497681",
+    "detectors": [
+      "H1",
+      "L1"
+    ],
+    "duration": 8.0,
+    "post_trigger_duration": 2.0,
+    "sampling_frequency": 1024.0,
+    "channel_dict": {
+      "H1": "GDS-CALIB_STRAIN_CLEAN_AR",
+      "L1": "GDS-CALIB_STRAIN_CLEAN_AR"
+    },
+    "frame_type_dict": {
+      "H1": "H1_HOFT_C00_AR",
+      "L1": "L1_HOFT_C00_AR"
+    },
+    "minimum_frequency": {
+      "H1": 20.0,
+      "L1": 20.0,
+      "waveform": 13.33
+    },
+    "maximum_frequency": {
+      "H1": 448.0,
+      "L1": 448.0
+    },
+    "samples": 13711,
+    "quantiles": {
+      "chirp_mass": [
+        34.04027673946513,
+        36.43792877747065,
+        38.771321952257395
+      ],
+      "mass_ratio": [
+        0.5045319977508853,
+        0.7654327849262585,
+        0.9765790328036257
+      ],
+      "luminosity_distance": [
+        994.3037835186601,
+        1495.2422586357006,
+        1844.9663476134037
+      ],
+      "chi_eff": [
+        -0.1701937432614306,
+        -0.02380235307619035,
+        0.11085071319272258
+      ],
+      "network_matched_filter_snr": [
+        20.7746432450215,
+        20.97241847163604,
+        21.10511149477312
+      ]
+    },
+    "geocent_time_offset": [
+      0.0022029876708984375,
+      0.00609135627746582,
+      0.007414698600769043
+    ],
+    "inside_prior": {
+      "chirp_mass": 1.0,
+      "mass_ratio": 1.0,
+      "luminosity_distance": 0.9992706585952884,
+      "a_1": 1.0,
+      "a_2": 1.0,
+      "geocent_time": 1.0,
+      "all": 0.9992706585952884
+    }
+  }
+}
