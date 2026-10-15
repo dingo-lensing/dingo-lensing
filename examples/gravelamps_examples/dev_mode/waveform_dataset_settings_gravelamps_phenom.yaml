@@ -1,0 +1,49 @@
+domain:
+  type: FrequencyDomain
+  f_min: 20.0
+  f_max: 1024.0
+  delta_f: 0.25
+
+waveform_generator:
+  approximant: IMRPhenomD
+  f_ref: 20.0
+  dev_plot_dir: dev_plots
+  spin_conversion_phase: 0.0
+  lens_model_code: gravelamps
+  amplification_factor_function: gravelamps_phenom
+  lens_model_settings:
+    max_num_images: 6
+
+intrinsic_prior:
+  mass_1: bilby.core.prior.Constraint(minimum=10.0, maximum=80.0, name='mass_1')
+  mass_2: bilby.core.prior.Constraint(minimum=10.0, maximum=80.0, name='mass_2')
+  chirp_mass: bilby.gw.prior.UniformInComponentsChirpMass(minimum=15.0, maximum=100.0, name='chirp_mass')
+  mass_ratio: bilby.gw.prior.UniformInComponentsMassRatio(minimum=0.125, maximum=1.0, name='mass_ratio')
+  phase: default
+  chi_1: bilby.gw.prior.AlignedSpin(name='chi_1', a_prior=Uniform(minimum=0, maximum=0.9))
+  chi_2: bilby.gw.prior.AlignedSpin(name='chi_2', a_prior=Uniform(minimum=0, maximum=0.9))
+  theta_jn: default
+  # Reference values for fixed (extrinsic) parameters. These are needed to generate a waveform.
+  luminosity_distance: 100.0  # Mpc
+  geocent_time: 0.0  # s
+  num_images: gravelamps.prior.discrete.DiscretePowerLaw(6, latex_label='$n_\{\rm\{images\}\}$', name='num_images')
+  mu_rel1: Uniform(name='mu_rel_1', minimum=0.01, maximum=100, latex_label='mu_rel_1')
+  mu_rel2: Uniform(name='mu_rel_2', minimum=0.01, maximum=100, latex_label='mu_rel_2')
+  mu_rel3: Uniform(name='mu_rel_3', minimum=0.01, maximum=100, latex_label='mu_rel_3')
+  mu_rel4: Uniform(name='mu_rel_4', minimum=0.01, maximum=100, latex_label='mu_rel_4')
+  mu_rel5: Uniform(name='mu_rel_5', minimum=0.01, maximum=100, latex_label='mu_rel_5')
+  dt1: Uniform(name='dt_1', minimum=0.001, maximum=0.1, unit='s', latex_label='$dt_\{0,1\}$')
+  dt2: Uniform(name='dt_2', minimum=0.001, maximum=0.1, unit='s', latex_label='$dt_\{1,2\}$')
+  dt3: Uniform(name='dt_3', minimum=0.001, maximum=0.1, unit='s', latex_label='$dt_\{2,3\}$')
+  dt4: Uniform(name='dt_4', minimum=0.001, maximum=0.1, unit='s', latex_label='$dt_\{3,4\}$')
+  dt5: Uniform(name='dt_5', minimum=0.001, maximum=0.1, unit='s', latex_label='$dt_\{4,5\}$')
+  n0: gravelamps.prior.discrete.UniformMorseIndex(name='n_0', latex_label='$n_\{0\}$')
+  n1: gravelamps.prior.discrete.UniformMorseIndex(name='n_1', latex_label='$n_\{1\}$')
+  n2: gravelamps.prior.discrete.UniformMorseIndex(name='n_2', latex_label='$n_\{2\}$')
+  n3: gravelamps.prior.discrete.UniformMorseIndex(name='n_3', latex_label='$n_\{3\}$')
+  n4: gravelamps.prior.discrete.UniformMorseIndex(name='n_4', latex_label='$n_\{4\}$')
+  n5: gravelamps.prior.discrete.UniformMorseIndex(name='n_5', latex_label='$n_\{5\}$')
+  
+dev_mode: True
+num_samples: 3
+
