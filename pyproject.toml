@@ -15,6 +15,7 @@ dependencies = [
     "bilby_pipe==1.8.0",
     "dingo-gw==0.9.8",
     "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git"
+    "gravelamps@git+https://git.ligo.org/link/pre-merger-software/gravelamps.git"
 ]
 requires-python = ">=3.10,<3.14"
 authors = [
