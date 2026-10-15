@@ -7,11 +7,10 @@ data over the whole stretch each analysis reads, their GWTC-4.0 parameters lie
 inside the production model's prior, and the LVK did not need to subtract
 glitches from their data (Zenodo 16857059 lists the events that did).
 
-Trigger times are to be the LVK's own, from the run configs in the GWTC-4.0
-parameter estimation release (Zenodo 16053483), so each segment is the LVK's
-segment: lvk_posteriors.py reads them into t4_lvk.json, and the unit tests
-compare the two. Until then, all but GW231206_233134's are GWOSC's event times
-(rounded to 0.1 s). Standard library only.
+Trigger times are the LVK's own, from its IMRPhenomXPHM-SpinTaylor run configs in
+the GWTC-4.0 parameter estimation release (Zenodo 16053483), as lvk_posteriors.py
+read them into t4_lvk.json; the unit tests compare the two. Standard library
+only.
 """
 from __future__ import annotations
 
@@ -29,13 +28,13 @@ class Event(NamedTuple):
 
 # In GPS order, which is also their order in T4m's gps-file.
 EVENTS = [
-    Event("a", "GW230628_231200", 1372029138.4),
-    Event("b", "GW230708_230935", 1372892993.5),
-    Event("c", "GW230914_111401", 1378725259.7),
-    Event("d", "GW230927_153832", 1379864330.9),
-    Event("e", "GW231102_071736", 1382944674.4),
+    Event("a", "GW230628_231200", 1372029138.372559),
+    Event("b", "GW230708_230935", 1372892993.476775),
+    Event("c", "GW230914_111401", 1378725259.728516),
+    Event("d", "GW230927_153832", 1379864330.918945),
+    Event("e", "GW231102_071736", 1382944674.370605),
     Event("f", "GW231206_233134", 1385940712.527832),
-    Event("g", "GW231206_233901", 1385941159.5),
+    Event("g", "GW231206_233901", 1385941159.497681),
 ]
 
 

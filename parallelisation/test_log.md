@@ -172,6 +172,101 @@ Launch with `bash option_a/launch.sh T3` (run folder
 Also: GW150914's event data should match T1a's from the first launch (within
 round-off), showing the fixes leave data handling unchanged.
 
+### T4: Seven O4a lensing candidates (production models)
+
+**Question:** With the production models on real data, does a config listing
+seven events give each the same analysis as running it alone? And what do the
+lensed and unlensed models say about events the LVK followed up as possible
+lensed images?
+
+- Events: Seven O4a events from the 50 pairs that reached the last tier of the
+  LVK's strong-lensing search (GWTC-4.0 lensing paper, arXiv:2512.16347,
+  Figure 3); none favoured lensing. Chosen because both LIGO detectors have
+  GWOSC data over each event's whole data stretch (GWOSC's segment lists), the
+  LVK's posteriors lie inside the models' prior, and the LVK needed no glitch
+  subtraction for them (Zenodo 16857059). GW231123_135430, the one O4a lensing
+  outlier, is left out (Kaili's decision). GW240104_164932 was ruled out: GWOSC
+  lists L1 files, but L1 has no data over its stretch.
+- Models: Exercise 3's production pair (`dingo_ls` output in `model_info/`): The
+  lensed model (`two_images_BBH`: a second, type II image up to 0.1 s later with
+  up to the first's magnification) and its unlensed twin, trained on the same
+  noise spectra with the same settings and priors. H1 and L1, 8 s, 20 to 448 Hz,
+  detector-frame chirp mass 10 to 180, distance 500 to 10,000 Mpc, time prior
+  +-0.1 s around the trigger, IMRPhenomXPHM, DINGO 0.9.7. Their training noise
+  set (a "representative selection" on Juno's other cluster) is not on CIT, so
+  which times it covers is unknown; asked Juno. Low importance-sampling
+  efficiency would flag an event outside it.
+- Data: GWOSC's O4a 4 kHz frames (channel `GWOSC-4KHZ_R1_STRAIN`, made from
+  `GDS-CALIB_STRAIN_CLEAN_AR`, the channel the LVK analysed), fetched by
+  `launch.sh`. Each event's PSD comes from 32 x 8 s just before its segment; the
+  LVK used BayesWave PSDs.
+- Trigger times: The LVK's own (`t4_lvk.json`, from `lvk_posteriors.py` on the
+  GWTC-4.0 release files, run on the cluster), so each segment is the LVK's.
+- Configs: Written by `make_t4_configs.py` from `t4_events.py`. Each single
+  config lists only its own frames; T4m lists all 14, and each of its
+  data-generation jobs keeps the ones overlapping its event. The unlensed configs
+  differ from the lensed ones only in label and model; plain `dingo_pipe` builds
+  them, since `dingo_lensing_pipe` can't run an unlensed model (finding 11).
+- Requests, from T2's measurements: Sampling 16 cores and 16 GB (T2 asked for 32
+  and 32, used 11 to 19 cores, and waited over two hours for slots that size),
+  importance sampling 32 cores and 8 GB, data generation 8 GB, disk 12 GB.
+
+| Event | Frame files | LVK lowest frequency (H1, L1) | LVK's own run, where it differs from the models' | LVK samples inside the models' prior | Note |
+|---|---|---|---|---|---|
+| T4a GW230628_231200 | 2 | 20, 20 Hz | | 99.97% | PSD stretch crosses a file boundary |
+| T4b GW230708_230935 | 1 | 20, 20 Hz | | 99.93% | LVK last-tier partner of GW231102_071736 |
+| T4c GW230914_111401 | 1 | 20, 20 Hz | | 99.98% | |
+| T4d GW230927_153832 | 1 | 20, 20 Hz | 2048 Hz, up to 896 Hz | 98.94% | 1.06% below the models' 500 Mpc; low chirp mass (~20), where training examples are thin |
+| T4e GW231102_071736 | 1 | 20.13, 20.13 Hz | 4 s segment | 100% | |
+| T4f GW231206_233134 | 1 | 40, 30 Hz | | 99.99% | Shares its frame file with T4g |
+| T4g GW231206_233901 | 1 | 20, 20 Hz | | 99.93% | |
+
+| Test | Files | Workflow |
+|---|---|---|
+| T4a to T4g | `T4<x>_<event>.ini` | Each event alone, lensed model |
+| T4m | `T4m_all.ini`, `T4m_gps.txt` | All seven events, lensed model |
+| T4ua to T4ug | `T4u<x>_<event>.ini` | Each event alone, unlensed model |
+
+Launch with `bash option_a/launch.sh T4` (run folder
+`~/dingo-lensing-runs/option_a_t4`; it refuses to run without `t4_lvk.json`),
+analyse with `bash option_a/analyse.sh T4`.
+
+**Pass criteria**
+1. Every chain of all 15 workflows finishes.
+2. No output file is written by more than one chain (T4m).
+3. Each event in T4m matches its single-event run: Event data and PSD files
+   equal to within round-off, network samples that pass the KS tests (with the
+   Bonferroni correction spread over all seven events, so the chance of any false
+   alarm in T4 is 1%), and log evidences within 3 sigma where both runs have at
+   least 100 effective samples.
+4. The seven events' data really differ (all 21 pairs, including the two that
+   share a frame file).
+5. Each event's lensed and unlensed runs analyse the same data (within
+   round-off), as their Bayes factor assumes.
+6. Timing recorded for every job.
+7. Importance sampling gives at least 100 effective samples in every run.
+   CHECK rather than FAIL: It measures how well the model fits an event, not the
+   pipeline.
+
+Also reported, flagged CHECK when odd: Each event's lensing Bayes factor (log10 B
+above 1, or unreliable), and the detector-frame chirp mass against the LVK's.
+
+New compared with T3: The production models, with (we expect) enough effective
+samples to compare evidences; seven events; a data stretch across two frame
+files and two events in one file; single configs listing only their own frames;
+workflows built by plain `dingo_pipe`; right-sized requests.
+
+Caveats:
+- DINGO 0.9.8's importance-sampling worker processes share one random stream on
+  Linux (DINGO issue #408, fixed upstream in v0.10.1), so the synthetic-phase
+  draws are correlated across workers. Each weight is still correct, but effective
+  sample sizes, and so evidence and Bayes-factor errors, are optimistic by an
+  unknown amount.
+- The models always start at 20 Hz, so GW231206_233134's analyses include H1 data
+  between 20 and 40 Hz and L1 data between 20 and 30 Hz that the LVK excluded.
+- The LVK's distance prior is uniform in comoving volume and the models' uniform
+  in distance, so distance posteriors differ by design.
+
 ### Launch attempts
 
 | Date (UTC) | Outcome |
