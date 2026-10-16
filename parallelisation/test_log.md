@@ -280,6 +280,7 @@ Caveats:
 | 2026-10-08 15:32 | Launched inside the image (tests `00a1914`, code `a4de31e`), after moving the EPNFS attempt's run folder to `option_a_held_epnfs_20261008`. Every check passed. Inside the image, gwpy read GWF with LALFrame: T1's GWOSC frames hold GPS 1126256640 to 1126260736 at 4096 Hz (the jobs need the 516 s from 1126258948.4), T2's injection frames hold 1384782874.63 to 1384782890.63 at 1024 Hz (the jobs need the 8 s segment from 1384782882.63), all finite. The image rebuilt both models' waveform generators. Every job of every workflow passed `check_workflow.py`: T1a 4 jobs, T1b 8, T2a 4, T2b 12. Submitted 15:39 UTC; DAGMan clusters T1a 569441103, T1b 569441104, T2a 569441115, T2b 569441121. At 15:46 UTC the first nodes had finished (T1a 1 of 4, T1b 3 of 8, T2a 1 of 4, T2b 1 of 12) and released their sampling jobs; nothing held. |
 | 2026-10-09 08:30 | T3, first try (tests `1410a65`, code `1d7c477`, new image `dingo-lensing_1d7c4771b4_recipe-ff6622d_cpu.sif` built and staged; all 166 unit tests passed on the cluster, including the 7 that need DINGO). Both events' GWOSC frames fetched; inside the image each event read only its own frame file. Stopped at the workflow checks, nothing submitted: T3a's data-generation job received none of the frame files, because the `data-dict` glob was never expanded at build time (finding 17). The configs now list the files. |
 | 2026-10-09 08:41 | T3 relaunched with the frame files listed (tests `c7ea309`, code `1d7c477`, the same image). Every check passed, including every job of every workflow receiving both events' frames, and all three DAGs finished: T3a and T3b in about 8 min 40 s, T3c (both events) in 9 min 22 s. Every job ran once. |
+| 2026-10-15 01:37 | T4 launched (tests `7bb0ddb`, code `1d7c477`, the same image as T3), under `nohup` on `ldas-grid`. Every check passed, including the unit tests that need DINGO, both models' waveform generators rebuilt in the image, the GWOSC frames read in the image for all 14 single configs, and every job of all 15 workflows (7 built with `dingo_pipe`). Submitted 01:44 UTC; all 84 jobs ran once, the last finishing 09:52 UTC. |
 
 ### Running jobs without `/home`: The container
 
@@ -394,6 +395,115 @@ number) and the corner plots.
   and each workflow's wall time, overall and per event.
 
 ### Results
+
+#### T4 (seven O4a events, production models)
+
+**Summary.** One config listing seven different real events gives each event the
+same analysis as running it alone, with the production models too. T4 ran seven
+O4a events the LVK followed up as possible lensed images, each alone through the
+lensed model (T4a to T4g), all seven in one config (T4m), and each alone through
+the unlensed model (T4ua to T4ug), launched 2026-10-15 01:44 UTC. All 84 jobs
+finished at their first attempt, and every pipeline criterion passes (analysed
+2026-10-15, results `8360265`). The CHECKs are about how well the model fits
+three of the events, not about the pipeline:
+
+| Criterion | Verdict |
+|---|---|
+| T4.1 Every chain completes | PASS: All 15 workflows, every node done. |
+| T4.2 No shared files | PASS: Every T4m output names its event. |
+| T4.3 Each event in T4m matches its single run | PASS for all seven: Event data and PSD files bit-identical; network samples agree (smallest KS p-value 0.0065, GW230927_153832, against a threshold of 8.9e-5 over 16 tests); log evidences within 0.63 sigma where both runs have at least 100 effective samples (GW230708_230935, GW230914_111401, GW231102_071736; not compared for the other four). |
+| T4.4 The seven events differ | PASS: All 21 pairs, including the two events that share a frame file. |
+| T4.5 Lensed and unlensed runs see the same data | PASS: Bit-identical for all seven events. |
+| T4.6 Timing recorded | PASS |
+| T4.7 At least 100 effective samples in every run | CHECK: Not for three events (model fit, below). |
+| Also: Lensing Bayes factors | CHECK: Three unreliable; the four reliable ones favour no lensing. |
+| Also: Chirp mass against the LVK's | PASS: The LVK's median lies inside every run's 90% interval. |
+
+- What it needed: No change to DINGO-Lensing (still `1d7c477`). On the test
+  side: Workflows built with plain `dingo_pipe` in the launch and its checks, a
+  fetch that handles a data stretch across two frame files, and the LVK's
+  trigger times (`t4_lvk.json`).
+- Model fit (table below): Three events fit poorly, with 2 to 6 effective
+  samples of 50,000 in the lensed runs (finding 20). Their evidences and Bayes
+  factors are unreliable, but the network posteriors still put each event's
+  chirp mass where the LVK does.
+- Lensing: The four events with reliable Bayes factors all favour no lensing,
+  log10 B from -0.87 to -1.05, about the penalty for two extra parameters with
+  nothing to fit, as the LVK found (table below).
+- Compute (table below): Option A neither saves nor costs CPU. It runs the same
+  four jobs per event as single runs do, so it changes how runs are configured
+  and tracked (one config, one workflow), not the work. Measured: 49.0 CPU-hours
+  for T4m against 52.7 for the seven single lensed runs, a 7% difference that is
+  the luck of the node draw. The node decides importance sampling's run time, by
+  up to 3.5x for the same event (finding 19). The whole suite used 150
+  CPU-hours, 48 of them for the unlensed runs.
+- Timing (table below): Waiting dominated. Each chain spent 12 to 36 min running
+  and 2.2 to 7.7 h waiting, behind Kaili's other jobs and for 32-core slots.
+  T4m finished in 8 h 8 min; the seven single lensed runs, submitted side by
+  side at the same moment, all finished within 8 h 6 min. T4m's later events
+  started 18 min 26 s after event 0, once its data generation (which had to
+  queue first) finished (trap 4). Sampling used 8 to 11 of its 16 cores.
+- Still open: Each of T4m's data-generation jobs received 6.9 GB (all 14 frame
+  files) against 5.7 GB for a single run, small at seven events but growing
+  with their number (a node-side filter). DINGO 0.9.8's shared random stream
+  (#408) makes every effective-sample count and evidence error optimistic. The
+  models start at 20 Hz where the LVK cut GW231206_233134's data at 40 Hz (H1)
+  and 30 Hz (L1), and the models' training noise covers unknown times.
+
+T4 model fit (effective samples of 50,000; the LVK's detector-frame chirp mass
+and network SNR) and lensing Bayes factors (log10 B, lensed over unlensed):
+
+| Event | Effective samples, lensed / unlensed | Chirp mass | SNR | log10 B |
+|---|---|---|---|---|
+| GW230708_230935 | 909 / 2,618 | ~69 | 9 | -0.87 +- 0.02 |
+| GW231102_071736 | 397 / 2,266 | ~72 | 13 | -1.03 +- 0.02 |
+| GW230914_111401 | 318 / 288 | ~59 | 16 | -0.95 +- 0.04 |
+| GW231206_233134 | 109 / 658 | ~42 | 11 | -1.05 +- 0.04 |
+| GW230628_231200 | 2 / 35 | ~36 | 16 | -0.59 +- 0.31 (unreliable) |
+| GW230927_153832 | 3 / 5 | ~20 | 20 | -0.54 +- 0.32 (unreliable) |
+| GW231206_233901 | 4 / 60 | ~36 | 21 | -1.25 +- 0.22 (unreliable) |
+
+T4 compute, each event's lensed chain alone and in T4m (CPU, then importance
+sampling's run time and the node it ran on):
+
+| Event | Single run | In T4m |
+|---|---|---|
+| GW230628_231200 | 14.3 h, 27.6 min (node839) | 9.7 h, 18.0 min (node2294) |
+| GW230708_230935 | 7.9 h, 14.7 min (node2287) | 8.7 h, 18.0 min (node2346) |
+| GW230914_111401 | 7.4 h, 15.3 min (node2287) | 4.1 h, 8.0 min (node2409) |
+| GW230927_153832 | 4.0 h, 7.6 min (node2409) | 7.5 h, 15.0 min (node2287) |
+| GW231102_071736 | 4.4 h, 7.3 min (node2409) | 7.2 h, 14.3 min (node2346) |
+| GW231206_233134 | 7.9 h, 15.8 min (node2287) | 4.2 h, 7.9 min (node2409) |
+| GW231206_233901 | 6.7 h, 12.7 min (node2314) | 7.7 h, 15.4 min (node2287) |
+| All seven | 52.7 h | 49.0 h |
+
+T4 timing, from each job's Condor log (wall time from the workflow's first
+submission to its last job's end; a chain is one event's jobs, from the
+submission of its data-generation job; all workflows were submitted within 6 s):
+
+| Run | Events | Wall time | Chain per event | Chain starts | CPU (h) | Attempts |
+|---|---|---|---|---|---|---|
+| T4a | GW230628_231200 | 6 h 55 min | 6 h 55 min | 0 s | 14.3 | 1 per job |
+| T4b | GW230708_230935 | 6 h 40 min | 6 h 40 min | 0 s | 7.9 | 1 per job |
+| T4c | GW230914_111401 | 6 h 57 min | 6 h 57 min | 0 s | 7.4 | 1 per job |
+| T4d | GW230927_153832 | 7 h 39 min | 7 h 39 min | 0 s | 4.0 | 1 per job |
+| T4e | GW231102_071736 | 7 h 54 min | 7 h 54 min | 0 s | 4.4 | 1 per job |
+| T4f | GW231206_233134 | 8 h 6 min | 8 h 6 min | 0 s | 7.8 | 1 per job |
+| T4g | GW231206_233901 | 2 h 45 min | 2 h 45 min | 0 s | 6.7 | 1 per job |
+| T4m | All seven | 8 h 8 min | 8 h 8 min, 6 h 26 min, 7 h 2 min, 7 h 25 min, 7 h 36 min, 6 h 54 min, 7 h 9 min | 0 s, then 18 min 26 s for the other six | 49.0 | 1 per job |
+| T4ua to T4ug | One each (unlensed) | 2 h 33 min to 7 h 44 min | As the wall time | 0 s | 4.1 to 8.9 each, 48.4 in all | 1 per job |
+
+Finding 19: The node decides importance sampling's run time, by up to 3.5x for
+the same event: node2409 took 7.3 to 8.0 min, node2287 and node2346 14.3 to 18.0
+min, node839 27.6 min, each using 28 to 29 cores. Every event that swapped
+between node2409 and node2287 took about twice as long on node2287. A precise
+comparison of two ways of running needs both pinned to one CPU model, or
+repeats.
+
+Finding 20: The model fits the loudest lower-mass events poorly. The likely
+reason is training coverage: The prior is uniform in component masses, so
+training examples per unit chirp mass rise with chirp mass, and the model was
+evidently built for heavy systems.
 
 #### T3 (two different events)
 
