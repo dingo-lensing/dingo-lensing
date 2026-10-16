@@ -14,8 +14,8 @@ dependencies = [
     "bilby==2.6.0",
     "bilby_pipe==1.8.0",
     "dingo-gw==0.9.8",
-    "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git"
-    "gravelamps@git+https://git.ligo.org/link/pre-merger-software/gravelamps.git"
+    "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git",
+    "gravelamps@git+https://git.ligo.org/link/pre-merger-software/gravelamps.git",
 ]
 requires-python = ">=3.10,<3.14"
 authors = [
@@ -43,3 +43,70 @@ dingo_lensing_pipe_generation = "dingo_lensing.pipe.data_generation:main"
 dingo_lensing_pipe_sampling = "dingo_lensing.pipe.sampling:main"
 dingo_lensing_pipe_importance_sampling = "dingo_lensing.pipe.importance_sampling:main"
 dingo_lensing_result = "dingo_lensing.pipe.dingo_result:main"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+dev = [
+    "pytest",
+    "ruff",
+    "pre-commit",
+]
+
+# ---------------------------------------------------------------------------
+# Code style and docstring checks (see CONTRIBUTING.md).
+#
+# `ruff check` enforces PEP 8 (E/W), pyflakes (F), PEP 8 import grouping (I),
+# and NumPy-style docstrings (D).  In CI these rules are applied only to the
+# lines changed in a pull request; run `ruff check dingo_lensing tests`
+# locally to see all findings, or `pre-commit run --all-files`.
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 79
+target-version = "py310"
+extend-exclude = ["examples"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors (PEP 8)
+    "W",   # pycodestyle warnings (PEP 8 whitespace)
+    "F",   # pyflakes (unused imports, undefined names, ...)
+    "I",   # isort: stdlib / third-party / local import groups
+    "D",   # pydocstyle: docstrings present and NumPy-formatted
+    # PEP 8 indentation (E1), whitespace (E2) and blank-line (E3) rules.
+    # ruff keeps these in "preview", so they are opted into one by one
+    # (explicit-preview-rules below) rather than enabling all preview rules.
+    "E111", "E112", "E113", "E114", "E115", "E116", "E117",
+    "E201", "E202", "E203", "E204", "E211", "E221", "E222", "E223", "E224",
+    "E225", "E227", "E228", "E231", "E241", "E242", "E251", "E252", "E261",
+    "E262", "E265", "E266", "E271", "E272", "E273", "E274", "E275",
+    "E301", "E302", "E303", "E304", "E305", "E306",
+]
+preview = true
+explicit-preview-rules = true
+ignore = [
+    "E226",  # allow `a*b + c` style spacing around arithmetic operators
+    "D105",  # magic methods (__repr__, __len__, ...) need no docstring
+    "D107",  # __init__ is documented in the class docstring
+    "D200",  # allow one-line docstrings on their own line
+    "D203",  # incompatible with D211 (no blank line before class docstring)
+    "D213",  # incompatible with D212 (summary on the first line)
+    "D401",  # do not police imperative mood in the summary line
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.isort]
+known-first-party = ["dingo_lensing"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test files: module/function docstrings are encouraged but not required.
+"tests/*" = ["D100", "D103"]
+"dingo_lensing/__init__.py" = ["F401"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

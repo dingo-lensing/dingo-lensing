@@ -1,0 +1,154 @@
+# Checks that pull requests follow CONTRIBUTING.md.
+#
+# All checks here are *diff-aware*: they only look at code added or modified
+# in the pull request, so pre-existing issues elsewhere in the repository do
+# not block contributors.  To reproduce locally:
+#
+#     pip install ruff
+#     python .github/scripts/check_contributing.py --base origin/main
+#
+# Jobs:
+#   config-files          pyproject.toml is valid TOML and follows the PEP 621
+#                         schema; workflow / pre-commit / environment YAML
+#                         files parse.
+#   style-and-docstrings  PEP 8 / import grouping / NumPy docstrings (ruff)
+#                         and a docstring on every new function/method/class.
+#   unit-tests-present    Changed modules in dingo_lensing/ have a matching
+#                         tests/test_<module>.py.  Add the label
+#                         `no-tests-needed` to a PR to skip this (e.g. for
+#                         pure refactors already covered by existing tests).
+#   pr-description        The PR description follows the four-item template.
+
+name: CONTRIBUTING checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contributing-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  config-files:
+    name: Project configuration files are valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install validators
+        run: python -m pip install --upgrade pip "validate-pyproject[all]" pyyaml
+
+      - name: Validate pyproject.toml and YAML files
+        run: python .github/scripts/check_contributing.py config
+
+  style-and-docstrings:
+    name: Code style and docstrings (changed lines only)
+    runs-on: ubuntu-latest
+    needs: config-files  # ruff cannot run with a broken pyproject.toml
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # needed to diff against the base branch
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install ruff
+        run: python -m pip install --upgrade pip ruff
+
+      - name: Fetch base branch
+        run: git fetch --no-tags origin ${{ github.event.pull_request.base.sha }}
+
+      - name: PEP 8, import order and docstring format (ruff)
+        run: >
+          python .github/scripts/check_contributing.py lint
+          --base ${{ github.event.pull_request.base.sha }}
+
+      - name: Docstring present on every new function, method and class
+        if: ${{ !cancelled() }}
+        run: >
+          python .github/scripts/check_contributing.py docstrings
+          --base ${{ github.event.pull_request.base.sha }}
+
+  unit-tests-present:
+    name: Unit tests accompany changed modules
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-tests-needed') }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Fetch base branch
+        run: git fetch --no-tags origin ${{ github.event.pull_request.base.sha }}
+
+      - name: Check tests/test_<module>.py exists for each changed module
+        run: >
+          python .github/scripts/check_contributing.py tests
+          --base ${{ github.event.pull_request.base.sha }}
+
+  pr-description:
+    name: PR description follows the template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the four required sections are present and filled in
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        shell: python {0}
+        run: |
+          import os
+          import re
+          import sys
+
+          body = os.environ.get("PR_BODY") or ""
+          # Strip HTML comments (the template's instructions) before checking.
+          body = re.sub(r"<!--.*?-->", "", body, flags=re.DOTALL)
+
+          required = [
+              "What was changed",
+              "Why the change was necessary",
+              "How the change was tested",
+              "Scientific or API assumptions",
+          ]
+          problems = []
+          if not body.strip():
+              problems.append("The pull-request description is empty.")
+          else:
+              # Split the body at the headings and make sure each section has
+              # some content.
+              pattern = "|".join(re.escape(h) for h in required)
+              parts = re.split(rf"^#+\s*(?:\d+\.\s*)?({pattern})\s*$",
+                               body, flags=re.MULTILINE | re.IGNORECASE)
+              found = {}
+              for i in range(1, len(parts) - 1, 2):
+                  found[parts[i].lower()] = parts[i + 1].strip()
+              for heading in required:
+                  text = found.get(heading.lower())
+                  if text is None:
+                      problems.append(f"Missing section: '{heading}'.")
+                  elif not re.sub(r"[-*\s]", "", text):
+                      problems.append(f"Section '{heading}' is empty.")
+
+          if problems:
+              for p in problems:
+                  print(f"::error::{p}")
+              print("\nCONTRIBUTING.md asks that the pull-request description "
+                    "briefly explain what was changed, why, how it was tested, "
+                    "and any scientific or API assumptions. Edit the PR "
+                    "description (the template is pre-filled on new PRs) and "
+                    "this check will re-run.")
+              sys.exit(1)
+          print("PR description contains all four required sections.")
