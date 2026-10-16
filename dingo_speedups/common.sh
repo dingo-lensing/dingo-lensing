@@ -19,11 +19,16 @@ BINDS=()
 fail() { echo "ERROR: $*" >&2; exit 1; }
 step() { printf '\n== %s\n' "$*"; }
 
+# newest_image: The newest image that passed every check of build_deps_image.sh. Only
+# those get a .url file, written once the image is staged; an image whose checks
+# failed, or one still being built, has none.
 newest_image() {
-    local image
-    image="$(ls -t "$IMAGE_DIR"/dingo-deps_recipe-*_cpu.sif 2> /dev/null | head -n 1 || true)"
-    [[ -n "$image" ]] || fail "No dependencies-only image in $IMAGE_DIR: Run container/build_deps_image.sh first"
-    echo "$image"
+    local url
+    url="$(ls -t "$IMAGE_DIR"/dingo-deps_recipe-*_cpu.sif.url 2> /dev/null | head -n 1 || true)"
+    [[ -n "$url" ]] \
+        || fail "No checked dependencies-only image in $IMAGE_DIR: Run container/build_deps_image.sh and let it finish"
+    [[ -f "${url%.url}" ]] || fail "${url%.url} is missing, although its .url file exists"
+    echo "${url%.url}"
 }
 
 # pack_and_unpack COMMIT WORK: Packs DINGO at COMMIT from DINGO_REPO into WORK and
