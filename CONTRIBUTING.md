@@ -193,6 +193,7 @@ Please keep pull requests focused. A pull request that addresses one feature, bu
 
 Several of the points above are checked automatically on every pull request by GitHub Actions (see `.github/workflows/`):
 
+- **Configuration files**: `pyproject.toml` must be valid TOML and follow the PEP 621 schema, and the workflow, pre-commit, and `environment.yml` files must be valid YAML.
 - **Code style and docstrings**: `ruff` checks PEP 8, import grouping, and NumPy-style docstring formatting, and a separate check requires a docstring on every new or modified function, method, and class (including private helpers). Only lines changed in the pull request are checked, so pre-existing issues elsewhere do not block you.
 - **Unit tests present**: every changed module `dingo_lensing/<module>.py` must have a matching `tests/test_<module>.py`. Maintainers can add the `no-tests-needed` label to a pull request to skip this check when it does not apply.
 - **Tests pass**: the full suite is run with `python -m pytest`.
@@ -201,7 +202,7 @@ Several of the points above are checked automatically on every pull request by G
 To run the same checks locally before pushing:
 
 ```bash
-pip install ruff
+pip install ruff "validate-pyproject[all]" pyyaml
 python .github/scripts/check_contributing.py --base origin/main
 ```
 

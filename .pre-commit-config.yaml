@@ -17,6 +17,12 @@ repos:
         name: ruff (PEP 8, imports, NumPy docstrings)
         args: [--fix, --exit-non-zero-on-fix]
 
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.25
+    hooks:
+      - id: validate-pyproject
+        additional_dependencies: ["validate-pyproject[all]"]
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:

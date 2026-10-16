@@ -6,8 +6,12 @@ modified relative to a base commit, so that contributors are held to the
 guidelines for the code they write without being blocked by pre-existing
 issues elsewhere in the repository.
 
-Three checks are implemented:
+Four checks are implemented:
 
+``config``
+    ``pyproject.toml`` parses and follows the PEP 621 schema, and the YAML
+    configuration files (workflows, pre-commit, conda environment) parse.
+    This is the one check that is not diff-aware.
 ``lint``
     Run ``ruff check`` (PEP 8, pyflakes, import grouping, NumPy docstring
     style; configured in ``pyproject.toml``) and report only the findings
@@ -25,8 +29,8 @@ Three checks are implemented:
 
 Usage::
 
-    python .github/scripts/check_contributing.py [all|lint|docstrings|tests] \
-        --base origin/main
+    python .github/scripts/check_contributing.py \
+        [all|config|lint|docstrings|tests] --base origin/main
 
 Findings are printed as GitHub Actions workflow commands (``::error ...``)
 so that they appear as inline annotations on pull requests, and as plain
@@ -37,6 +41,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import glob
 import json
 import os
 import pathlib
@@ -44,6 +49,11 @@ import re
 import subprocess
 import sys
 from collections.abc import Iterable
+
+try:
+    import tomllib
+except ImportError:  # Python < 3.11
+    import tomli as tomllib  # type: ignore[no-redef]
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 PACKAGE_DIR = "dingo_lensing"
@@ -86,6 +96,7 @@ class Reporter:
     def _emit(
         level: str, message: str, file: str | None, line: int | None
     ) -> None:
+        """Print one annotation (GitHub workflow command or plain text)."""
         if IN_GITHUB_ACTIONS:
             props = []
             if file:
@@ -204,6 +215,7 @@ def check_lint(base: str, files: Iterable[str], reporter: Reporter) -> None:
 # Check: docstrings on new/modified definitions
 # ---------------------------------------------------------------------------
 def _definitions(tree: ast.AST) -> Iterable[ast.AST]:
+    """Yield every function, method and class definition in ``tree``."""
     for node in ast.walk(tree):
         if isinstance(
             node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
@@ -240,6 +252,10 @@ def check_docstrings(
             header_end = node.body[0].lineno - 1 if node.body else node.lineno
             header_end = max(header_end, node.lineno)
             if not overlaps(lines, header_start, header_end):
+                continue
+            # Dunder methods (__init__, __repr__, ...) are documented by the
+            # class docstring, matching ruff's D105/D107 being ignored.
+            if node.name.startswith("__") and node.name.endswith("__"):
                 continue
             n_checked += 1
             if ast.get_docstring(node, clean=False) is None:
@@ -355,6 +371,91 @@ def _looks_like_test(node: ast.FunctionDef) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Check: project configuration files are well-formed
+# ---------------------------------------------------------------------------
+CONFIG_YAML_FILES = (
+    "environment.yml",
+    ".pre-commit-config.yaml",
+    ".github/workflows/*.yml",
+    ".github/workflows/*.yaml",
+)
+
+
+def check_config(reporter: Reporter) -> None:
+    """Validate ``pyproject.toml`` and the YAML configuration files.
+
+    ``pyproject.toml`` must parse as TOML and, if ``validate-pyproject`` is
+    installed, conform to the PEP 621 / setuptools schema.  The YAML files
+    must parse if ``pyyaml`` is installed.  This check is not diff-aware:
+    a broken configuration file breaks every tool that reads it, so it is
+    always checked in full.
+    """
+    pyproject = REPO_ROOT / "pyproject.toml"
+    try:
+        with pyproject.open("rb") as fh:
+            tomllib.load(fh)
+    except tomllib.TOMLDecodeError as exc:
+        match = re.search(r"at line (\d+)", str(exc))
+        reporter.error(
+            f"pyproject.toml is not valid TOML: {exc}",
+            file="pyproject.toml",
+            line=int(match.group(1)) if match else 1,
+        )
+        print("config: pyproject.toml failed to parse.")
+        return
+    else:
+        print("config: pyproject.toml parses as TOML.")
+
+    try:
+        from validate_pyproject import api as vp_api
+        from validate_pyproject import errors as vp_errors
+    except ImportError:
+        reporter.notice(
+            "validate-pyproject is not installed; skipping the PEP 621 "
+            "schema check of pyproject.toml (pip install validate-pyproject)."
+        )
+    else:
+        with pyproject.open("rb") as fh:
+            data = tomllib.load(fh)
+        try:
+            vp_api.Validator()(data)
+        except vp_errors.ValidationError as exc:
+            reporter.error(
+                f"pyproject.toml does not follow the PEP 621 schema: "
+                f"{exc.summary if hasattr(exc, 'summary') else exc}",
+                file="pyproject.toml",
+                line=1,
+            )
+        else:
+            print("config: pyproject.toml follows the PEP 621 schema.")
+
+    try:
+        import yaml
+    except ImportError:
+        reporter.notice(
+            "pyyaml is not installed; skipping YAML checks "
+            "(pip install pyyaml)."
+        )
+        return
+    n_yaml = 0
+    for pattern in CONFIG_YAML_FILES:
+        for path in sorted(glob.glob(str(REPO_ROOT / pattern))):
+            rel = str(pathlib.Path(path).relative_to(REPO_ROOT))
+            n_yaml += 1
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    yaml.safe_load(fh)
+            except yaml.YAMLError as exc:
+                mark = getattr(exc, "problem_mark", None)
+                reporter.error(
+                    f"{rel} is not valid YAML: {exc}",
+                    file=rel,
+                    line=mark.line + 1 if mark else 1,
+                )
+    print(f"config: {n_yaml} YAML file(s) parsed.")
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 def main(argv: list[str] | None = None) -> int:
@@ -364,7 +465,7 @@ def main(argv: list[str] | None = None) -> int:
         "check",
         nargs="?",
         default="all",
-        choices=["all", "lint", "docstrings", "tests"],
+        choices=["all", "config", "lint", "docstrings", "tests"],
     )
     parser.add_argument(
         "--base",
@@ -374,6 +475,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     reporter = Reporter()
+
+    if args.check in ("all", "config"):
+        check_config(reporter)
+        if args.check == "config":
+            return _finish(reporter)
+
     changed, deleted = changed_python_files(args.base)
     print(f"Comparing HEAD against {args.base}: "
           f"{len(changed)} changed, {len(deleted)} deleted Python file(s).")
@@ -384,7 +491,11 @@ def main(argv: list[str] | None = None) -> int:
         check_docstrings(args.base, changed, reporter)
     if args.check in ("all", "tests"):
         check_tests(changed, deleted, reporter)
+    return _finish(reporter)
 
+
+def _finish(reporter: Reporter) -> int:
+    """Print a summary line and return the process exit status."""
     if reporter.n_errors:
         print(f"\n{reporter.n_errors} problem(s) found. See CONTRIBUTING.md.")
         return 1
