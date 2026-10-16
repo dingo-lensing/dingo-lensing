@@ -1,0 +1,64 @@
+# Run the unit-test suite, as required by CONTRIBUTING.md
+# ("All tests should pass before a contribution is merged").
+#
+# The package is installed with pip from pyproject.toml.  Two dependencies are
+# fetched from git (modwaveforms from GitHub, gravelamps from git.ligo.org),
+# and dingo-gw pulls in PyTorch, so the install step takes a while; the pip
+# cache keeps re-runs fast.
+
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    name: pytest (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        # Keep in sync with environment.yml and `requires-python`.
+        python-version: ["3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install DINGO-lensing and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # CPU-only PyTorch keeps the download small (dingo-gw depends on it).
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install -e ".[test]"
+
+      - name: Show installed versions
+        run: python -m pip list
+
+      - name: Run the test suite
+        run: |
+          set +e
+          python -m pytest -v --color=yes
+          rc=$?
+          set -e
+          if [ "$rc" -eq 5 ]; then
+            echo "::warning::pytest collected no tests. CONTRIBUTING.md asks that new functionality be accompanied by unit tests under tests/."
+            exit 0
+          fi
+          exit $rc

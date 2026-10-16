@@ -189,6 +189,29 @@ Before opening a pull request, please make sure that:
 
 Please keep pull requests focused. A pull request that addresses one feature, bug, or well-defined refactoring is generally easier to review than one containing several unrelated changes.
 
+### Automated checks
+
+Several of the points above are checked automatically on every pull request by GitHub Actions (see `.github/workflows/`):
+
+- **Code style and docstrings**: `ruff` checks PEP 8, import grouping, and NumPy-style docstring formatting, and a separate check requires a docstring on every new or modified function, method, and class (including private helpers). Only lines changed in the pull request are checked, so pre-existing issues elsewhere do not block you.
+- **Unit tests present**: every changed module `dingo_lensing/<module>.py` must have a matching `tests/test_<module>.py`. Maintainers can add the `no-tests-needed` label to a pull request to skip this check when it does not apply.
+- **Tests pass**: the full suite is run with `python -m pytest`.
+- **Pull-request description**: the four sections of the pull-request template must be filled in.
+
+To run the same checks locally before pushing:
+
+```bash
+pip install ruff
+python .github/scripts/check_contributing.py --base origin/main
+```
+
+You can also install the [pre-commit](https://pre-commit.com) hooks, which run `ruff` on the files you commit:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
 The pull-request description should briefly explain:
 
 1. What was changed.
