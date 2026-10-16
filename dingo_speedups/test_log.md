@@ -32,7 +32,7 @@ Not for review/merge. Plan and log for four exact speed-ups to the synthetic pha
 Items marked (Kaili) are decisions; items marked (cluster) are runs on the CIT cluster.
 
 **0. Decide first**
-- [ ] 0.1 (Kaili) Fork dingo-gw/dingo on GitHub; one branch per speed-up, cut from the pinned baseline. In progress.
+- [x] 0.1 (Kaili) Fork dingo-gw/dingo on GitHub; one branch per speed-up, cut from the pinned baseline. Done: `git@github.com:KailibRyanDoney/dingo-effeciency.git`, `main` at dd481d98 (level with upstream). First branch: `kailib-synthetic-phase-in-workers` (speed-ups 1 and 2).
 - [ ] 0.2 (Kaili) Upstream or not: If these become PRs to DINGO, their tests go in DINGO's own `tests/`. Benchmarks and cluster scripts stay on this branch either way.
 - [ ] 0.3 Baseline: Upstream `main` at dd481d98 (12 October 2026); recompare if `main` moves.
 - [ ] 0.4 Test data: The unlensed Exercise 3 model, so plain DINGO works without porting DINGO-Lensing.
@@ -77,3 +77,4 @@ Items marked (Kaili) are decisions; items marked (cluster) are runs on the CIT c
 ## Log
 
 - 16 October 2026: Folder added with this plan and `bench/grid_eval_main.py`. Fork (0.1) in progress.
+- 16 October 2026: Fork created (0.1), level with upstream `main` at dd481d98, so the baseline (0.3) holds. Local clone has `upstream` set to dingo-gw/dingo, fetch only. Branch `kailib-synthetic-phase-in-workers` cut from `main` locally; it gets pushed with its first commit.
