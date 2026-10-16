@@ -15,7 +15,6 @@ dependencies = [
     "bilby_pipe==1.8.0",
     "dingo-gw==0.9.8",
     "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git",
-    "gravelamps@git+https://git.ligo.org/link/pre-merger-software/gravelamps.git",
 ]
 requires-python = ">=3.10,<3.14"
 authors = [
@@ -45,6 +44,10 @@ dingo_lensing_pipe_importance_sampling = "dingo_lensing.pipe.importance_sampling
 dingo_lensing_result = "dingo_lensing.pipe.dingo_result:main"
 
 [project.optional-dependencies]
+# Gravelamps needs its C++ libraries built first; see README.md.
+gravelamps = [
+    "gravelamps@git+https://git.ligo.org/link/pre-merger-software/gravelamps.git",
+]
 test = [
     "pytest",
 ]

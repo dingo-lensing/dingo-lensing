@@ -1,10 +1,10 @@
 # Run the unit-test suite, as required by CONTRIBUTING.md
 # ("All tests should pass before a contribution is merged").
 #
-# The package is installed with pip from pyproject.toml.  Two dependencies are
-# fetched from git (modwaveforms from GitHub, gravelamps from git.ligo.org),
-# and dingo-gw pulls in PyTorch, so the install step takes a while; the pip
-# cache keeps re-runs fast.
+# The package is installed with pip from pyproject.toml.  modwaveforms is
+# fetched from GitHub, and dingo-gw pulls in PyTorch, so the install step takes
+# a while; the pip cache keeps re-runs fast.  The optional `gravelamps` extra
+# is not installed here, as it needs its C++ libraries built first.
 
 name: Tests
 

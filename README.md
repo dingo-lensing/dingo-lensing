@@ -42,6 +42,14 @@ pip install -e .
 ```
 for the installation
 
+Optional: to use the Gravelamps lens models (`lens_model_code: gravelamps`),
+first build and install the
+[Gravelamps](https://git.ligo.org/link/pre-merger-software/gravelamps) C++
+libraries following its own instructions, then install the extra:
+```sh
+pip install -e ".[gravelamps]"
+```
+
 ## Reference 
 
 **DINGO-lensing** is described in [Chan et al. 2025](https://arxiv.org/abs/2511.07186). If you use this code, we kindly ask you to cite this paper:
