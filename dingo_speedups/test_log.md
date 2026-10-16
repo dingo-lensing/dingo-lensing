@@ -33,16 +33,17 @@ Items marked (Kaili) are decisions; items marked (cluster) are runs on the CIT c
 
 **0. Decide first**
 - [x] 0.1 (Kaili) Fork dingo-gw/dingo on GitHub; one branch per speed-up, cut from the pinned baseline. Done: `git@github.com:KailibRyanDoney/dingo-effeciency.git`, `main` at dd481d98 (level with upstream). First branch: `kailib-synthetic-phase-in-workers` (speed-ups 1 and 2).
-- [ ] 0.2 (Kaili) Upstream or not: If these become PRs to DINGO, their tests go in DINGO's own `tests/`. Benchmarks and cluster scripts stay on this branch either way.
-- [ ] 0.3 Baseline: Upstream `main` at dd481d98 (12 October 2026); recompare if `main` moves.
+- [x] 0.2 (Kaili) Upstream or not: Decided 16 October: The work stays on our fork's branch, and at the end we decide what to push upstream. Tooling, benchmarks and results stay on this branch.
+- [x] 0.3 Baseline: Upstream `main` at dd481d98 (12 October 2026), recorded in `BASELINE_COMMIT`; recompare if `main` moves.
 - [ ] 0.4 Test data: The unlensed Exercise 3 model, so plain DINGO works without porting DINGO-Lensing.
 
 **1. The right DINGO on the cluster**
-- [ ] 1.1 A dependencies-only image: The current recipe minus DINGO and DINGO-Lensing, plus `pytest`. With no DINGO installed, a wrong path fails loudly instead of importing 0.9.8. DINGO-Lensing must never go into it, since it pins `dingo-gw==0.9.8`.
-- [ ] 1.2 Ship DINGO as source with each job: A `git archive` of the commit plus a `COMMIT` file, transferred with the job and put first on `sys.path` by the scripts (`python -I` ignores `PYTHONPATH`). DINGO is pure Python, so no image rebuild per change.
-- [ ] 1.3 A guard every script runs first: It checks that `dingo.__file__` is inside the shipped tree, that `COMMIT` is as expected and that DINGO-Lensing is not importable, records the lalsuite, numpy, scipy, torch and bilby versions and the CPU model, and refuses to run on a mismatch. Unit tests, mutation-checked.
-- [ ] 1.4 (cluster) Build and stage the image; run DINGO's test suite in it at the baseline commit.
-- [ ] 1.5 (cluster) Check whether the latest DINGO can (a) load Juno's 0.9.7-trained unlensed model and (b) read the network samples from the tutorial's non-lensed run. If (b) fails, sample a fresh proposal with the latest DINGO.
+- [x] 1.1 A dependencies-only image: The current recipe minus DINGO and DINGO-Lensing (`pytest` was already pinned). With no DINGO installed, a wrong path fails loudly instead of importing 0.9.8. DINGO-Lensing must never go into it, since it pins `dingo-gw==0.9.8`. Done in code: `container/dingo-deps.def`, `container/make_deps_requirements.py` (reuses the DINGO-Lensing image's generator unchanged; the pins differ only by `dingo-gw==0.9.8`), `container/build_deps_image.sh`. Not built yet: That is step 1.4.
+- [x] 1.2 Ship DINGO as source with each job: `pack_dingo.py` writes `dingo_<commit10>.tar.gz`, a `git archive` of the commit plus `COMMIT.json` (commit, `git describe`, version) and `dingo/_version.py`. Without the version file DINGO stamps its outputs "dingo=None", which reads back as version 0.0.0 and sets off its backward-compatibility warning. Version as setuptools_scm gives it: `0.10.4.dev1+gdd481d98` for the baseline. The same commit gives the same bytes. Scripts put the unpacked tree first on `sys.path` themselves (`python -I` ignores `PYTHONPATH`). DINGO is pure Python, so no image rebuild per change.
+- [x] 1.3 A guard every script runs first (`guard.py`): DINGO not yet imported; no dingo-gw or DINGO-Lensing installed or importable; `COMMIT.json` names the expected commit; `dingo` imports from inside the tree with the recorded version. Refuses (exit 2) otherwise, and returns the provenance for results (versions, host, CPU flags, threads). Also runs DINGO's own tests from a tree (`guard.py pytest`).
+  Locally (Windows, Python 3.9): 59 unit tests pass (4 pytest-mode tests skipped; they run inside the image), 28 of 28 mutations caught (`tests/mutation_check.py`; 2 more need the image), and the real baseline packs (1.1 MB, sha256 74f0463d…) and passes the guard.
+- [ ] 1.4 (cluster) Build and stage the image (`container/build_deps_image.sh`, which also runs the unit tests and the guard's mutation check inside it); run DINGO's test suite in it at the baseline commit (`run_dingo_tests.sh`, results in `results/dingo_tests/`).
+- [ ] 1.5 (cluster) Check whether the latest DINGO can (a) load Juno's 0.9.7-trained unlensed model and draw network samples, and (b) read the network samples from the tutorial's non-lensed run (`dingo_EXP2_nonlensed`) and importance-sample a subset (`run_compat_check.sh`, results in `results/compat/`). If (b) fails, sample a fresh proposal with the latest DINGO.
 
 **2. Baseline (latest DINGO, unchanged)**
 - [ ] 2.1 Importance sampling on 50,000 samples, 32 CPUs, ample memory: Time and peak memory per step, to confirm or rule out the 32 GB grid step.
@@ -78,3 +79,4 @@ Items marked (Kaili) are decisions; items marked (cluster) are runs on the CIT c
 
 - 16 October 2026: Folder added with this plan and `bench/grid_eval_main.py`. Fork (0.1) in progress.
 - 16 October 2026: Fork created (0.1), level with upstream `main` at dd481d98, so the baseline (0.3) holds. Local clone has `upstream` set to dingo-gw/dingo, fetch only. Branch `kailib-synthetic-phase-in-workers` cut from `main` locally; it gets pushed with its first commit.
+- 16 October 2026: 1.1 to 1.3 written and tested locally (see the plan); runners for 1.4 and 1.5 ready. The fork on GitHub has no tags, so a clone of it needs `git fetch upstream --tags` before `pack_dingo.py` can compute the version.

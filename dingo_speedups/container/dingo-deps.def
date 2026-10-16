@@ -1,0 +1,79 @@
+# CPU-only image with DINGO's dependencies and no DINGO, for the DINGO speed-up
+# tests (see ../test_log.md). Jobs ship DINGO's source at one commit
+# (../pack_dingo.py) and check it before use (../guard.py). With no DINGO in the
+# image, a job that fails to put its tree on the path fails loudly, instead of
+# quietly importing another DINGO. Build it with build_deps_image.sh.
+#
+# Contents: Python 3.13.13 from conda-forge and every package at dingo_env's exact
+# version (requirements-deps-cpu.txt), with PyTorch as CPU builds, minus dingo-gw.
+# No modwaveforms or DINGO-Lensing either: DINGO-Lensing pins dingo-gw 0.9.8.
+
+Bootstrap: docker
+From: condaforge/miniforge3:latest
+
+%files
+    requirements-deps-cpu.txt /opt/requirements-deps-cpu.txt
+
+%post
+    set -eu
+    conda create --yes --quiet --prefix /opt/dingo_env --channel conda-forge \
+        python=3.13.13 pip=26.1.1
+    PYTHON=/opt/dingo_env/bin/python
+    # ligo-segments 1.4.0 and python-ligo-lw 1.8.4 exist only as source on PyPI for
+    # Linux, so pip compiles them. Their C code needs a pre-GCC-14 compiler (see
+    # ../../parallelisation/container/dingo-lensing.def). The compiler goes in a
+    # separate prefix that is deleted afterwards, so the image doesn't ship it.
+    conda create --yes --quiet --prefix /opt/build-tools --channel conda-forge "gcc=13"
+    PATH="/opt/build-tools/bin:$PATH" $PYTHON -m pip install --no-cache-dir \
+        --requirement /opt/requirements-deps-cpu.txt
+    rm -rf /opt/build-tools
+
+    # Record what went in, plus anything pip considers inconsistent.
+    $PYTHON -m pip list --format=freeze > /opt/pip-list.txt
+    $PYTHON -m pip check > /opt/pip-check.txt 2>&1 || true
+    conda clean --all --yes
+
+%environment
+    export PATH=/opt/dingo_env/bin:$PATH
+
+%test
+    set -eu
+    # From / in Python's isolated mode (-I), so nothing outside the image can
+    # shadow its packages.
+    cd /
+    /opt/dingo_env/bin/python -I - <<'EOF'
+import importlib
+import importlib.metadata as metadata
+import importlib.util
+
+# The point of this image: No DINGO and nothing that would bring one in.
+for module in ("dingo", "dingo_lensing", "modwaveforms"):
+    assert importlib.util.find_spec(module) is None, f"{module} is importable"
+for name in ("dingo-gw", "dingo-lensing", "modwaveforms"):
+    try:
+        version = metadata.version(name)
+    except metadata.PackageNotFoundError:
+        continue
+    raise AssertionError(f"{name} {version} is installed")
+
+# DINGO main's dependencies (its pyproject.toml), and pytest for its tests.
+for module in (
+    "astropy", "bilby", "bilby_pipe", "configargparse", "corner", "glasflow", "gwpy",
+    "h5py", "lal", "lalsimulation", "matplotlib", "numpy", "pandas", "pycbc",
+    "pycondor", "yaml", "requests", "sklearn", "scipy", "threadpoolctl", "torch",
+    "torchdiffeq", "torchvision", "tqdm", "pytest",
+):
+    importlib.import_module(module)
+import torch
+
+assert torch.__version__.endswith("+cpu"), torch.__version__
+# Compiled from source during the build; must load now that the compiler is gone.
+for compiled in ("ligo.segments.__segments", "ligo.lw.tokenizer"):
+    importlib.import_module(compiled)
+for name in ("lalsuite", "bilby", "bilby_pipe", "numpy", "scipy", "torch", "pytest"):
+    print(f"{name}: {metadata.version(name)}")
+EOF
+
+%labels
+    contents dingo-dependencies-only
+    torch_build cpu
