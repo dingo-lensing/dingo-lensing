@@ -6,3 +6,7 @@ AGENTS.md
 prompts/
 build/
 .ipynb_checkpoints/
+
+# Never commit container images or trained models
+*.sif
+*.pt
