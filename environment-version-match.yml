@@ -1,0 +1,10 @@
+# Native prerequisites for the CPU toy workflow. Install pip packages after
+# scripts/install_gravelamps_native.sh, as documented in the example README.
+name: dingo_lensing_version_match
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - pip
+  - libflint>=3
+  - gsl

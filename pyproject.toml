@@ -13,9 +13,9 @@ dependencies = [
     "lalsuite>=7.21",
     "bilby==2.6.0",
     "bilby_pipe==1.8.0",
-    "dingo-gw==0.9.8",
-    "modwaveforms@git+https://github.com/ezquiaga/modwaveforms.git",
-    "gravelamps@git+https://git.ligo.org/link/pre-merger-software/gravelamps.git",
+    "dingo-gw==0.10.3",
+    "modwaveforms@https://api.github.com/repos/ezquiaga/modwaveforms/tarball/fa692172c831160e9e615689caf6ed045f60a494",
+    "gravelamps@https://git.ligo.org/link/pre-merger-software/gravelamps/-/archive/5545fa16561db99d02aff404b3282fc85be6ff7b/gravelamps-5545fa16561db99d02aff404b3282fc85be6ff7b.tar.gz",
 ]
 requires-python = ">=3.10,<3.14"
 authors = [
@@ -27,7 +27,9 @@ readme = "README.md"
 
 [tool.setuptools]
 include-package-data = true
-packages = ["dingo_lensing"]
+
+[tool.setuptools.packages.find]
+include = ["dingo_lensing*"]
 
 [tool.setuptools.package-data]
 #TODO: Ship template ini files here
@@ -107,6 +109,8 @@ known-first-party = ["dingo_lensing"]
 "dingo_lensing/__init__.py" = ["F401"]
 
 [tool.pytest.ini_options]
+markers = ["heavy: local CPU end-to-end training (excluded from ordinary CI)"]
+addopts = "-m 'not heavy'"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]

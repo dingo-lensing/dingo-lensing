@@ -8,3 +8,21 @@ build/
 .ruff_cache/
 .pytest_cache/
 .ipynb_checkpoints/
+
+# Generated training signals, noise/ASD datasets, and model checkpoints.
+# Existing files tracked by the upstream baseline remain tracked.
+*.hdf5
+*.h5
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+*.gwf
+training_data/
+training/
+artifacts/
+cache/
+envs/
+tmp/
+dist/

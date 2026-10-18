@@ -2,7 +2,7 @@
 # ("All tests should pass before a contribution is merged").
 #
 # The package is installed with pip from pyproject.toml.  Two dependencies are
-# fetched from git (modwaveforms from GitHub, gravelamps from git.ligo.org),
+# fetched from pinned archives (GitHub and git.ligo.org),
 # and dingo-gw pulls in PyTorch, so the install step takes a while; the pip
 # cache keeps re-runs fast.
 
@@ -35,30 +35,57 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: conda-incubator/setup-miniconda@v3
         with:
+          miniforge-version: latest
+          activate-environment: lensing-tests
           python-version: ${{ matrix.python-version }}
-          cache: pip
-          cache-dependency-path: pyproject.toml
+          channels: conda-forge
+          conda-remove-defaults: true
+
+      - name: Cache pip downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          restore-keys: pip-${{ runner.os }}-${{ matrix.python-version }}-
+
+      - name: Install native Gravelamps requirements
+        shell: bash -el {0}
+        run: |
+          conda install -y -c conda-forge 'libflint>=3' cmake boost-cpp
+          bash scripts/install_gravelamps_native.sh "$CONDA_PREFIX" "$RUNNER_TEMP/gravelamps"
 
       - name: Install DINGO-lensing and test dependencies
+        shell: bash -el {0}
         run: |
+          export CPLUS_INCLUDE_PATH="$CONDA_PREFIX/include"
+          export LIBRARY_PATH="$CONDA_PREFIX/lib"
+          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          export LDFLAGS="-L$CONDA_PREFIX/lib -Wl,-rpath,$CONDA_PREFIX/lib"
           python -m pip install --upgrade pip
-          # CPU-only PyTorch keeps the download small (dingo-gw depends on it).
-          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
           python -m pip install -e ".[test]"
+          python -m pip check
 
       - name: Show installed versions
+        shell: bash -el {0}
         run: python -m pip list
 
       - name: Run the test suite
+        shell: bash -el {0}
+        env:
+          OMP_NUM_THREADS: "2"
+          OPENBLAS_NUM_THREADS: "2"
+          MPLBACKEND: Agg
         run: |
-          set +e
+          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           python -m pytest -v --color=yes
-          rc=$?
-          set -e
-          if [ "$rc" -eq 5 ]; then
-            echo "::warning::pytest collected no tests. CONTRIBUTING.md asks that new functionality be accompanied by unit tests under tests/."
-            exit 0
-          fi
-          exit $rc
+
+      - name: Build and inspect the standard wheel
+        shell: bash -el {0}
+        run: |
+          python -m pip wheel --no-deps --no-build-isolation . -w dist
+          python -m pip install --no-deps --force-reinstall dist/dingo_lensing-*.whl
+          cd "$RUNNER_TEMP"
+          python -c "import dingo_lensing.pipe.sampling; import dingo_lensing.pipe.nodes.sampling_node"

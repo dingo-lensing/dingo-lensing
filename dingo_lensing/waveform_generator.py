@@ -7,6 +7,21 @@ import dingo.gw.waveform_generator.wfg_utils as wfg_utils
 from dingo_lensing.dev_mode import plot_amplification_factor, plot_waveform_overlay
 from dingo_lensing.lens_code_loader import load_amplification_model
 
+
+LENS_SETTING_KEYS = {
+    "dev_mode", "dev_plot_dir", "fdsm_function", "lens_model_code",
+    "amplification_factor_function", "lens_model_defaults",
+    "lens_model_settings",
+}
+
+
+def split_waveform_settings(settings):
+    """Separate local lens settings from upstream generator settings."""
+    lens = {k: v for k, v in settings.items() if k in LENS_SETTING_KEYS}
+    base = {k: v for k, v in settings.items() if k not in LENS_SETTING_KEYS}
+    return base, lens
+
+
 class LensedWaveformGenerator(WaveformGenerator):
     def __init__(
         self,
@@ -89,9 +104,11 @@ class LensedWaveformGenerator(WaveformGenerator):
         return self._model.resolve(parameters, self.lens_model_defaults)
 
     def generate_hplus_hcross(
-            self, parameters: Dict[str, float], catch_waveform_errors=True
+            self, parameters: Dict[str, float], catch_waveform_errors=True,
+            apply_postprocessing=True,
         ) -> Dict[str, np.ndarray]:
-
+        """Generate lensed polarizations before upstream postprocessing."""
+        parameters = parameters.copy()
         sample_index = parameters.pop("sample_index", None)
         resolved_lensing_parameters = self._resolve_lensing_parameters(parameters)
         self._current_sample_index = sample_index
@@ -100,23 +117,26 @@ class LensedWaveformGenerator(WaveformGenerator):
             "lensed": {**parameters, **resolved_lensing_parameters},
         }
 
-        self.generate_FD_waveform = lambda parameters_lal, target_function: self.generate_lensed_FD_waveform(
-            parameters_lal,
-            target_function,
-        )
-
         try:
-            return super().generate_hplus_hcross(parameters, catch_waveform_errors)
+            return super().generate_hplus_hcross(
+                parameters, catch_waveform_errors, apply_postprocessing
+            )
         finally:
             self._current_sample_index = None
             self._current_plot_parameters = None
+
+    def generate_FD_waveform(self, parameters_lal, target_function):
+        """Apply lensing through a method that can be pickled for workers."""
+        return self.generate_lensed_FD_waveform(
+            parameters_lal, target_function
+        )
 
     def generate_lensed_FD_waveform(
         self,
         parameters_lal: Tuple,
         target_function: Callable,
     ) -> Dict[str, np.ndarray]:
-
+        """Multiply raw frequency-domain polarizations by amplification."""
         unlensed_polarizations = super().generate_FD_waveform(
             parameters_lal, target_function
         )
@@ -141,6 +161,11 @@ class LensedWaveformGenerator(WaveformGenerator):
     def generate_hplus_hcross_m(
         self, parameters: Dict[str, float]
     ) -> Dict[tuple, Dict[str, np.ndarray]]:
+        """Lens mode contributions exactly once for either upstream path."""
+        parameters = parameters.copy()
+        if self.uses_dft_phase_decomposition:
+            # The upstream DFT calls our polarization method at each phase.
+            return super().generate_hplus_hcross_m(parameters)
 
         resolved_lensing_parameters = self._resolve_lensing_parameters(parameters)
 
@@ -161,7 +186,10 @@ class LensedWaveformGenerator(WaveformGenerator):
         frequency_array: np.ndarray,
         resolved_parameters: Dict[str, float],
     ) -> np.ndarray:
-        return self._model.compute(frequency_array, resolved_parameters)
+        """Evaluate delay phases in float64, including float32 domain grids."""
+        return self._model.compute(
+            np.asarray(frequency_array, dtype=float), resolved_parameters
+        )
 
     def _save_dev_plot(
         self,
