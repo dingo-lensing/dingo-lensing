@@ -1,0 +1,29 @@
+Putting posterior model to device cpu.
+Loading dataset from label_data0_1384782888-63_generation_event_data.hdf5.
+Saving dataset to out/network_samples.hdf5
+Loading dataset from out/network_samples.hdf5.
+Setting spin_conversion_phase = 0.0. Using this value for the phase parameter for conversion to cartesian spins.
+Sampling SyntheticPhaseFactor for 49910 samples.
+Done. This took 222.17 s.
+Using 49910 cached log likelihoods.
+Saving dataset to out/importance_sampling.hdf5
+{
+  "evidence": {
+    "num_samples": 50000,
+    "log_evidence": -5829.6248468704935,
+    "log_evidence_std": 0.008407253545258522,
+    "n_eff": 11027.557492152524,
+    "sample_efficiency": 0.2205511498430505
+  },
+  "total_seconds": 307.342
+}
+unpack                           0.2 s   main peak   0.02 GB
+imports                          8.7 s   main peak   0.53 GB
+model_load                      10.6 s   main peak   6.59 GB
+event_data                       0.0 s   main peak   2.50 GB
+network_sampling                64.3 s   main peak   2.62 GB
+save_network_samples             0.0 s   main peak   2.62 GB
+importance_sampling_setup        0.1 s   main peak   1.25 GB
+synthetic_phase                222.7 s   main peak  33.28 GB
+importance_sample                0.3 s   main peak   1.34 GB
+save_result                      0.0 s   main peak   1.34 GB

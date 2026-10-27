@@ -1,0 +1,171 @@
+{
+  "inputs": {
+    "tarball": "dingo_dd481d9846.tar.gz",
+    "commit": "dd481d98467c14114d7cf81981076806c5b2a4bc",
+    "model": "model_nonlensed.pt",
+    "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+    "num_samples": "50000",
+    "batch_size": "5000",
+    "num_processes": "32",
+    "seed": "1"
+  },
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "32",
+    "OPENBLAS_NUM_THREADS": null
+  },
+  "stages": {
+    "unpack": {
+      "seconds": 0.155,
+      "main_peak_bytes": 18714624,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 0,
+      "job_peak_bytes_so_far": null
+    },
+    "imports": {
+      "seconds": 8.691,
+      "main_peak_bytes": 532574208,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 528248832,
+      "job_peak_bytes_so_far": null
+    },
+    "model_load": {
+      "seconds": 10.572,
+      "main_peak_bytes": 6589591552,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 528248832,
+      "job_peak_bytes_so_far": null
+    },
+    "event_data": {
+      "seconds": 0.008,
+      "main_peak_bytes": 2501005312,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 528248832,
+      "job_peak_bytes_so_far": null
+    },
+    "network_sampling": {
+      "seconds": 64.321,
+      "main_peak_bytes": 2615336960,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 528248832,
+      "job_peak_bytes_so_far": null
+    },
+    "save_network_samples": {
+      "seconds": 0.027,
+      "main_peak_bytes": 2615853056,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 528248832,
+      "job_peak_bytes_so_far": null
+    },
+    "importance_sampling_setup": {
+      "seconds": 0.057,
+      "main_peak_bytes": 1251721216,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 528248832,
+      "job_peak_bytes_so_far": null
+    },
+    "synthetic_phase": {
+      "seconds": 222.673,
+      "main_peak_bytes": 33276911616,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 3186335744,
+      "job_peak_bytes_so_far": null
+    },
+    "importance_sample": {
+      "seconds": 0.343,
+      "main_peak_bytes": 1338896384,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 3186335744,
+      "job_peak_bytes_so_far": null
+    },
+    "save_result": {
+      "seconds": 0.031,
+      "main_peak_bytes": 1338896384,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 3186335744,
+      "job_peak_bytes_so_far": null
+    }
+  },
+  "provenance": {
+    "dingo": {
+      "commit": "dd481d98467c14114d7cf81981076806c5b2a4bc",
+      "describe": "v0.10.3-1-gdd481d98",
+      "version": "0.10.4.dev1+gdd481d98",
+      "tree": "/srv/scratch/dingo_dd481d9846",
+      "imported_from": "/srv/scratch/dingo_dd481d9846/dingo"
+    },
+    "python": {
+      "version": "3.13.13",
+      "executable": "/opt/dingo_env/bin/python",
+      "isolated": true
+    },
+    "packages": {
+      "lalsuite": "7.26.15",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3",
+      "torch": "2.13.0+cpu",
+      "bilby": "2.6.0",
+      "bilby-pipe": "1.8.0",
+      "pandas": "3.0.5",
+      "h5py": "3.16.0",
+      "pycbc": "2.11.0",
+      "pytest": "9.1.1"
+    },
+    "host": {
+      "name": "node798",
+      "platform": "Linux-6.12.0-211.61.1.el10_2.x86_64-x86_64-with-glibc2.39",
+      "cpu": {
+        "model": "Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz",
+        "flags": {
+          "avx2": true,
+          "avx512f": false,
+          "fma": true
+        }
+      },
+      "cpu_count": 48,
+      "usable_cpus": 48
+    },
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "32",
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "torch_threads": 24,
+  "synthetic_phase_parts": {
+    "per_sample_terms_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 181.17,
+      "main_peak_bytes": 1337630720
+    },
+    "grid_evaluation_in_main": {
+      "found": true,
+      "calls": 2,
+      "seconds": 31.909,
+      "main_peak_bytes": 33276911616
+    },
+    "floor_in_main": {
+      "found": true,
+      "calls": 1,
+      "seconds": 4.264,
+      "main_peak_bytes": 33276911616
+    },
+    "draws_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 4.803,
+      "main_peak_bytes": 33276911616
+    }
+  },
+  "evidence": {
+    "num_samples": 50000,
+    "log_evidence": -5829.6248468704935,
+    "log_evidence_std": 0.008407253545258522,
+    "n_eff": 11027.557492152524,
+    "sample_efficiency": 0.2205511498430505
+  },
+  "total_seconds": 307.342,
+  "job_peak_bytes": null,
+  "children_peak_bytes": 3186335744
+}

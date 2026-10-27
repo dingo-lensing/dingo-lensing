@@ -1,0 +1,46 @@
+000 (571477171.000.000) 2026-10-27 00:03:30 Job submitted from host: <10.14.0.12:9618?addrs=10.14.0.12-9618&alias=ldas-grid.ligo.caltech.edu&noUDP&sock=schedd_3013_3ef1>
+    WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:WARNING: This vanilla-universe job specifies a container image (SingularityImage=./dingo-deps_recipe-8f44d79_cpu.sif). Consider using 'universe = container' with 'container_image' instead. See: https://htcondor.readthedocs.io/en/latest/users-manual/env-of-job.html#container-universe-jobs
+...
+040 (571477171.000.000) 2026-10-27 00:11:29 Started transferring input files
+	Transferring to host: <10.14.4.48:9618?addrs=10.14.4.48-9618&alias=node798.cluster.ldas.cit&noUDP&sock=slot1_1_2611_6f83_44311>
+...
+040 (571477171.000.000) 2026-10-27 00:11:58 Finished transferring input files
+...
+001 (571477171.000.000) 2026-10-27 00:11:58 Job executing on host: <10.14.4.48:9618?addrs=10.14.4.48-9618&alias=node798.cluster.ldas.cit&noUDP&sock=startd_2042_387b>
+	SlotName: slot1_1@node798.cluster.ldas.cit
+	CondorScratchDir = "/var/lib/condor/execute/dir_2062199/scratch"
+	Cpus = 32
+	Disk = 12582912
+	GPUs = 0
+	Memory = 49152
+...
+006 (571477171.000.000) 2026-10-27 00:12:17 Image size of job updated: 411864
+	403  -  MemoryUsage of job (MB)
+	411864  -  ResidentSetSize of job (KB)
+...
+006 (571477171.000.000) 2026-10-27 00:17:17 Image size of job updated: 30193396
+	403  -  MemoryUsage of job (MB)
+	411900  -  ResidentSetSize of job (KB)
+...
+040 (571477171.000.000) 2026-10-27 00:18:32 Started transferring output files
+...
+040 (571477171.000.000) 2026-10-27 00:18:32 Finished transferring output files
+...
+005 (571477171.000.000) 2026-10-27 00:18:34 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 01:58:09, Sys 0 00:02:21  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 01:58:09, Sys 0 00:02:21  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	8972765  -  Run Bytes Sent By Job
+	5375682885  -  Run Bytes Received By Job
+	8972765  -  Total Bytes Sent By Job
+	5375682885  -  Total Bytes Received By Job
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :        0       32        32 
+	   Disk (KB)            :  5264288 12582912  12582912 
+	   GPUs                 :                           0 
+	   Memory (MB)          :      403    49152     49152 
+	   TimeExecute (s)      :      319                    
+	   TimeSlotBusy (s)     :      424                    
+...
