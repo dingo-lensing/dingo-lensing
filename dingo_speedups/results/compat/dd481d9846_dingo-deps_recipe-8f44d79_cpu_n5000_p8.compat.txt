@@ -1,0 +1,332 @@
+INFO:    underlay of /etc/localtime required more than 50 (79) bind mounts
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/domains/base_frequency_domain.py:150: SyntaxWarning: invalid escape sequence '\p'
+  Convention: the phase $\phi(f)$ is defined via $\exp[- i \phi(f)]$.
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/transforms/gnpe_transforms.py:35: SyntaxWarning: invalid escape sequence '\h'
+  \hat g ~ p(\hat g | g).
+PyCBC.libutils: pkg-config call failed, setting NO_PKGCONFIG=1
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+Putting posterior model to device cpu.
+Loading dataset from /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5.
+Loading dataset from /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/result/label_data0_1384782888-63_sampling.hdf5.
+Setting spin_conversion_phase = 0.0. Using this value for the phase parameter for conversion to cartesian spins.
+Sampling SyntheticPhaseFactor for 4988 samples.
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+/local/kailibryan.doney/dingo-compat.yE8ruY/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+Done. This took 89.45 s.
+Using 4988 cached log likelihoods.
+PASS model: {'seconds': 36.745, 'inference_parameters': ['chirp_mass', 'mass_ratio', 'a_1', 'a_2', 'tilt_1', 'tilt_2', 'phi_12', 'phi_jl', 'theta_jn', 'dec', 'ra', 'geocent_time', 'luminosity_distance', 'psi']}
+PASS event_data: {'seconds': 0.084}
+PASS network_sampling: {'seconds': 146.29, 'num_samples': 5000, 'has_log_prob': True, 'has_phase': False}
+PASS old_proposal: {'seconds': 0.125, 'num_samples': 50000, 'has_log_prob': True, 'has_phase': False, 'version': 'dingo=0.9.8'}
+PASS importance_sampling: {'seconds': 90.313, 'source': 'old_proposal', 'num_samples': 5000, 'synthetic_phase_seconds': 89.929, 'importance_sample_seconds': 0.166, 'log_evidence': -5829.623078281872, 'log_evidence_std': 0.023841534065656696, 'n_eff': 1301.3737684298258, 'sample_efficiency': 0.26027475368596514}
