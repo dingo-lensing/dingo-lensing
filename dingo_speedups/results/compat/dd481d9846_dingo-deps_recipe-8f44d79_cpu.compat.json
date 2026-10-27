@@ -1,0 +1,108 @@
+{
+  "provenance": {
+    "dingo": {
+      "commit": "dd481d98467c14114d7cf81981076806c5b2a4bc",
+      "describe": "v0.10.3-1-gdd481d98",
+      "version": "0.10.4.dev1+gdd481d98",
+      "tree": "/local/kailibryan.doney/dingo-compat.yxQYVK/dingo_dd481d9846",
+      "imported_from": "/local/kailibryan.doney/dingo-compat.yxQYVK/dingo_dd481d9846/dingo"
+    },
+    "python": {
+      "version": "3.13.13",
+      "executable": "/opt/dingo_env/bin/python",
+      "isolated": true
+    },
+    "packages": {
+      "lalsuite": "7.26.15",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3",
+      "torch": "2.13.0+cpu",
+      "bilby": "2.6.0",
+      "bilby-pipe": "1.8.0",
+      "pandas": "3.0.5",
+      "h5py": "3.16.0",
+      "pycbc": "2.11.0",
+      "pytest": "9.1.1"
+    },
+    "host": {
+      "name": "ldas-grid",
+      "platform": "Linux-4.18.0-553.174.1.el8_10.x86_64-x86_64-with-glibc2.39",
+      "cpu": {
+        "model": "AMD EPYC 9475F 48-Core Processor",
+        "flags": {
+          "avx2": true,
+          "avx512f": true,
+          "fma": true
+        }
+      },
+      "cpu_count": 24,
+      "usable_cpus": 24
+    },
+    "threads": {
+      "OMP_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "inputs": {
+    "model": "/home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/models/model_nonlensed.pt",
+    "event_data": "/home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5",
+    "proposal": "/home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/result/label_data0_1384782888-63_sampling.hdf5",
+    "num_samples": 200,
+    "num_processes": 4,
+    "seed": 1
+  },
+  "checks": {
+    "model": {
+      "ok": true,
+      "seconds": 46.295,
+      "inference_parameters": [
+        "chirp_mass",
+        "mass_ratio",
+        "a_1",
+        "a_2",
+        "tilt_1",
+        "tilt_2",
+        "phi_12",
+        "phi_jl",
+        "theta_jn",
+        "dec",
+        "ra",
+        "geocent_time",
+        "luminosity_distance",
+        "psi"
+      ]
+    },
+    "event_data": {
+      "ok": true,
+      "seconds": 0.198
+    },
+    "network_sampling": {
+      "ok": true,
+      "seconds": 66.604,
+      "num_samples": 200,
+      "has_log_prob": true,
+      "has_phase": false
+    },
+    "old_proposal": {
+      "ok": true,
+      "seconds": 0.194,
+      "num_samples": 50000,
+      "has_log_prob": true,
+      "has_phase": false,
+      "version": "dingo=0.9.8"
+    },
+    "importance_sampling": {
+      "ok": true,
+      "seconds": 10.838,
+      "source": "old_proposal",
+      "num_samples": 200,
+      "synthetic_phase_seconds": 5.403,
+      "importance_sample_seconds": 0.148,
+      "log_evidence": -5829.59080475315,
+      "log_evidence_std": 0.10072188595142019,
+      "n_eff": 66.02883555615581,
+      "sample_efficiency": 0.33014417778077904
+    }
+  }
+}
