@@ -6,7 +6,9 @@ and the event data file. It:
 
 1. unpacks the tarball and checks it with guard.py;
 2. loads the model and draws the network samples for the event, as dingo_pipe's
-   sampling job does (50,000 by default), and saves them as that job does;
+   sampling job does (50,000 by default), and saves them as that job does; or,
+   with --proposal, takes the network samples from that file instead (e.g. an
+   earlier run's), so two DINGO commits can be compared on identical samples;
 3. frees the model, reloads the samples and importance-samples them as
    dingo_pipe's importance-sampling job does: Synthetic phase on the default
    5,001-point grid, then importance sampling from the cached likelihoods;
@@ -170,7 +172,8 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--tarball", required=True, type=Path)
     parser.add_argument("--commit", required=True)
-    parser.add_argument("--model", required=True)
+    parser.add_argument("--model", help="The trained network (not needed with --proposal)")
+    parser.add_argument("--proposal", help="Network samples to importance-sample instead of drawing new ones")
     parser.add_argument("--event-data", required=True)
     parser.add_argument("--num-samples", type=int, default=50_000)
     parser.add_argument("--batch-size", type=int, default=5_000)
@@ -194,6 +197,8 @@ def main(argv=None) -> int:
     try:
         with stages.stage("unpack"):
             tree = unpack(args.tarball, Path("."))
+        if (args.model is None) == (args.proposal is None):
+            raise ValueError("Give exactly one of --model and --proposal")
         report["provenance"] = guard.use_dingo(tree, args.commit)
     except (guard.GuardError, ValueError, OSError, tarfile.TarError) as error:
         prefix = "GUARD FAILED" if isinstance(error, guard.GuardError) else "SETUP FAILED"
@@ -216,22 +221,29 @@ def main(argv=None) -> int:
             from dingo.gw.result import Result
         report["torch_threads"] = torch.get_num_threads()
 
-        with stages.stage("model_load"):
-            model = build_model_from_kwargs(filename=args.model, device="cpu", load_training_info=False)
         with stages.stage("event_data"):
             event = EventDataset(file_name=args.event_data)
-        with stages.stage("network_sampling"):
-            seed_generators(np.random.SeedSequence([args.seed, 0]), all_devices=True)
-            sampler = GWComposedSampler.from_model(model, event.data, event_metadata=event.settings)
-            sampler.run_sampler(args.num_samples, batch_size=args.batch_size)
-        with stages.stage("save_network_samples"):
-            sampler.to_hdf5(label="network_samples", outdir=str(OUT))
-        del sampler, model
-        gc.collect()
+        if args.proposal is None:
+            with stages.stage("model_load"):
+                model = build_model_from_kwargs(filename=args.model, device="cpu", load_training_info=False)
+            with stages.stage("network_sampling"):
+                seed_generators(np.random.SeedSequence([args.seed, 0]), all_devices=True)
+                sampler = GWComposedSampler.from_model(model, event.data, event_metadata=event.settings)
+                sampler.run_sampler(args.num_samples, batch_size=args.batch_size)
+            with stages.stage("save_network_samples"):
+                sampler.to_hdf5(label="network_samples", outdir=str(OUT))
+            del sampler, model
+            gc.collect()
+            proposal = OUT / "network_samples.hdf5"
+        else:
+            proposal = Path(args.proposal)
 
         # The importance-sampling job starts from the saved samples, without the network.
         with stages.stage("importance_sampling_setup"):
-            result = Result(file_name=str(OUT / "network_samples.hdf5"))
+            result = Result(file_name=str(proposal))
+            if args.proposal is not None and args.num_samples < len(result.samples):
+                # The first num_samples rows (a pre-flight), split off as dingo_pipe's n-parallel does.
+                result = result.split(-(-len(result.samples) // args.num_samples))[0]
             result.reset_event(event)
             result.use_base_domain = False  # as the job sets it for a uniform-frequency model
         parts: Dict[str, dict] = {}
@@ -239,7 +251,9 @@ def main(argv=None) -> int:
         wrap_timed(steps, "_stacked_phase_grid_terms", parts, "per_sample_terms_in_workers")
         wrap_timed(StationaryGaussianGWLikelihood, "log_likelihood_from_phase_grid_terms", parts, "grid_evaluation_in_main")
         wrap_timed(steps, "_floored_density", parts, "floor_in_main")
-        wrap_timed(steps, "interpolated_sample_and_log_prob_multi", parts, "draws_in_workers")
+        wrap_timed(steps, "interpolated_sample_and_log_prob_multi", parts, "draws")
+        # DINGO PR #454 evaluates each sample's grid and floor in the workers.
+        wrap_timed(steps, "_phase_densities", parts, "grid_and_floor_in_workers")
 
         with stages.stage("synthetic_phase"):
             seed_generators(np.random.SeedSequence([args.seed, 1]), all_devices=True)

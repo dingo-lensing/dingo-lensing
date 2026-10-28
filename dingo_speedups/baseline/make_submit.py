@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import PurePosixPath
-from typing import List
+from typing import List, Optional
 
 ACCOUNTING_GROUP = "ligo.dev.o4.cbc.explore.test"
 
@@ -26,9 +26,10 @@ class BaselineJob:
     run_script: str  # absolute paths on the access point
     guard: str
     tarball: str
-    model: str
+    model: Optional[str]  # the network, or None with a proposal
     event_data: str
     commit: str
+    proposal: Optional[str] = None  # network samples to importance-sample instead
     num_samples: int = 50_000
     batch_size: int = 5_000
     cpus: int = 32
@@ -40,8 +41,12 @@ class BaselineJob:
     def check(self) -> None:
         if not self.image_url.startswith("osdf:///") or not self.image_url.endswith(".sif"):
             raise ValueError(f"Expected an osdf:///...sif image URL, got {self.image_url!r}")
-        for name in ("run_script", "guard", "tarball", "model", "event_data"):
+        if (self.model is None) == (self.proposal is None):
+            raise ValueError("Give exactly one of model and proposal")
+        for name in ("run_script", "guard", "tarball", "model", "event_data", "proposal"):
             path = getattr(self, name)
+            if path is None:
+                continue
             if not PurePosixPath(path).is_absolute():
                 raise ValueError(f"{name} must be an absolute path, got {path!r}")
             if "," in path or " " in path:
@@ -63,14 +68,14 @@ def submit_text(job: BaselineJob) -> str:
         "-I", name(job.run_script),
         "--tarball", name(job.tarball),
         "--commit", job.commit,
-        "--model", name(job.model),
+        *(["--model", name(job.model)] if job.model else ["--proposal", name(job.proposal)]),
         "--event-data", name(job.event_data),
         "--num-samples", str(job.num_samples),
         "--batch-size", str(job.batch_size),
         "--num-processes", str(job.cpus),
         "--seed", str(job.seed),
     ]
-    inputs: List[str] = [job.image_url, job.run_script, job.guard, job.tarball, job.model, job.event_data]
+    inputs: List[str] = [job.image_url, job.run_script, job.guard, job.tarball, job.model or job.proposal, job.event_data]
     lines = [
         "universe = vanilla",
         "executable = /opt/dingo_env/bin/python",
@@ -103,8 +108,11 @@ def main(argv=None) -> int:
     import argparse
 
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    for field in ("image_url", "run_script", "guard", "tarball", "model", "event_data", "commit"):
+    for field in ("image_url", "run_script", "guard", "tarball", "event_data", "commit"):
         parser.add_argument(f"--{field.replace('_', '-')}", required=True)
+    network = parser.add_mutually_exclusive_group(required=True)
+    network.add_argument("--model")
+    network.add_argument("--proposal")
     for field, default in (("num_samples", 50_000), ("batch_size", 5_000), ("cpus", 32),
                            ("memory_gb", 48), ("disk_gb", 12), ("priority", 50), ("seed", 1)):
         parser.add_argument(f"--{field.replace('_', '-')}", type=int, default=default)
