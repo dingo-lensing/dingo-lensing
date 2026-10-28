@@ -17,7 +17,7 @@ Not for review/merge. Plan and log for four exact speed-ups to the synthetic pha
   3. Pool workers draw each phase from a scipy `rv_histogram`, after the whole (samples × 5,001) density array is copied out to them (`dingo/core/density/interpolation.py`).
 
   Importance sampling then reuses the cached log likelihood at the drawn phase (#422).
-- Local benchmark of step 2 (`bench/grid_eval_main.py`, DINGO's code copied, one thread, on Kaili's Windows machine): 0.64 MB per sample every time, so about 32 GB at 50,000 samples. The time varied between runs, 0.7 to 1.6 ms per sample, so about 33 to 80 s at 50,000 samples. Not yet measured in the real pipeline or on the cluster.
+- Local benchmark of step 2 (`bench/grid_eval_main.py`, DINGO's code copied, one thread, on a local Windows machine): 0.64 MB per sample every time, so about 32 GB at 50,000 samples. The time varied between runs, 0.7 to 1.6 ms per sample, so about 33 to 80 s at 50,000 samples. Not yet measured in the real pipeline or on the cluster.
 - Estimate: The 9 XPHM calls cost about 40 to 55 ms per sample (4 to 6 ms per ordinary call, from Exercise 3's likelihood step).
 
 ## The four speed-ups
@@ -29,11 +29,11 @@ Not for review/merge. Plan and log for four exact speed-ups to the synthetic pha
 
 ## Plan
 
-Items marked (Kaili) are decisions; items marked (cluster) are runs on the CIT cluster.
+Items marked (decision) are decisions; items marked (cluster) are runs on the CIT cluster.
 
 **0. Decide first**
-- [x] 0.1 (Kaili) Fork dingo-gw/dingo on GitHub; one branch per speed-up, cut from the pinned baseline. Done: `git@github.com:KailibRyanDoney/dingo-effeciency.git`, `main` at dd481d98 (level with upstream). First branch: `kailib-synthetic-phase-in-workers` (speed-ups 1 and 2).
-- [x] 0.2 (Kaili) Upstream or not: Decided 16 October: The work stays on our fork's branch, and at the end we decide what to push upstream. Tooling, benchmarks and results stay on this branch.
+- [x] 0.1 (decision) Fork dingo-gw/dingo on GitHub; one branch per speed-up, cut from the pinned baseline. Done: `git@github.com:KailibRyanDoney/dingo-effeciency.git`, `main` at dd481d98 (level with upstream). First branch: `kailib-synthetic-phase-in-workers` (speed-ups 1 and 2).
+- [x] 0.2 (decision) Upstream or not: Decided 16 October: The work stays on our fork's branch, and at the end we decide what to push upstream. Tooling, benchmarks and results stay on this branch.
 - [x] 0.3 Baseline: Upstream `main` at dd481d98 (12 October 2026), recorded in `BASELINE_COMMIT`; recompare if `main` moves.
 - [ ] 0.4 Test data: The unlensed Exercise 3 model, so plain DINGO works without porting DINGO-Lensing.
 
@@ -47,16 +47,18 @@ Items marked (Kaili) are decisions; items marked (cluster) are runs on the CIT c
 
 **2. Baseline (latest DINGO, unchanged)**
 - [x] 2.1 Importance sampling on 50,000 samples, 32 CPUs, ample memory: Time and peak memory per step, to confirm or rule out the 32 GB grid step. Done 27 October (`results/baseline/20261027T070059Z/`): Confirmed, 33.3 GB. See the log.
-- [ ] 2.2 Per-sample microbenchmarks on one core (200 samples): One XPHM call, the nine-call DFT, projection, inner products, grid, draw; a profile of one sample's DFT separating LAL time from Python overhead.
+- [ ] 2.2 Per-sample microbenchmarks on one core: One XPHM call, the nine-call DFT, projection, inner products, grid, draw; a profile of one sample's DFT separating LAL time from Python overhead. Written (`bench/xphm_profile.py`, run by `bench/run_xphm_profile.sh` in the image, 100 of the 2.1 run's network samples by default, results in `results/xphm_profile/`); also times the same LAL call as XHM, XP, XAS and XPHM without multibanding, checks the bins beyond 448 Hz, and records which XPHM model parameters change across the nine phases (for 4.1 and 5.3). Not run yet.
 - [ ] 2.3 (cluster) Run both on dedicated slots, on two node types.
 - [ ] 2.4 Gate: Order the speed-ups by the measured split.
 
 **3. Speed-ups 1 and 2**
+
+Being done upstream in draft PR #454 (see the log, 28 October), so 3.1 to 3.4 are its work; we test it (3.5).
 - [ ] 3.1 Grid evaluation and draw in the workers, in chunks; workers return the phase, its log probability and the small terms for the cache. Uniform variates still drawn in the main process.
 - [ ] 3.2 Vectorised inverse CDF reproducing scipy's `rv_histogram` exactly, including normalisation and edge cases.
 - [ ] 3.3 Check the reverse direction (`log_prob` for given phases) and the phase-and-psi factor for the same pattern.
 - [ ] 3.4 Tests: Same phases, log probabilities and cached likelihoods as the current code to round-off, on identical inputs and seeds; draws against `rv_histogram`; peak memory bounded as the sample count grows.
-- [ ] 3.5 (cluster) Rerun 2.1 with the branch.
+- [ ] 3.5 (cluster) Rerun 2.1 at PR #454's head (e92d71fb) on the 2.1 run's network samples (`PROPOSAL=... launch_baseline.sh e92d71fb...`), then compare the two importance-sampling results (`baseline/compare_runs.sh`): Same phases, weights and ln Z to round-off (the PR draws from the same bilby uniforms with `rv_histogram`'s arithmetic), and the time and peak memory of the grid step.
 
 **4. Speed-up 4: Convert once per sample**
 - [ ] 4.1 From 2.2's profile, confirm the converted LAL arguments differ across the nine calls only in phiRef.
@@ -64,9 +66,9 @@ Items marked (Kaili) are decisions; items marked (cluster) are runs on the CIT c
 - [ ] 4.3 (cluster) Microbenchmark and end-to-end rerun.
 
 **5. Speed-up 3: Shared XPHM precession (feasibility first)**
-- [ ] 5.1 Read LALSimulation's IMRPhenomXPHM code: Where phiRef enters the polarisation routine, and which parts do not depend on it.
+- [x] 5.1 Read LALSimulation's IMRPhenomXPHM code: Where phiRef enters the polarisation routine, and which parts do not depend on it. Done 29 October, see the log.
 - [ ] 5.2 (cluster) List what lalsuite 7.26's Python bindings expose for XPHM and time those parts against one full call.
-- [ ] 5.3 (Kaili) Gate: Either (a) do it in DINGO with exposed functions, only if that reproduces LAL's polarisations to round-off, (b) propose a multi-phase XPHM function to LALSuite, or (c) stop.
+- [ ] 5.3 (decision) Gate: Either (a) do it in DINGO with exposed functions, only if that reproduces LAL's polarisations to round-off, (b) propose a multi-phase XPHM function to LALSuite, or (c) stop.
 - [ ] 5.4 If going ahead: The m-components match the current DFT path to round-off at all nine phases and sum to `generate_hplus_hcross`.
 
 **6. Wrap up**
@@ -106,3 +108,9 @@ Items marked (Kaili) are decisions; items marked (cluster) are runs on the CIT c
   - Measured cost: About 7.5 core-hours per injection for both models (this one 32-core job per model: 423 s with input transfer, times 32 cores, times 2), against about 17 to 18 for 0.9.8. About 22 injections per core per week, about 11,000 a week at 500 cores, on nodes like this one; newer nodes should do better.
   - Gate 2.4 from this split: Speed-ups 3 and 4 (and the 448 Hz lead) act on the 81%; speed-up 1 on the 16% and the 33 GB peak; speed-up 2 on only 2%, so it drops to last.
 - 27 October 2026: Step 2.1 written (`baseline/`): `baseline_run.py` (the job: 50,000 network samples, saved and reloaded as the pipeline does, then importance sampling; per-step wall time and peak memory, the synthetic phase's parts timed by wrapping four DINGO functions unchanged), `make_submit.py` (the smoke test's proven submit settings, 32 cores, 48 GB, priority 50, OMP_NUM_THREADS=1 as bilby_pipe sets), `launch_baseline.sh` (pre-flight of the same script with 500 samples in the image, then submit), `collect_baseline.py` (report plus Condor's timing and memory into `results/baseline/`). 77 unit tests pass locally.
+- 29 October 2026: 5.1, read in lalsuite 7.26.15 (`LALSimIMRPhenomXPHM.c`, `LALSimIMRPhenomX_precession.c`, `LALSimIMRPhenomX.c`, `LALSimIMRPhenomXHM_multiband.c`):
+  - The reference phase enters XPHM only through the precession geometry set up before any frequency loop: The line of sight in the L0 frame, and from it thetaJN, the angle offsets alpha0 and epsilon0, zeta_polarization, and the phase handed to the co-precessing model (`pWF->phi0`, phi_aligned). `XLALSimIMRPhenomXPCalculateModelParametersFromSourceFrame` returns these.
+  - The polarisation routine (`IMRPhenomXPHM_hplushcross`) loops over the co-precessing modes: Each mode comes from multibanded XHM (on the aligned spins and masses, threshold 0.001), the MSA angles (default PrecVersion 300, i.e. 223) are evaluated on a coarse grid with their complex exponentials interpolated, and `IMRPhenomXPHMTwistUp` rotates the mode into the inertial frame bin by bin.
+  - So across the nine DFT phases the co-precessing modes and the frequency dependence of the angles are the same; what changes is constant (alpha0, epsilon0, zeta, thetaJN in the Wigner-d matrices, phi_aligned). A multi-phase polarisation function in LAL could build the modes and angles once and twist up nine times, or return the m-components directly. How much that saves depends on the split 2.2 measures (XHM, XP and XAS against XPHM).
+  - With PR #445's finding (m-components built from LAL's individual modes agree only to a mismatch of about 1e-6), the exact route for speed-up 3 is option (b) of gate 5.3, a LAL function, not DINGO code on exposed parts.
+- 29 October 2026: Tooling for 2.2 and 3.5. `baseline_run.py` takes `--proposal` instead of `--model` (skips the network and importance-samples the given samples; a pre-flight takes the first rows), passed through by `make_submit.py` and `launch_baseline.sh` (`PROPOSAL=`), and also times PR #454's `_phase_densities`. `baseline/compare_results.py` (run by `compare_runs.sh`) compares two importance-sampling results column by column (largest absolute and relative difference, NaN mismatches) plus ln Z, its error and n_eff. `bench/xphm_profile.py` and `run_xphm_profile.sh` for 2.2. 91 unit tests pass locally (4 run only in the image), 28 of 28 mutations caught.
