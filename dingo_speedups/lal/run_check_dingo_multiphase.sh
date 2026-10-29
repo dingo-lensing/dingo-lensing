@@ -20,7 +20,7 @@ EX3="${EX3:-$HOME/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application
 PROPOSAL="${PROPOSAL:-$HOME/dingo-speedups-runs/baseline/20261027T070059Z/out/network_samples.hdf5}"
 EVENT_DATA="${EVENT_DATA:-$EX3/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5}"
 NUM_SAMPLES="${NUM_SAMPLES:-50}"
-[[ -f "$LALBUILD/BUILT.txt" && -d "$LAL_SITE/lalsimulation" ]] || fail "No finished build in $LALBUILD: Run build_lal.sh first"
+require_current_lal_build "$LALBUILD"
 for file in "$PROPOSAL" "$EVENT_DATA"; do
     [[ -f "$file" ]] || fail "Not found: $file (set PROPOSAL or EVENT_DATA)"
 done

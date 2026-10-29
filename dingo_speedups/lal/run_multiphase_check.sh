@@ -15,7 +15,7 @@ LALBUILD="${LALBUILD:-$HOME/dingo-speedups-lal}"
 ENV="$LALBUILD/env"
 SAMPLES="${SAMPLES-$HOME/dingo-speedups-runs/xphm_args/xphm_args.npz}"
 RANDOM_SETS="${RANDOM_SETS:-200}"
-[[ -x "$ENV/bin/python" && -f "$LALBUILD/BUILT.txt" ]] || fail "No finished build in $LALBUILD: Run build_lal.sh first"
+require_current_lal_build "$LALBUILD"
 SAMPLE_ARGS=()
 if [[ -n "$SAMPLES" ]]; then
     [[ -f "$SAMPLES" ]] || fail "Not found: $SAMPLES (run ../bench/run_xphm_profile.sh, or set SAMPLES= to skip)"

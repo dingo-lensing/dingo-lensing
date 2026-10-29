@@ -59,3 +59,18 @@ in_image() {
     done
     (cd / && apptainer exec --cleanenv --contain "${binds[@]}" "$image" "$@")
 }
+
+# require_current_lal_build LALBUILD: Fails unless LALBUILD holds a finished build_lal.sh build of
+# the current lal/xphm_multiphase.patch. While a rebuild runs, BUILT.txt still describes the
+# earlier build, whose installed files the rebuild is about to replace.
+require_current_lal_build() {
+    local lalbuild="$1" have want
+    if command -v pgrep > /dev/null && pgrep -u "$(id -u)" -f build_lal.sh > /dev/null; then
+        fail "build_lal.sh is running: Let it finish, then run this again"
+    fi
+    [[ -f "$lalbuild/BUILT.txt" ]] || fail "No finished build in $lalbuild: Run lal/build_lal.sh first"
+    have="$(awk '$1 == "patch_sha256" {print $2}' "$lalbuild/BUILT.txt")"
+    want="$(sha256sum "$SPEEDUPS/lal/xphm_multiphase.patch" | cut -d' ' -f1)"
+    [[ "$have" == "$want" ]] \
+        || fail "$lalbuild holds a build of an earlier xphm_multiphase.patch (${have:0:10}, now ${want:0:10}): Run lal/build_lal.sh"
+}
