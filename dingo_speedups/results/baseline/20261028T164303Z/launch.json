@@ -1,0 +1,13 @@
+{
+  "dingo_commit": "e92d71fbd83fd6e1dd9795655082ed95abdbcda5",
+  "image": "/home/kailibryan.doney/dingo-speedups-images/dingo-deps_recipe-8f44d79_cpu.sif",
+  "image_url": "osdf:///igwn/cit/staging/kailibryan.doney/containers/dingo-deps_recipe-8f44d79_cpu.sif",
+  "sync_commit": "605003cb5edbca0f3e52fd033ee0512835024ddf",
+  "network": "--proposal /home/kailibryan.doney/dingo-speedups-runs/baseline/20261027T070059Z/out/network_samples.hdf5",
+  "event_data": "/home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5",
+  "num_samples": 50000,
+  "cpus": 32,
+  "memory_gb": 48,
+  "priority": 50,
+  "launched_utc": "2026-10-28T16:43:29Z"
+}

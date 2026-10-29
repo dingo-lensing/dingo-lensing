@@ -1,0 +1,197 @@
+{
+  "provenance": {
+    "dingo": {
+      "commit": "dd481d98467c14114d7cf81981076806c5b2a4bc",
+      "describe": "v0.10.3-1-gdd481d98",
+      "version": "0.10.4.dev1+gdd481d98",
+      "tree": "/local/kailibryan.doney/dingo-compare.3zu5pD/dingo_dd481d9846",
+      "imported_from": "/local/kailibryan.doney/dingo-compare.3zu5pD/dingo_dd481d9846/dingo"
+    },
+    "python": {
+      "version": "3.13.13",
+      "executable": "/opt/dingo_env/bin/python",
+      "isolated": true
+    },
+    "packages": {
+      "lalsuite": "7.26.15",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3",
+      "torch": "2.13.0+cpu",
+      "bilby": "2.6.0",
+      "bilby-pipe": "1.8.0",
+      "pandas": "3.0.5",
+      "h5py": "3.16.0",
+      "pycbc": "2.11.0",
+      "pytest": "9.1.1"
+    },
+    "host": {
+      "name": "ldas-grid",
+      "platform": "Linux-4.18.0-553.179.1.el8_10.x86_64-x86_64-with-glibc2.39",
+      "cpu": {
+        "model": "AMD EPYC 9475F 48-Core Processor",
+        "flags": {
+          "avx2": true,
+          "avx512f": true,
+          "fma": true
+        }
+      },
+      "cpu_count": 24,
+      "usable_cpus": 24
+    },
+    "threads": {
+      "OMP_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "first": "/home/kailibryan.doney/dingo-speedups-runs/baseline/20261027T070059Z/out/importance_sampling.hdf5",
+  "second": "/home/kailibryan.doney/dingo-speedups-runs/baseline/20261028T164303Z/out/importance_sampling.hdf5",
+  "rtol": 1e-09,
+  "num_samples": [
+    50000,
+    50000
+  ],
+  "columns": {
+    "a_1": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "a_2": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "chirp_mass": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "dec": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "geocent_time": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "log_likelihood": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 90,
+      "nonfinite_mismatch": 0
+    },
+    "log_likelihood_cache": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 90,
+      "nonfinite_mismatch": 0
+    },
+    "log_prior": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 90,
+      "nonfinite_mismatch": 0
+    },
+    "log_prob": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 90,
+      "nonfinite_mismatch": 0
+    },
+    "luminosity_distance": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "mass_ratio": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "phase": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "phi_12": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "phi_jl": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "psi": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "ra": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "theta_jn": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "tilt_1": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "tilt_2": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "weights": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    }
+  },
+  "only_in_first": [],
+  "only_in_second": [],
+  "summary": {
+    "log_evidence": [
+      -5829.6248468704935,
+      -5829.6248468704935
+    ],
+    "log_evidence_std": [
+      0.008407253545258522,
+      0.008407253545258522
+    ],
+    "n_eff": [
+      11027.557492152524,
+      11027.557492152524
+    ],
+    "sample_efficiency": [
+      0.2205511498430505,
+      0.2205511498430505
+    ]
+  },
+  "identical_to_rtol": true
+}

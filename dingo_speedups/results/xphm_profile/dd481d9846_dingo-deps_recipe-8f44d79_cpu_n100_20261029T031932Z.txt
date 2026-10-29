@@ -1,0 +1,168 @@
+INFO:    underlay of /etc/localtime required more than 50 (79) bind mounts
+/local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/domains/base_frequency_domain.py:150: SyntaxWarning: invalid escape sequence '\p'
+  Convention: the phase $\phi(f)$ is defined via $\exp[- i \phi(f)]$.
+/local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/transforms/gnpe_transforms.py:35: SyntaxWarning: invalid escape sequence '\h'
+  \hat g ~ p(\hat g | g).
+PyCBC.libutils: pkg-config call failed, setting NO_PKGCONFIG=1
+/local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:865: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+Loading dataset from /home/kailibryan.doney/dingo-speedups-runs/baseline/20261027T070059Z/out/network_samples.hdf5.
+Loading dataset from /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5.
+Setting spin_conversion_phase = 0.0. Using this value for the phase parameter for conversion to cartesian spins.
+{
+  "generator": {
+    "approximant": "IMRPhenomXPHM",
+    "spin_conversion_phase": 0.0,
+    "uses_dft_phase_decomposition": true,
+    "ell_max": 4,
+    "domain_bins": 3585,
+    "f_max": 448.0
+  },
+  "per_sample": {
+    "generate_hplus_hcross": {
+      "mean_ms": 3.1447,
+      "median_ms": 2.5063,
+      "min_ms": 2.1037,
+      "n": 100
+    },
+    "convert_parameters": {
+      "mean_ms": 0.0554,
+      "median_ms": 0.0505,
+      "min_ms": 0.0282,
+      "n": 100
+    },
+    "lal_XPHM": {
+      "mean_ms": 2.3709,
+      "median_ms": 2.226,
+      "min_ms": 1.8537,
+      "n": 100
+    },
+    "generate_hplus_hcross_m": {
+      "mean_ms": 23.5503,
+      "median_ms": 22.1121,
+      "min_ms": 18.8125,
+      "n": 100
+    },
+    "phase_grid_terms": {
+      "mean_ms": 30.8501,
+      "median_ms": 29.4484,
+      "min_ms": 25.6159,
+      "n": 100
+    },
+    "lal_XPHM_no_multibanding": {
+      "mean_ms": 3.9345,
+      "median_ms": 3.8376,
+      "min_ms": 3.1143,
+      "n": 100
+    },
+    "lal_XHM": {
+      "mean_ms": 0.6246,
+      "median_ms": 0.5742,
+      "min_ms": 0.4879,
+      "n": 100
+    },
+    "lal_XP": {
+      "mean_ms": 0.7835,
+      "median_ms": 0.7702,
+      "min_ms": 0.6181,
+      "n": 100
+    },
+    "lal_XAS": {
+      "mean_ms": 0.1993,
+      "median_ms": 0.1867,
+      "min_ms": 0.1559,
+      "n": 100
+    }
+  },
+  "shares": {
+    "conversion_of_one_call": 0.02014922395563181,
+    "lal_of_one_call": 0.8881618321828991,
+    "nine_calls_of_m_components": 1.0201066384468231,
+    "m_components_of_phase_grid_terms": 0.7508761087189797,
+    "XHM_of_XPHM": 0.2579514824797844,
+    "XP_of_XPHM": 0.3460017969451932,
+    "XAS_of_XPHM": 0.08387241689128482,
+    "XPHM_without_multibanding_over_with": 1.723989218328841
+  },
+  "lal_output": {
+    "lal_bins": 4097,
+    "domain_bins": 3585,
+    "nonzero_bins_beyond_domain": 0
+  },
+  "phase_dependence": {
+    "chi1L": {
+      "min": -0.31356305229132725,
+      "max": -0.31356305229132725,
+      "changes_with_phase": false
+    },
+    "chi2L": {
+      "min": 0.4316491745099307,
+      "max": 0.4316491745099307,
+      "changes_with_phase": false
+    },
+    "chi_p": {
+      "min": 0.2673164190802131,
+      "max": 0.2673164190802131,
+      "changes_with_phase": false
+    },
+    "thetaJN": {
+      "min": 1.1235184127721398,
+      "max": 1.1954448357016738,
+      "changes_with_phase": true
+    },
+    "alpha0": {
+      "min": 0.1691877288396051,
+      "max": 5.7644234352408965,
+      "changes_with_phase": true
+    },
+    "phi_aligned": {
+      "min": 2.7953008066048,
+      "max": 2.7953008066048,
+      "changes_with_phase": false
+    },
+    "zeta_polarization": {
+      "min": -3.121841771421731,
+      "max": 3.134885390593456,
+      "changes_with_phase": true
+    }
+  }
+}
+         57901 function calls (57811 primitive calls) in 0.289 seconds
+
+   Ordered by: internal time
+   List reduced from 147 to 30 due to restriction <30>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       90    0.192    0.002    0.192    0.002 {built-in method lalsimulation._lalsimulation.SimInspiralFD}
+     1620    0.021    0.000    0.024    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/likelihood.py:584(<genexpr>)
+      360    0.019    0.000    0.020    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/domains/base_frequency_domain.py:141(add_phase)
+       90    0.008    0.000    0.203    0.002 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:768(generate_FD_waveform)
+      180    0.004    0.000    0.038    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/transforms/detector_transforms.py:143(__call__)
+      720    0.004    0.000    0.004    0.000 /opt/dingo_env/lib/python3.13/site-packages/bilby/gw/detector/interferometer.py:253(antenna_response)
+      180    0.004    0.000    0.004    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/transforms/noise_transforms.py:145(__call__)
+     1080    0.003    0.000    0.003    0.000 {method 'conj' of 'numpy.ndarray' objects}
+       10    0.002    0.000    0.003    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/waveform_generator/wfg_utils.py:305(recover_pol_m_from_multi_phase)
+      360    0.002    0.000    0.002    0.000 /opt/dingo_env/lib/python3.13/site-packages/bilby/gw/detector/interferometer.py:541(time_delay_from_geocenter)
+      180    0.002    0.000    0.004    0.000 /opt/dingo_env/lib/python3.13/site-packages/numpy/_core/numeric.py:2373(isclose)
+      200    0.001    0.000    0.002    0.000 /opt/dingo_env/lib/python3.13/site-packages/numpy/_core/shape_base.py:380(stack)
+      360    0.001    0.000    0.001    0.000 {built-in method numpy._core._multiarray_umath.c_einsum}
+       90    0.001    0.000    0.005    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/waveform_generator/waveform_generator.py:501(_convert_parameters)
+      900    0.001    0.000    0.002    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/domains/uniform_frequency_domain.py:98(update_data)
+      360    0.001    0.000    0.024    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/domains/base_frequency_domain.py:98(time_translate_data)
+      720    0.001    0.000    0.001    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+  550/460    0.001    0.000    0.025    0.000 {built-in method builtins.sum}
+       10    0.001    0.000    0.289    0.029 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/likelihood.py:520(phase_grid_terms)
+     6180    0.001    0.000    0.001    0.000 {built-in method builtins.isinstance}
+      180    0.001    0.000    0.001    0.000 /opt/dingo_env/lib/python3.13/site-packages/numpy/_core/numeric.py:98(zeros_like)
+       90    0.001    0.000    0.002    0.000 /opt/dingo_env/lib/python3.13/site-packages/bilby/gw/conversion.py:182(convert_to_lal_binary_black_hole_parameters)
+       90    0.001    0.000    0.049    0.001 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/injection.py:321(_project_at_psis)
+      540    0.000    0.000    0.002    0.000 /opt/dingo_env/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:89(_wrapreduction_any_all)
+      360    0.000    0.000    0.002    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/injection.py:337(asd)
+      180    0.000    0.000    0.046    0.000 /opt/dingo_env/lib/python3.13/site-packages/torchvision/transforms/transforms.py:93(__call__)
+      360    0.000    0.000    0.001    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/domains/uniform_frequency_domain.py:132(get_sample_frequencies_astype)
+      180    0.000    0.000    0.003    0.000 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/transforms/detector_transforms.py:102(__call__)
+       10    0.000    0.000    0.263    0.026 /local/kailibryan.doney/dingo-xphm.yex9lu/dingo_dd481d9846/dingo/gw/injection.py:248(signal_m)
+       90    0.000    0.000    0.002    0.000 /opt/dingo_env/lib/python3.13/site-packages/bilby/gw/conversion.py:106(bilby_to_lalsimulation_spins)
+
+
+

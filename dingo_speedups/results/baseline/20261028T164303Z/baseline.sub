@@ -1,0 +1,23 @@
+universe = vanilla
+executable = /opt/dingo_env/bin/python
+arguments = "-I baseline_run.py --tarball dingo_e92d71fbd8.tar.gz --commit e92d71fbd83fd6e1dd9795655082ed95abdbcda5 --proposal network_samples.hdf5 --event-data label_data0_1384782888-63_generation_event_data.hdf5 --num-samples 50000 --batch-size 5000 --num-processes 32 --seed 1"
+transfer_executable = False
+MY.SingularityImage = "./dingo-deps_recipe-8f44d79_cpu.sif"
+requirements = (HAS_SINGULARITY=?=True)
+MY.flock_local = True
+MY.DESIRED_Sites = "nogrid"
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = osdf:///igwn/cit/staging/kailibryan.doney/containers/dingo-deps_recipe-8f44d79_cpu.sif, /home/kailibryan.doney/dingo-speedups-runs/baseline/20261028T164303Z/baseline_run.py, /home/kailibryan.doney/dingo-speedups-runs/baseline/20261028T164303Z/guard.py, /home/kailibryan.doney/dingo-speedups-runs/baseline/20261028T164303Z/dingo_e92d71fbd8.tar.gz, /home/kailibryan.doney/dingo-speedups-runs/baseline/20261027T070059Z/out/network_samples.hdf5, /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5
+transfer_output_files = out
+use_oauth_services = scitokens
+environment = "OMP_NUM_THREADS=1"
+request_cpus = 32
+request_memory = 48GB
+request_disk = 12GB
+priority = 50
+accounting_group = ligo.dev.o4.cbc.explore.test
+log = baseline.log
+output = baseline.out
+error = baseline.err
+queue

@@ -1,0 +1,77 @@
+{
+  "run": "20261028T164303Z",
+  "condor": {
+    "succeeded": true,
+    "return_value": 0,
+    "attempts": 1,
+    "host": "node820.cluster.ldas.cit",
+    "wait_seconds": 4757.0,
+    "input_transfer_seconds": 419.0,
+    "run_seconds": 215.0,
+    "output_transfer_seconds": 1.0,
+    "cpu_seconds": 5695.0,
+    "cores_used": 26.488372093023255,
+    "memory_usage_mb": 363.0,
+    "memory_request_mb": 49152.0,
+    "bytes_received": 867323837
+  },
+  "error": null,
+  "evidence": {
+    "num_samples": 50000,
+    "log_evidence": -5829.6248468704935,
+    "log_evidence_std": 0.008407253545258522,
+    "n_eff": 11027.557492152524,
+    "sample_efficiency": 0.2205511498430505
+  },
+  "total_seconds": 202.678,
+  "stage_seconds": {
+    "unpack": 0.162,
+    "imports": 9.21,
+    "event_data": 0.009,
+    "importance_sampling_setup": 0.076,
+    "synthetic_phase": 192.552,
+    "importance_sample": 0.345,
+    "save_result": 0.247
+  },
+  "synthetic_phase_parts": {
+    "per_sample_terms_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 177.67,
+      "main_peak_bytes": 703766528
+    },
+    "grid_evaluation_in_main": {
+      "found": true,
+      "calls": 1,
+      "seconds": 0.067,
+      "main_peak_bytes": 5369942016
+    },
+    "floor_in_main": {
+      "found": true,
+      "calls": 0,
+      "seconds": 0.0,
+      "main_peak_bytes": null
+    },
+    "draws": {
+      "found": true,
+      "calls": 1,
+      "seconds": 7.246,
+      "main_peak_bytes": 5369942016
+    },
+    "grid_and_floor_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 6.964,
+      "main_peak_bytes": 4692496384
+    }
+  },
+  "job_peak_bytes": null,
+  "host_cpu": {
+    "model": "Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz",
+    "flags": {
+      "avx2": true,
+      "avx512f": false,
+      "fma": true
+    }
+  }
+}

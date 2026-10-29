@@ -1,0 +1,157 @@
+{
+  "inputs": {
+    "tarball": "dingo_e92d71fbd8.tar.gz",
+    "commit": "e92d71fbd83fd6e1dd9795655082ed95abdbcda5",
+    "model": "None",
+    "proposal": "network_samples.hdf5",
+    "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+    "num_samples": "50000",
+    "batch_size": "5000",
+    "num_processes": "32",
+    "seed": "1"
+  },
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "32",
+    "OPENBLAS_NUM_THREADS": null
+  },
+  "stages": {
+    "unpack": {
+      "seconds": 0.162,
+      "main_peak_bytes": 18694144,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 0,
+      "job_peak_bytes_so_far": null
+    },
+    "imports": {
+      "seconds": 9.21,
+      "main_peak_bytes": 530718720,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 524283904,
+      "job_peak_bytes_so_far": null
+    },
+    "event_data": {
+      "seconds": 0.009,
+      "main_peak_bytes": 532156416,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 524283904,
+      "job_peak_bytes_so_far": null
+    },
+    "importance_sampling_setup": {
+      "seconds": 0.076,
+      "main_peak_bytes": 543477760,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 524283904,
+      "job_peak_bytes_so_far": null
+    },
+    "synthetic_phase": {
+      "seconds": 192.552,
+      "main_peak_bytes": 5369942016,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 568934400,
+      "job_peak_bytes_so_far": null
+    },
+    "importance_sample": {
+      "seconds": 0.345,
+      "main_peak_bytes": 2678460416,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 568934400,
+      "job_peak_bytes_so_far": null
+    },
+    "save_result": {
+      "seconds": 0.247,
+      "main_peak_bytes": 2678468608,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 568934400,
+      "job_peak_bytes_so_far": null
+    }
+  },
+  "provenance": {
+    "dingo": {
+      "commit": "e92d71fbd83fd6e1dd9795655082ed95abdbcda5",
+      "describe": "v0.10.3-7-ge92d71fb",
+      "version": "0.10.4.dev7+ge92d71fb",
+      "tree": "/srv/scratch/dingo_e92d71fbd8",
+      "imported_from": "/srv/scratch/dingo_e92d71fbd8/dingo"
+    },
+    "python": {
+      "version": "3.13.13",
+      "executable": "/opt/dingo_env/bin/python",
+      "isolated": true
+    },
+    "packages": {
+      "lalsuite": "7.26.15",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3",
+      "torch": "2.13.0+cpu",
+      "bilby": "2.6.0",
+      "bilby-pipe": "1.8.0",
+      "pandas": "3.0.5",
+      "h5py": "3.16.0",
+      "pycbc": "2.11.0",
+      "pytest": "9.1.1"
+    },
+    "host": {
+      "name": "node820",
+      "platform": "Linux-6.12.0-211.61.1.el10_2.x86_64-x86_64-with-glibc2.39",
+      "cpu": {
+        "model": "Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz",
+        "flags": {
+          "avx2": true,
+          "avx512f": false,
+          "fma": true
+        }
+      },
+      "cpu_count": 48,
+      "usable_cpus": 48
+    },
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "32",
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "torch_threads": 24,
+  "synthetic_phase_parts": {
+    "per_sample_terms_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 177.67,
+      "main_peak_bytes": 703766528
+    },
+    "grid_evaluation_in_main": {
+      "found": true,
+      "calls": 1,
+      "seconds": 0.067,
+      "main_peak_bytes": 5369942016
+    },
+    "floor_in_main": {
+      "found": true,
+      "calls": 0,
+      "seconds": 0.0,
+      "main_peak_bytes": null
+    },
+    "draws": {
+      "found": true,
+      "calls": 1,
+      "seconds": 7.246,
+      "main_peak_bytes": 5369942016
+    },
+    "grid_and_floor_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 6.964,
+      "main_peak_bytes": 4692496384
+    }
+  },
+  "evidence": {
+    "num_samples": 50000,
+    "log_evidence": -5829.6248468704935,
+    "log_evidence_std": 0.008407253545258522,
+    "n_eff": 11027.557492152524,
+    "sample_efficiency": 0.2205511498430505
+  },
+  "total_seconds": 202.678,
+  "job_peak_bytes": null,
+  "children_peak_bytes": 568934400
+}
