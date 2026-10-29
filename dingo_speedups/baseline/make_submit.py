@@ -13,6 +13,8 @@ Standard library only.
 """
 from __future__ import annotations
 
+import argparse
+import sys
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 from typing import List, Optional
@@ -64,18 +66,26 @@ def name(path: str) -> str:
 
 def submit_text(job: BaselineJob) -> str:
     job.check()
-    arguments = [
-        "-I", name(job.run_script),
-        "--tarball", name(job.tarball),
-        "--commit", job.commit,
-        *(["--model", name(job.model)] if job.model else ["--proposal", name(job.proposal)]),
-        "--event-data", name(job.event_data),
-        "--num-samples", str(job.num_samples),
-        "--batch-size", str(job.batch_size),
-        "--num-processes", str(job.cpus),
-        "--seed", str(job.seed),
+    network = ("--model", name(job.model)) if job.model else ("--proposal", name(job.proposal))
+    options = [
+        ("--tarball", name(job.tarball)),
+        ("--commit", job.commit),
+        network,
+        ("--event-data", name(job.event_data)),
+        ("--num-samples", str(job.num_samples)),
+        ("--batch-size", str(job.batch_size)),
+        ("--num-processes", str(job.cpus)),
+        ("--seed", str(job.seed))
     ]
-    inputs: List[str] = [job.image_url, job.run_script, job.guard, job.tarball, job.model or job.proposal, job.event_data]
+    arguments = ["-I", name(job.run_script), *(item for option in options for item in option)]
+    inputs: List[str] = [
+        job.image_url,
+        job.run_script,
+        job.guard,
+        job.tarball,
+        job.model or job.proposal,
+        job.event_data
+    ]
     lines = [
         "universe = vanilla",
         "executable = /opt/dingo_env/bin/python",
@@ -99,22 +109,28 @@ def submit_text(job: BaselineJob) -> str:
         "log = baseline.log",
         "output = baseline.out",
         "error = baseline.err",
-        "queue",
+        "queue"
     ]
     return "\n".join(lines) + "\n"
 
 
 def main(argv=None) -> int:
-    import argparse
-
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     for field in ("image_url", "run_script", "guard", "tarball", "event_data", "commit"):
         parser.add_argument(f"--{field.replace('_', '-')}", required=True)
     network = parser.add_mutually_exclusive_group(required=True)
     network.add_argument("--model")
     network.add_argument("--proposal")
-    for field, default in (("num_samples", 50_000), ("batch_size", 5_000), ("cpus", 32),
-                           ("memory_gb", 48), ("disk_gb", 12), ("priority", 50), ("seed", 1)):
+    defaults = (
+        ("num_samples", 50_000),
+        ("batch_size", 5_000),
+        ("cpus", 32),
+        ("memory_gb", 48),
+        ("disk_gb", 12),
+        ("priority", 50),
+        ("seed", 1)
+    )
+    for field, default in defaults:
         parser.add_argument(f"--{field.replace('_', '-')}", type=int, default=default)
     parser.add_argument("--output", required=True, help="Where to write the submit file")
     args = vars(parser.parse_args(argv))
@@ -126,6 +142,4 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    import sys
-
     sys.exit(main())

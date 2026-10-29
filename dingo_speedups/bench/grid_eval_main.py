@@ -27,9 +27,8 @@ def log_likelihood_from_phase_grid_terms(log_Zn, terms, phases, psis):
     phasor_delta = np.exp(-1j * terms["deltas"][:, None] * phases[..., None, :])
     kappa2_b = (terms["kappa2_modes"] @ phasor_m).real
     crossterms = terms["rho2opt_crossterms"]
-    rho2opt_bc = np.asarray(terms["rho2opt_const"])[..., None] + (
-        crossterms.reshape(*crossterms.shape[:-3], 4, -1) @ phasor_delta
-    ).real.reshape(*kappa2_b.shape[:-2], 2, 2, -1)
+    cross = (crossterms.reshape(*crossterms.shape[:-3], 4, -1) @ phasor_delta).real
+    rho2opt_bc = np.asarray(terms["rho2opt_const"])[..., None] + cross.reshape(*kappa2_b.shape[:-2], 2, 2, -1)
     kappa2 = np.einsum("...bg,...hb->...gh", kappa2_b, w, optimize=True)
     rho2opt = np.einsum("...bcg,...hb,...hc->...gh", rho2opt_bc, w, w, optimize=True)
     return log_Zn + kappa2 - 0.5 * rho2opt
@@ -48,7 +47,7 @@ def run(n, n_grid=5001, seed=0):
         "deltas": np.arange(1, 9),
         "kappa2_modes": cplx(n, 2, 9),
         "rho2opt_const": rng.normal(size=(n, 2, 2)),
-        "rho2opt_crossterms": cplx(n, 2, 2, 8),
+        "rho2opt_crossterms": cplx(n, 2, 2, 8)
     }
     phases = np.linspace(0, 2 * np.pi, n_grid)
     psis = rng.uniform(0, np.pi, size=n)[:, None]

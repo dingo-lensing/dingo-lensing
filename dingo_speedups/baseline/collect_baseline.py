@@ -74,7 +74,8 @@ def main(argv=None) -> int:
     destination.mkdir(parents=True, exist_ok=True)
     for name in COPIED:
         if (run_dir / name).is_file():
-            shutil.copy2(run_dir / name, destination / f"{name}.txt" if name.endswith(".log") else destination / name)
+            target = destination / f"{name}.txt" if name.endswith(".log") else destination / name
+            shutil.copy2(run_dir / name, target)
     if (run_dir / "out" / "baseline.json").is_file():
         shutil.copy2(run_dir / "out" / "baseline.json", destination / "baseline.json")
     summary = summarise(run_dir)

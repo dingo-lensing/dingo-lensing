@@ -46,7 +46,11 @@ def timed(name: str, checks: Dict[str, dict], function: Callable):
     try:
         value = function()
     except Exception:  # recorded, not raised: The report should cover every check
-        checks[name] = {"ok": False, "seconds": round(time.perf_counter() - start, 3), "error": traceback.format_exc()}
+        checks[name] = {
+            "ok": False,
+            "seconds": round(time.perf_counter() - start, 3),
+            "error": traceback.format_exc()
+        }
         return None
     checks[name] = {"ok": True, "seconds": round(time.perf_counter() - start, 3)}
     return value
@@ -83,14 +87,18 @@ def main(argv=None) -> int:
     from dingo.gw.result import Result
 
     checks: Dict[str, dict] = {}
+    inputs = ("model", "event_data", "proposal", "num_samples", "num_processes", "seed")
     report = {
         "provenance": provenance,
-        "inputs": {k: getattr(args, k) for k in ("model", "event_data", "proposal", "num_samples", "num_processes", "seed")},
-        "checks": checks,
+        "inputs": {k: getattr(args, k) for k in inputs},
+        "checks": checks
     }
 
-    model = timed("model", checks, lambda: build_model_from_kwargs(
-        filename=args.model, device="cpu", load_training_info=False))
+    model = timed(
+        "model",
+        checks,
+        lambda: build_model_from_kwargs(filename=args.model, device="cpu", load_training_info=False)
+    )
     if model is not None:
         data_settings = (getattr(model, "metadata", None) or {}).get("train_settings", {}).get("data", {})
         checks["model"]["inference_parameters"] = data_settings.get("inference_parameters")

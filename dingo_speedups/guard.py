@@ -206,8 +206,12 @@ def main(argv=None) -> int:
         command.add_argument("--tree", required=True, help="An unpacked pack_dingo.py tarball")
         command.add_argument("--commit", required=True, help="The commit the tree must be")
     check.add_argument(
-        "--import", dest="modules", action="append", default=[], metavar="MODULE",
-        help="Also import this module once the tree checks out (repeatable)",
+        "--import",
+        dest="modules",
+        action="append",
+        default=[],
+        metavar="MODULE",
+        help="Also import this module once the tree checks out (repeatable)"
     )
     run_tests.add_argument("pytest_args", nargs="*", help="Arguments for pytest, after --")
     args = parser.parse_args(argv)

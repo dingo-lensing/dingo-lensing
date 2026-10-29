@@ -16,6 +16,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+import numpy as np
 
 HERE = Path(__file__).resolve().parent
 for folder in (HERE, HERE.parent):
@@ -30,8 +31,6 @@ def column_differences(a: np.ndarray, b: np.ndarray) -> dict:
     """Largest absolute and relative difference of two equally long columns where both are finite.
     Entries not finite in either must be identical (the same infinity, or both NaN), e.g. the log
     prior of samples outside the prior."""
-    import numpy as np
-
     a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)
     if a.shape != b.shape:
         raise ValueError(f"Columns differ in shape: {a.shape} and {b.shape}")
@@ -43,7 +42,7 @@ def column_differences(a: np.ndarray, b: np.ndarray) -> dict:
         "max_abs": float(difference.max()) if difference.size else 0.0,
         "max_rel": float((difference / scale).max()) if difference.size else 0.0,
         "nonfinite": int(np.sum(~finite)),
-        "nonfinite_mismatch": int(np.sum(~finite & ~same)),
+        "nonfinite_mismatch": int(np.sum(~finite & ~same))
     }
 
 
@@ -65,7 +64,6 @@ def main(argv=None) -> int:
     except guard.GuardError as error:
         print(f"GUARD FAILED: {error}", file=sys.stderr)
         return 2
-    import numpy as np
     from dingo.gw.result import Result
 
     first, second = Result(file_name=args.first), Result(file_name=args.second)
@@ -76,7 +74,10 @@ def main(argv=None) -> int:
     if same_length:
         for name in sorted(set(first.samples.columns) & set(second.samples.columns)):
             if np.issubdtype(first.samples[name].dtype, np.number):
-                columns[name] = column_differences(first.samples[name].to_numpy(), second.samples[name].to_numpy())
+                columns[name] = column_differences(
+                    first.samples[name].to_numpy(),
+                    second.samples[name].to_numpy()
+                )
     report["columns"] = columns
     report["only_in_first"] = sorted(set(first.samples.columns) - set(second.samples.columns))
     report["only_in_second"] = sorted(set(second.samples.columns) - set(first.samples.columns))
@@ -88,7 +89,8 @@ def main(argv=None) -> int:
     Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     for name, c in columns.items():
-        print(f"{name:28s} max abs {c['max_abs']:10.3e}   max rel {c['max_rel']:10.3e}   non-finite {c['nonfinite']}, mismatched {c['nonfinite_mismatch']}")
+        differences = f"max abs {c['max_abs']:10.3e}   max rel {c['max_rel']:10.3e}"
+        print(f"{name:28s} {differences}   non-finite {c['nonfinite']}, mismatched {c['nonfinite_mismatch']}")
     for key, (x, y) in report["summary"].items():
         print(f"{key:28s} {x:.6f} vs {y:.6f}")
     print(f"Identical to rtol {args.rtol:g}: {report['identical_to_rtol']}")

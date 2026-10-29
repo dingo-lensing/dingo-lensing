@@ -228,7 +228,11 @@ def main(argv=None) -> int:
                 model = build_model_from_kwargs(filename=args.model, device="cpu", load_training_info=False)
             with stages.stage("network_sampling"):
                 seed_generators(np.random.SeedSequence([args.seed, 0]), all_devices=True)
-                sampler = GWComposedSampler.from_model(model, event.data, event_metadata=event.settings)
+                sampler = GWComposedSampler.from_model(
+                    model,
+                    event.data,
+                    event_metadata=event.settings
+                )
                 sampler.run_sampler(args.num_samples, batch_size=args.batch_size)
             with stages.stage("save_network_samples"):
                 sampler.to_hdf5(label="network_samples", outdir=str(OUT))
@@ -249,7 +253,12 @@ def main(argv=None) -> int:
         parts: Dict[str, dict] = {}
         report["synthetic_phase_parts"] = parts
         wrap_timed(steps, "_stacked_phase_grid_terms", parts, "per_sample_terms_in_workers")
-        wrap_timed(StationaryGaussianGWLikelihood, "log_likelihood_from_phase_grid_terms", parts, "grid_evaluation_in_main")
+        wrap_timed(
+            StationaryGaussianGWLikelihood,
+            "log_likelihood_from_phase_grid_terms",
+            parts,
+            "grid_evaluation_in_main"
+        )
         wrap_timed(steps, "_floored_density", parts, "floor_in_main")
         wrap_timed(steps, "interpolated_sample_and_log_prob_multi", parts, "draws")
         # DINGO PR #454 evaluates each sample's grid and floor in the workers.
@@ -270,7 +279,7 @@ def main(argv=None) -> int:
             "log_evidence": float(result.log_evidence),
             "log_evidence_std": float(result.log_evidence_std),
             "n_eff": float(result.n_eff),
-            "sample_efficiency": float(result.sample_efficiency),
+            "sample_efficiency": float(result.sample_efficiency)
         }
     except Exception as error:  # recorded for the report, then a failed exit
         report["error"] = f"{type(error).__name__}: {error}"
@@ -285,7 +294,8 @@ def main(argv=None) -> int:
 
     print(json.dumps({k: report[k] for k in ("evidence", "total_seconds")}, indent=2))
     for name, record in stages.records.items():
-        print(f"{name:26s} {record['seconds']:9.1f} s   main peak {(record['main_peak_bytes'] or 0) / 1e9:6.2f} GB")
+        peak_gb = (record["main_peak_bytes"] or 0) / 1e9
+        print(f"{name:26s} {record['seconds']:9.1f} s   main peak {peak_gb:6.2f} GB")
     return 0
 
 

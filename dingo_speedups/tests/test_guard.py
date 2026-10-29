@@ -25,7 +25,7 @@ from helpers import (  # noqa: E402
     guard_case,
     make_tree,
     run_script,
-    write,
+    write
 )
 
 
@@ -62,12 +62,13 @@ class TestAccepts(GuardTestCase):
         self.assertTrue(provenance["python"]["isolated"])
         self.assertEqual(
             set(provenance["packages"]),
-            {"lalsuite", "numpy", "scipy", "torch", "bilby", "bilby-pipe", "pandas", "h5py", "pycbc", "pytest"},
+            {"lalsuite", "numpy", "scipy", "torch", "bilby", "bilby-pipe", "pandas", "h5py", "pycbc", "pytest"}
         )
         self.assertEqual(set(provenance["host"]), {"name", "platform", "cpu", "cpu_count", "usable_cpus"})
         self.assertEqual(set(provenance["host"]["cpu"]["flags"]), {"avx2", "avx512f", "fma"})
         self.assertEqual(
-            set(provenance["threads"]), {"OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"}
+            set(provenance["threads"]),
+            {"OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"}
         )
 
     def test_records_installed_package_versions(self):
@@ -133,15 +134,18 @@ class TestRefusesTheWrongEnvironment(GuardTestCase):
 
     def test_dingo_lensing_importable(self):
         env = self.fake_package("dingo_lensing")
-        self.assertRefuses(guard_case(make_tree(self.base), COMMIT, prepend=[env]), "dingo_lensing is importable")
+        case = guard_case(make_tree(self.base), COMMIT, prepend=[env])
+        self.assertRefuses(case, "dingo_lensing is importable")
 
     def test_dingo_gw_installed(self):
         env = fake_distribution(self.base / "env", "dingo-gw", "0.9.8")
-        self.assertRefuses(guard_case(make_tree(self.base), COMMIT, prepend=[env]), "dingo-gw 0.9.8")
+        case = guard_case(make_tree(self.base), COMMIT, prepend=[env])
+        self.assertRefuses(case, "dingo-gw 0.9.8")
 
     def test_dingo_lensing_installed(self):
         env = fake_distribution(self.base / "env", "dingo-lensing", "0.0.1")
-        self.assertRefuses(guard_case(make_tree(self.base), COMMIT, prepend=[env]), "dingo-lensing 0.0.1")
+        case = guard_case(make_tree(self.base), COMMIT, prepend=[env])
+        self.assertRefuses(case, "dingo-lensing 0.0.1")
 
     def test_dingo_loaded_from_outside_the_tree(self):
         # A tree whose dingo/__init__.py swaps in another copy: The import must
@@ -229,8 +233,10 @@ class TestPytestMode(GuardTestCase):
 
     def test_a_given_test_path_is_used_instead(self):
         tree = self.tree_with_tests("def test_ok():\n    pass\n")
-        write(tree / "examples" / "test_example.py", "def test_example():\n    pass\ndef test_two():\n    pass\n")
-        result = run_guard("pytest", "--tree", str(tree), "--commit", COMMIT, "--", "-q", "examples", site=True)
+        two_tests = "def test_example():\n    pass\ndef test_two():\n    pass\n"
+        write(tree / "examples" / "test_example.py", two_tests)
+        options = ["--tree", str(tree), "--commit", COMMIT, "--", "-q", "examples"]
+        result = run_guard("pytest", *options, site=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("2 passed", result.stdout)
 

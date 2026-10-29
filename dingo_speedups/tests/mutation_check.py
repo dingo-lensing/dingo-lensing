@@ -24,7 +24,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from helpers import environment_is_clean  # noqa: E402
 
 SPEEDUPS = Path(__file__).resolve().parent.parent
-TESTS = {"guard.py": ("DINGO_SPEEDUPS_GUARD", "test_guard.py"), "pack_dingo.py": ("DINGO_SPEEDUPS_PACK", "test_pack_dingo.py")}
+TESTS = {
+    "guard.py": ("DINGO_SPEEDUPS_GUARD", "test_guard.py"),
+    "pack_dingo.py": ("DINGO_SPEEDUPS_PACK", "test_pack_dingo.py")
+}
 
 # (file, text to replace, replacement, what it breaks[, what catching it needs])
 MUTATIONS = [
@@ -48,7 +51,7 @@ MUTATIONS = [
     ("guard.py", '        pytest_args.append("tests")\n', "        pass\n", "pytest defaults to tests/", "pytest"),
     ("pack_dingo.py", "    release[-1] += 1\n", "", "next patch release"),
     ("pack_dingo.py", "    if distance == 0:\n", "    if False:\n", "tagged commit version"),
-    ("pack_dingo.py", 'if commit == git(repo, "rev-parse", "HEAD") and git(', "if False and git(", "uncommitted changes"),
+    ("pack_dingo.py", "    if checked_out and git(", "    if False and git(", "uncommitted changes"),
     ("pack_dingo.py", '"--match", "v[0-9]*", ', "", "release tags only"),
     ("pack_dingo.py", "mtime=0\n", "mtime=None\n", "reproducible gzip header"),
     ("pack_dingo.py", '            add_file(archive, f"{name}/{VERSION_FILE}", version_file_text(version, version_tuple), mtime)\n', "", "version file"),
@@ -66,16 +69,24 @@ def run_tests(module: str, path: Path) -> subprocess.CompletedProcess:
     env = {**os.environ, variable: str(path)}
     return subprocess.run(
         [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", pattern],
-        cwd=SPEEDUPS, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True,
+        cwd=SPEEDUPS,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True
     )
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
-        "--module", choices=sorted(TESTS), action="append",
-        help="Only this module's mutations (repeatable; default both). Inside the image, which has "
-        "no git, use --module guard.py",
+        "--module",
+        choices=sorted(TESTS),
+        action="append",
+        help=(
+            "Only this module's mutations (repeatable; default both). "
+            "Inside the image, which has no git, use --module guard.py"
+        )
     )
     modules = parser.parse_args(argv).module or list(TESTS)
     mutations = [mutation for mutation in MUTATIONS if mutation[0] in modules]
@@ -89,11 +100,12 @@ def main(argv=None) -> int:
     with tempfile.TemporaryDirectory() as scratch:
         for number, (module, old, new, what, *needs) in enumerate(mutations, start=1):
             source = (SPEEDUPS / module).read_text(encoding="utf-8")
-            if source.count(old) != 1:
-                print(f"{number:2d} {module}: {what}: The text to replace occurs {source.count(old)} times; update the mutation")
+            count = source.count(old)
+            if count != 1:
+                print(f"{number:2d} {module}: {what}: The text to replace occurs {count} times: Update it")
                 return 1
             if needs and not environment_is_clean():
-                print(f"{number:2d} {module:13s} not here {what} (its tests need pytest and no DINGO: Run inside the image)")
+                print(f"{number:2d} {module:13s} not here {what} (needs pytest and no DINGO, as in the image)")
                 unchecked.append(what)
                 continue
             mutated = Path(scratch) / f"{number}_{module}"

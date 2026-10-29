@@ -23,8 +23,7 @@ from make_requirements import normalise, read_pip_list  # noqa: E402
 
 CPU_REQUIREMENTS = deps.PARALLELISATION_CONTAINER / "requirements-cpu.txt"
 BASELINE = (SPEEDUPS / "BASELINE_COMMIT").read_text().strip()
-# The fork's clone sits next to the sync checkout: C:\Users\Kaili\dingo-effeciency
-# here, ~/dingo-effeciency on the cluster.
+# The fork's clone sits next to the sync checkout, e.g. ~/dingo-effeciency on the cluster.
 FORK = SPEEDUPS.parents[1] / "dingo-effeciency"
 
 
@@ -62,7 +61,9 @@ def baseline_pyproject():
         return None
     result = subprocess.run(
         ["git", "-C", str(FORK), "show", f"{BASELINE}:pyproject.toml"],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True
     )
     return result.stdout if result.returncode == 0 else None
 
@@ -71,7 +72,8 @@ def baseline_pyproject():
 class TestBaselineDependencies(unittest.TestCase):
     def test_every_dependency_of_the_baseline_commit_is_pinned(self):
         block = re.search(r"^dependencies = \[(.*?)^\]", baseline_pyproject(), re.S | re.M).group(1)
-        names = [normalise(re.split(r"[<>=!~ ;\[]", item, maxsplit=1)[0]) for item in re.findall(r'"([^"]+)"', block)]
+        items = re.findall(r'"([^"]+)"', block)
+        names = [normalise(re.split(r"[<>=!~ ;\[]", item, maxsplit=1)[0]) for item in items]
         self.assertGreater(len(names), 10)
         pinned = pins(deps.REQUIREMENTS)
         self.assertEqual([name for name in names if name not in pinned], [])

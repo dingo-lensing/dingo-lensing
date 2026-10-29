@@ -30,9 +30,26 @@ import statistics
 import sys
 import time
 from pathlib import Path
+import numpy as np
 
 NUM_PHASES = 9  # 2 ell_max + 1 for ell_max = 4, as in DINGO's DFT
-ARG_NAMES = ("m1", "m2", "s1x", "s1y", "s1z", "s2x", "s2y", "s2z", "distance", "inclination", "f_min", "f_max", "delta_f", "f_ref")
+# XLALSimIMRPhenomXPHM's arguments other than phiRef and the dictionary, in its order
+ARG_NAMES = (
+    "m1",
+    "m2",
+    "s1x",
+    "s1y",
+    "s1z",
+    "s2x",
+    "s2y",
+    "s2z",
+    "distance",
+    "inclination",
+    "f_min",
+    "f_max",
+    "delta_f",
+    "f_ref"
+)
 
 
 def dft_phases(n: int = NUM_PHASES) -> list:
@@ -41,8 +58,6 @@ def dft_phases(n: int = NUM_PHASES) -> list:
 
 def relative_difference(reference, other) -> float:
     """Largest max |other - reference| / max |reference| over the rows; inf for a shape or NaN mismatch."""
-    import numpy as np
-
     reference, other = np.atleast_2d(np.asarray(reference)), np.atleast_2d(np.asarray(other))
     if reference.shape != other.shape:
         return math.inf
@@ -56,7 +71,6 @@ def relative_difference(reference, other) -> float:
 
 def mismatch(a, b, weights) -> float:
     """1 - <a, b> / sqrt(<a, a> <b, b>), <x, y> = sum Re(conj(x) y) weights over frequency, not maximised."""
-    import numpy as np
 
     def inner(x, y):
         return float(np.sum((np.conj(x) * y).real * weights))
@@ -86,19 +100,19 @@ def summarise(values) -> dict:
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--samples", help="LAL arguments of DINGO network samples (.npz from xphm_profile.py)")
+    parser.add_argument("--samples", help="LAL arguments of DINGO network samples, from xphm_profile.py")
     parser.add_argument("--random", type=int, default=200, help="Number of random parameter sets")
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--rtol", type=float, default=1e-10)
     parser.add_argument("--repeats", type=int, default=3, help="Timing repeats per DINGO sample (best kept)")
-    parser.add_argument("--angle-samples", type=int, default=20, help="DINGO samples for the angle multibanding check")
+    parser.add_argument("--angle-samples", type=int, default=20, help="DINGO samples in the angle check")
     parser.add_argument("--built", help="BUILT.txt of build_lal.sh, recorded in the report")
     parser.add_argument("--output", required=True)
     args = parser.parse_args(argv)
 
+    # The patched LAL is only in build_lal.sh's environment.
     import lal
     import lalsimulation as LS
-    import numpy as np
 
     phases = dft_phases()
 
@@ -127,19 +141,17 @@ def main(argv=None) -> int:
         return d
 
     def single(a, phase_list, d):
-        m1, m2, s1x, s1y, s1z, s2x, s2y, s2z, dist, incl, f_min, f_max, delta_f, f_ref = a
         hp, hc = [], []
         for phase in phase_list:
-            p, c = LS.SimIMRPhenomXPHM(m1, m2, s1x, s1y, s1z, s2x, s2y, s2z, dist, incl, float(phase), f_min, f_max, delta_f, f_ref, d)
+            p, c = LS.SimIMRPhenomXPHM(*a[:10], float(phase), *a[10:], d)
             hp.append(p.data.data.copy())
             hc.append(c.data.data.copy())
         return np.array(hp), np.array(hc)
 
     def multi(a, phase_list, d):
-        m1, m2, s1x, s1y, s1z, s2x, s2y, s2z, dist, incl, f_min, f_max, delta_f, f_ref = a
         vector = lal.CreateREAL8Vector(len(phase_list))
         vector.data[:] = np.asarray(phase_list, dtype=float)
-        p, c = LS.SimIMRPhenomXPHMMultiPhase(m1, m2, s1x, s1y, s1z, s2x, s2y, s2z, dist, incl, vector, f_min, f_max, delta_f, f_ref, d)
+        p, c = LS.SimIMRPhenomXPHMMultiPhase(*a[:10], vector, *a[10:], d)
         return np.array(p.data, copy=True), np.array(c.data, copy=True)
 
     def best_time(function, repeats):
@@ -154,30 +166,47 @@ def main(argv=None) -> int:
         hp1, hc1 = single(a, phase_list, d)
         hp9, hc9 = multi(a, phase_list, d)
         difference = max(relative_difference(hp1, hp9), relative_difference(hc1, hc9))
-        return {"name": name, "expected": expected, "difference": difference, "ok": verdict(expected, difference, args.rtol)}
+        return {
+            "name": name,
+            "expected": expected,
+            "difference": difference,
+            "ok": verdict(expected, difference, args.rtol)
+        }
 
     report = {
-        "versions": {"lal": lal.__version__, "lalsimulation": LS.__version__, "numpy": np.__version__, "python": platform.python_version()},
+        "versions": {
+            "lal": lal.__version__,
+            "lalsimulation": LS.__version__,
+            "numpy": np.__version__,
+            "python": platform.python_version()
+        },
         "host": {"node": platform.node(), "machine": platform.machine(), "processor": platform.processor()},
         "built": Path(args.built).read_text(encoding="utf-8").splitlines() if args.built else None,
         "rtol": args.rtol,
-        "phases": phases,
+        "phases": phases
     }
     failures = []
 
     # Special cases: what the function shares, and what it must hand to single calls.
     msun, mpc = lal.MSUN_SI, 1e6 * lal.PC_SI
-    base = [36 * msun, 29 * msun, 0.3, -0.2, 0.25, -0.1, 0.4, -0.3, 800 * mpc, 1.1, 20.0, 448.0, 0.125, 20.0]
-    equal = [30 * msun, 30 * msun, 0.4, 0.0, 0.3, 0.0, 0.4, 0.3, 800 * mpc, 0.7, 20.0, 448.0, 0.125, 20.0]
-    heavy = [330 * msun, 280 * msun, 0.3, -0.2, 0.25, -0.1, 0.4, -0.3, 800 * mpc, 1.1, 20.0, 448.0, 0.125, 20.0]
-    nearly_aligned = [36 * msun, 29 * msun, 1e-5, 0.0, 0.25, 0.0, 1e-5, -0.3, 800 * mpc, 1.1, 20.0, 448.0, 0.125, 20.0]
+    frequencies = [20.0, 448.0, 0.125, 20.0]  # f_min, f_max, delta_f, f_ref
+
+    def arguments(m1, m2, s1, s2, incl):
+        return [m1 * msun, m2 * msun, *s1, *s2, 800 * mpc, incl, *frequencies]
+
+    base = arguments(36, 29, (0.3, -0.2, 0.25), (-0.1, 0.4, -0.3), 1.1)
+    equal = arguments(30, 30, (0.4, 0.0, 0.3), (0.0, 0.4, 0.3), 0.7)
+    heavy = arguments(330, 280, (0.3, -0.2, 0.25), (-0.1, 0.4, -0.3), 1.1)
+    nearly_aligned = arguments(36, 29, (1e-5, 0.0, 0.25), (0.0, 1e-5, -0.3), 1.1)
+    only_22 = [(2, 2), (2, -2)]
+    only_22_33 = only_22 + [(3, 3), (3, -3)]
     cases = [
         ("default", base, "shared", phases, None),
         ("one phase", base, "shared", [1.3], None),
         ("three phases off the DFT grid", base, "shared", [0.1, 2.0, 5.5], None),
         ("equal masses and aligned spins (odd modes skipped)", equal, "shared", phases, None),
-        ("only the (2, 2) mode", base, "shared", phases, lal_dict(modes=[(2, 2), (2, -2)])),
-        ("(2, 2) and (3, 3) modes", base, "shared", phases, lal_dict(modes=[(2, 2), (2, -2), (3, 3), (3, -3)])),
+        ("only the (2, 2) mode", base, "shared", phases, lal_dict(modes=only_22)),
+        ("(2, 2) and (3, 3) modes", base, "shared", phases, lal_dict(modes=only_22_33)),
         ("mode multibanding off", base, "shared", phases, lal_dict(mode_threshold=0.0)),
         ("convention 0", base, "shared", phases, lal_dict(convention=0)),
         ("PrecVersion 223 explicitly", base, "shared", phases, lal_dict(prec_version=223)),
@@ -186,7 +215,7 @@ def main(argv=None) -> int:
         ("angle multibanding off", base, "fallback", phases, lal_dict(prec_threshold=0.0)),
         ("NNLO angles (PrecVersion 102)", base, "fallback", phases, lal_dict(prec_version=102)),
         ("total mass above 500 (multibanding off)", heavy, "fallback", phases, None),
-        ("nearly aligned spins", nearly_aligned, "either", phases, None),
+        ("nearly aligned spins", nearly_aligned, "either", phases, None)
     ]
     special = [compare(name, a, expected, phase_list, d) for name, a, expected, phase_list, d in cases]
     report["special_cases"] = special
@@ -202,8 +231,20 @@ def main(argv=None) -> int:
         tilt1, tilt2 = np.arccos(rng.uniform(-1, 1, 2))
         phi12, phi_jl = rng.uniform(0, 2 * np.pi, 2)
         theta_jn = float(np.arccos(rng.uniform(-1, 1)))
-        incl, s1x, s1y, s1z, s2x, s2y, s2z = LS.SimInspiralTransformPrecessingNewInitialConditions(theta_jn, phi_jl, tilt1, tilt2, phi12, a1, a2, m1, m2, 20.0, 0.0)
-        a = [m1, m2, s1x, s1y, s1z, s2x, s2y, s2z, rng.uniform(100, 3000) * mpc, incl, 20.0, 448.0, 0.125, 20.0]
+        incl, s1x, s1y, s1z, s2x, s2y, s2z = LS.SimInspiralTransformPrecessingNewInitialConditions(
+            theta_jn,
+            phi_jl,
+            tilt1,
+            tilt2,
+            phi12,
+            a1,
+            a2,
+            m1,
+            m2,
+            frequencies[3],
+            0.0
+        )
+        a = [m1, m2, s1x, s1y, s1z, s2x, s2y, s2z, rng.uniform(100, 3000) * mpc, incl, *frequencies]
         result = compare(f"random {k}", a, "either")
         result["arguments"] = dict(zip(ARG_NAMES, map(float, a)))
         random_results.append(result)
@@ -211,7 +252,7 @@ def main(argv=None) -> int:
         "n": len(random_results),
         "max_difference": max((r["difference"] for r in random_results), default=0.0),
         "exact": sum(r["difference"] == 0.0 for r in random_results),
-        "failures": [r for r in random_results if not r["ok"]][:10],
+        "failures": [r for r in random_results if not r["ok"]][:10]
     }
     failures += [r for r in random_results if not r["ok"]]
 
@@ -237,21 +278,31 @@ def main(argv=None) -> int:
             "time_nine_single_calls_ms": summarise([1e3 * t for t in single_times]),
             "time_multi_phase_call_ms": summarise([1e3 * t for t in multi_times]),
             "time_multi_phase_call_one_phase_ms": summarise([1e3 * t for t in one_times]),
-            "speedup_nine_phases": summarise(speedups),
+            "speedup_nine_phases": summarise(speedups)
         }
 
         if "ref_hp" in data.files and len(data["ref_hp"]):
             reference = []
             for k in range(len(data["ref_hp"])):
                 hp1, hc1 = single(sample_args[k], data["phases"], None)
-                reference.append(max(relative_difference(data["ref_hp"][k], hp1), relative_difference(data["ref_hc"][k], hc1)))
+                plus = relative_difference(data["ref_hp"][k], hp1)
+                cross = relative_difference(data["ref_hc"][k], hc1)
+                reference.append(max(plus, cross))
             report["release_vs_this_build"] = {
                 "n": len(reference),
                 "max_difference": max(reference),
-                "release": {"lal": str(data["lal_version"]), "lalsimulation": str(data["lalsimulation_version"])},
+                "release": {
+                    "lal": str(data["lal_version"]),
+                    "lalsimulation": str(data["lalsimulation_version"])
+                }
             }
 
-        angle = {"default_vs_exact": [], "complex_q_vs_exact": [], "default_vs_complex_q": [], "complex_q_used": []}
+        angle = {
+            "default_vs_exact": [],
+            "complex_q_vs_exact": [],
+            "default_vs_complex_q": [],
+            "complex_q_used": []
+        }
         for a in sample_args[: args.angle_samples]:
             f = np.arange(int(round(a[11] / a[12])) + 1) * a[12]
             hp_default, hc_default = multi(a, phases[:1], None)
@@ -263,7 +314,9 @@ def main(argv=None) -> int:
             weights[band] = [1.0 / LS.SimNoisePSDaLIGOZeroDetHighPower(float(x)) for x in f[:n][band]]
 
             def worst(x, y):
-                return max(mismatch(x[0][0, :n], y[0][0, :n], weights), mismatch(x[1][0, :n], y[1][0, :n], weights))
+                plus = mismatch(x[0][0, :n], y[0][0, :n], weights)
+                cross = mismatch(x[1][0, :n], y[1][0, :n], weights)
+                return max(plus, cross)
 
             default, exact, cq = (hp_default, hc_default), (hp_exact, hc_exact), (hp_cq, hc_cq)
             angle["default_vs_exact"].append(worst(default, exact))
@@ -271,12 +324,12 @@ def main(argv=None) -> int:
             angle["default_vs_complex_q"].append(worst(default, cq))
             angle["complex_q_used"].append(relative_difference(hp_default, hp_cq) > 0)
         report["angle_multibanding"] = {
-            "weighting": "aLIGO zero-detuned high-power PSD, f_min to f_max, h+ and hx (worse of the two), phase 0, no maximisation",
+            "weighting": "aLIGO design PSD, f_min to f_max, worse of h+ and hx, phase 0, not maximised",
             "n": len(angle["default_vs_exact"]),
             "complex_q_took_effect": sum(angle["complex_q_used"]),
             "mismatch_default_vs_exact": summarise(angle["default_vs_exact"]),
             "mismatch_complex_q_vs_exact": summarise(angle["complex_q_vs_exact"]),
-            "mismatch_default_vs_complex_q": summarise(angle["default_vs_complex_q"]),
+            "mismatch_default_vs_complex_q": summarise(angle["default_vs_complex_q"])
         }
 
     report["failures"] = len(failures)
@@ -285,11 +338,17 @@ def main(argv=None) -> int:
 
     print(json.dumps(report["versions"]))
     for c in special:
-        print(f"{'ok  ' if c['ok'] else 'FAIL'} {c['name']:52s} expected {c['expected']:8s} max rel. difference {c['difference']:.2e}")
-    print(f"random: {report['random']['n']} sets, max rel. difference {report['random']['max_difference']:.2e}, {report['random']['exact']} exact, {len(report['random']['failures'])} failed")
+        status = "ok  " if c["ok"] else "FAIL"
+        print(f"{status} {c['name']:52s} expected {c['expected']:8s} max rel. diff. {c['difference']:.2e}")
+    r = report["random"]
+    print(
+        f"random: {r['n']} sets, max rel. difference {r['max_difference']:.2e},",
+        f"{r['exact']} exact, {len(r['failures'])} failed"
+    )
     for key in ("dingo_samples", "release_vs_this_build", "angle_multibanding"):
         if key in report:
-            print(key, json.dumps({k: v for k, v in report[key].items() if k not in ("failures", "file")}, indent=1))
+            shown = {k: v for k, v in report[key].items() if k not in ("failures", "file")}
+            print(key, json.dumps(shown, indent=1))
     print(f"{'OK' if report['ok'] else 'FAILED'}: {report['failures']} failures; report {args.output}")
     return 0 if report["ok"] else 1
 

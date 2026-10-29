@@ -17,7 +17,8 @@ profile = load_module("xphm_profile_under_test", SCRIPT)
 
 class TestHelpers(unittest.TestCase):
     def test_summary_is_in_milliseconds(self):
-        self.assertEqual(profile.summary_ms([0.001, 0.003, 0.002]), {"mean_ms": 2.0, "median_ms": 2.0, "min_ms": 1.0, "n": 3})
+        expected = {"mean_ms": 2.0, "median_ms": 2.0, "min_ms": 1.0, "n": 3}
+        self.assertEqual(profile.summary_ms([0.001, 0.003, 0.002]), expected)
 
     def test_timed_returns_the_seconds_and_the_value(self):
         seconds, value = profile.timed(lambda x, y=0: x + y, 2, y=3)
@@ -35,13 +36,8 @@ class TestGuard(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             tree = make_tree(base / "src")
-            args = [
-                "--tree", str(tree),
-                "--commit", "fedcba9876543210",
-                "--proposal", "p.hdf5",
-                "--event-data", "e.hdf5",
-                "--output", str(base / "profile.json"),
-            ]
+            args = ["--tree", str(tree), "--commit", "fedcba9876543210", "--proposal", "p.hdf5"]
+            args += ["--event-data", "e.hdf5", "--output", str(base / "profile.json")]
             result = run_script(SCRIPT, args)
             self.assertEqual(result.returncode, 2, result.stderr)
             self.assertIn("GUARD FAILED", result.stderr)

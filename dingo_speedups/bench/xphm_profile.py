@@ -59,7 +59,7 @@ def summary_ms(seconds):
         "mean_ms": round(statistics.fmean(values), 4),
         "median_ms": round(statistics.median(values), 4),
         "min_ms": round(min(values), 4),
-        "n": len(values),
+        "n": len(values)
     }
 
 
@@ -77,8 +77,8 @@ def main(argv=None) -> int:
     parser.add_argument("--event-data", required=True)
     parser.add_argument("--num-samples", type=int, default=100)
     parser.add_argument("--profile-samples", type=int, default=10)
-    parser.add_argument("--dump-lal-args", help="Also write the samples' XLALSimIMRPhenomXPHM arguments here (.npz)")
-    parser.add_argument("--dump-reference", type=int, default=5, help="Samples whose polarisations go into the dump")
+    parser.add_argument("--dump-lal-args", help="Also write the samples' LAL arguments to this .npz")
+    parser.add_argument("--dump-reference", type=int, default=5, help="Samples with polarisations in the dump")
     parser.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
@@ -100,7 +100,8 @@ def main(argv=None) -> int:
     result.use_base_domain = False
     likelihood = result.sampler_context.likelihood(use_base_domain=False)
     generator = likelihood.waveform_generator
-    keys = [k for k, v in result.prior.items() if not isinstance(v, Constraint) and k in result.samples.columns]
+    prior_keys = [k for k, v in result.prior.items() if not isinstance(v, Constraint)]
+    keys = [k for k in prior_keys if k in result.samples.columns]
     rows = result.samples[keys].iloc[: args.num_samples].to_dict("records")
 
     report = {
@@ -112,13 +113,15 @@ def main(argv=None) -> int:
             "uses_dft_phase_decomposition": generator.uses_dft_phase_decomposition,
             "ell_max": generator._get_ell_max(),
             "domain_bins": len(generator.domain()),
-            "f_max": generator.domain.f_max,
-        },
+            "f_max": generator.domain.f_max
+        }
     }
 
     def lal_arguments(theta, phase):
         parameters, target = generator._convert_parameters(
-            {**theta, "phase": phase, "f_ref": generator.f_ref}, generator.lal_params, return_target_function=True
+            {**theta, "phase": phase, "f_ref": generator.f_ref},
+            generator.lal_params,
+            return_target_function=True
         )
         return parameters, target
 
@@ -136,18 +139,27 @@ def main(argv=None) -> int:
             values[LAL_DICT] = lal_dict
         return tuple(values)
 
-    times = {name: [] for name in (
-        "generate_hplus_hcross", "convert_parameters", "lal_XPHM", "generate_hplus_hcross_m", "phase_grid_terms",
-        "lal_XPHM_no_multibanding", "lal_XHM", "lal_XP", "lal_XAS",
-    )}
+    timed_steps = (
+        "generate_hplus_hcross",
+        "convert_parameters",
+        "lal_XPHM",
+        "generate_hplus_hcross_m",
+        "phase_grid_terms",
+        "lal_XPHM_no_multibanding",
+        "lal_XHM",
+        "lal_XP",
+        "lal_XAS"
+    )
+    times = {name: [] for name in timed_steps}
     for row in rows:
         theta = {k: float(v) for k, v in row.items()}
         intrinsic = {k: float(v) for k, v in split_off_extrinsic_parameters(theta)[0].items()}
-        times["generate_hplus_hcross"].append(timed(generator.generate_hplus_hcross, {**intrinsic, "phase": 0.0})[0])
+        at_zero = {**intrinsic, "phase": 0.0}
+        times["generate_hplus_hcross"].append(timed(generator.generate_hplus_hcross, at_zero)[0])
         seconds, (parameters, target) = timed(lal_arguments, intrinsic, 0.0)
         times["convert_parameters"].append(seconds)
         times["lal_XPHM"].append(timed(target, *parameters)[0])
-        times["generate_hplus_hcross_m"].append(timed(generator.generate_hplus_hcross_m, {**intrinsic, "phase": 0.0})[0])
+        times["generate_hplus_hcross_m"].append(timed(generator.generate_hplus_hcross_m, at_zero)[0])
         times["phase_grid_terms"].append(timed(likelihood.phase_grid_terms, {**theta, "phase": 0.0})[0])
         times["lal_XPHM_no_multibanding"].append(timed(target, *variant(parameters, multibanding=False))[0])
         times["lal_XHM"].append(timed(target, *variant(parameters, LS.IMRPhenomXHM, in_plane_zero=True))[0])
@@ -165,7 +177,7 @@ def main(argv=None) -> int:
         "XHM_of_XPHM": medians["lal_XHM"] / medians["lal_XPHM"],
         "XP_of_XPHM": medians["lal_XP"] / medians["lal_XPHM"],
         "XAS_of_XPHM": medians["lal_XAS"] / medians["lal_XPHM"],
-        "XPHM_without_multibanding_over_with": medians["lal_XPHM_no_multibanding"] / medians["lal_XPHM"],
+        "XPHM_without_multibanding_over_with": medians["lal_XPHM_no_multibanding"] / medians["lal_XPHM"]
     }
 
     # One sample: LAL's output length, and which model parameters depend on the phase.
@@ -177,7 +189,7 @@ def main(argv=None) -> int:
     report["lal_output"] = {
         "lal_bins": len(hp.data.data),
         "domain_bins": bins,
-        "nonzero_bins_beyond_domain": int(np.count_nonzero(hp.data.data[bins:])),
+        "nonzero_bins_beyond_domain": int(np.count_nonzero(hp.data.data[bins:]))
     }
     phases = np.linspace(0, 2 * np.pi, 2 * generator._get_ell_max() + 1, endpoint=False)
     names = ("chi1L", "chi2L", "chi_p", "thetaJN", "alpha0", "phi_aligned", "zeta_polarization")
@@ -185,13 +197,16 @@ def main(argv=None) -> int:
         values = []
         for phase in phases:
             p, _ = lal_arguments(intrinsic, float(phase))
-            values.append(LS.SimIMRPhenomXPCalculateModelParametersFromSourceFrame(
-                p[0], p[1], p[17], p[10], p[9], p[2], p[3], p[4], p[5], p[6], p[7], p[LAL_DICT]
-            ))
+            # m1, m2, f_ref, phiRef, inclination, the six spin components, the dictionary
+            source_frame = (p[0], p[1], p[17], p[10], p[9], *p[2:8], p[LAL_DICT])
+            values.append(LS.SimIMRPhenomXPCalculateModelParametersFromSourceFrame(*source_frame))
         values = np.array(values, dtype=float)
         report["phase_dependence"] = {
-            name: {"min": float(values[:, i].min()), "max": float(values[:, i].max()),
-                   "changes_with_phase": bool(np.ptp(values[:, i]) > 1e-12)}
+            name: {
+                "min": float(values[:, i].min()),
+                "max": float(values[:, i].max()),
+                "changes_with_phase": bool(np.ptp(values[:, i]) > 1e-12)
+            }
             for i, name in enumerate(names)
         }
     except Exception as error:  # recorded: LAL's binding may differ by version
@@ -209,9 +224,11 @@ def main(argv=None) -> int:
     if args.dump_lal_args:
         dumped = []
         for row in rows:
-            p, _ = lal_arguments({k: float(v) for k, v in split_off_extrinsic_parameters({k: float(v) for k, v in row.items()})[0].items()}, 0.0)
+            theta = {k: float(v) for k, v in row.items()}
+            intrinsic = {k: float(v) for k, v in split_off_extrinsic_parameters(theta)[0].items()}
+            p, _ = lal_arguments(intrinsic, 0.0)
             if p[LAL_DICT] is not None:
-                raise SystemExit("The generator passes a LAL dictionary; the dump covers lal_params = None only")
+                raise SystemExit("The generator passes a LAL dictionary; the dump needs lal_params = None")
             dumped.append([float(p[i]) for i in XPHM_ARGUMENTS])
         reference_hp, reference_hc = [], []
         for a in dumped[: args.dump_reference]:
@@ -229,12 +246,17 @@ def main(argv=None) -> int:
             ref_hp=np.array(reference_hp),
             ref_hc=np.array(reference_hc),
             lal_version=lal.__version__,
-            lalsimulation_version=LS.__version__,
+            lalsimulation_version=LS.__version__
         )
-        report["dump"] = {"file": args.dump_lal_args, "samples": len(dumped), "reference_samples": len(reference_hp)}
+        report["dump"] = {
+            "file": args.dump_lal_args,
+            "samples": len(dumped),
+            "reference_samples": len(reference_hp)
+        }
 
     Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({k: report[k] for k in ("generator", "per_sample", "shares", "lal_output", "phase_dependence")}, indent=2))
+    shown = ("generator", "per_sample", "shares", "lal_output", "phase_dependence")
+    print(json.dumps({k: report[k] for k in shown}, indent=2))
     print(report["profile_phase_grid_terms"])
     return 0
 

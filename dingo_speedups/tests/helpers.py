@@ -20,6 +20,7 @@ import subprocess
 import sys
 import tarfile
 import textwrap
+from importlib import metadata
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -188,8 +189,6 @@ def environment_is_clean() -> bool:
     """Whether this interpreter has pytest and no DINGO, as inside the image."""
     if importlib.util.find_spec("pytest") is None:
         return False
-    from importlib import metadata
-
     for name in ("dingo-gw", "dingo-lensing"):
         try:
             metadata.version(name)

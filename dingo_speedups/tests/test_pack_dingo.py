@@ -25,7 +25,7 @@ from helpers import (  # noqa: E402
     load_module,
     make_repo,
     run_python,
-    write,
+    write
 )
 
 pack_dingo = load_module("pack_dingo_under_test", PACK_PATH)
@@ -83,8 +83,16 @@ class TestPack(PackTestCase):
             names = set(archive.getnames())  # folders are listed without a trailing slash
         outside = [name for name in names if name != self.name and not name.startswith(f"{self.name}/")]
         self.assertEqual(outside, [])
-        for relative in ("dingo/__init__.py", "dingo/sub.py", "dingo/more.py", "pyproject.toml",
-                         "tests/test_nothing.py", "COMMIT.json", "dingo/_version.py"):
+        expected = (
+            "dingo/__init__.py",
+            "dingo/sub.py",
+            "dingo/more.py",
+            "pyproject.toml",
+            "tests/test_nothing.py",
+            "COMMIT.json",
+            "dingo/_version.py"
+        )
+        for relative in expected:
             self.assertIn(f"{self.name}/{relative}", names)
 
     def test_commit_file_records_commit_describe_and_version(self):
@@ -103,9 +111,8 @@ class TestPack(PackTestCase):
         )
         result = run_python(code, [str(self.base / "x" / self.name)])
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(
-            result.stdout.strip(), repr((f"0.10.4.dev1+g{self.short}", (0, 10, 4, "dev1", f"g{self.short}")))
-        )
+        expected = repr((f"0.10.4.dev1+g{self.short}", (0, 10, 4, "dev1", f"g{self.short}")))
+        self.assertEqual(result.stdout.strip(), expected)
 
     def test_the_guard_accepts_the_unpacked_tree(self):
         extract(Path(self.packed.path), self.base / "x")

@@ -1,24 +1,30 @@
 """Unit tests for lal/check_multiphase.py's helpers, and for what lal/xphm_multiphase.patch may
 change in LALSimulation. The check itself runs in the build environment on the cluster
-(lal/run_multiphase_check.sh). Standard library only, except the numerical helpers, which
-need numpy."""
+(lal/run_multiphase_check.sh). The helpers need numpy, as check_multiphase.py does; the patch
+tests are standard library only."""
 from __future__ import annotations
 
-import importlib.util
 import math
 import sys
 import unittest
 from pathlib import Path
 
+try:
+    import numpy as np
+except ImportError:  # the helpers' tests are skipped without it
+    np = None
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from helpers import SPEEDUPS, load_module  # noqa: E402
 
-check = load_module("check_multiphase_under_test", SPEEDUPS / "lal" / "check_multiphase.py")
+HAVE_NUMPY = np is not None
+CHECK = SPEEDUPS / "lal" / "check_multiphase.py"
+check = load_module("check_multiphase_under_test", CHECK) if HAVE_NUMPY else None
 PATCH = SPEEDUPS / "lal" / "xphm_multiphase.patch"
-HAVE_NUMPY = importlib.util.find_spec("numpy") is not None
 
 
+@unittest.skipUnless(HAVE_NUMPY, "needs numpy")
 class TestHelpers(unittest.TestCase):
     def test_dft_phases_are_dingos(self):
         phases = check.dft_phases()
@@ -38,15 +44,14 @@ class TestHelpers(unittest.TestCase):
         self.assertFalse(check.verdict("either", math.inf, 1e-10))
 
     def test_summarise_drops_nans(self):
-        self.assertEqual(check.summarise([3.0, math.nan, 1.0, 2.0]), {"n": 3, "median": 2.0, "max": 3.0, "min": 1.0})
+        expected = {"n": 3, "median": 2.0, "max": 3.0, "min": 1.0}
+        self.assertEqual(check.summarise([3.0, math.nan, 1.0, 2.0]), expected)
         self.assertEqual(check.summarise([]), {"n": 0})
 
 
 @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
 class TestNumerics(unittest.TestCase):
     def test_relative_difference_is_the_worst_row_against_its_peak(self):
-        import numpy as np
-
         reference = np.array([[1.0, 2.0j, -4.0], [10.0, 0.0, 0.0]])
         other = reference.copy()
         other[0, 1] += 0.04
@@ -55,8 +60,6 @@ class TestNumerics(unittest.TestCase):
         self.assertEqual(check.relative_difference(reference, reference), 0.0)
 
     def test_relative_difference_flags_shapes_nans_and_zero_references(self):
-        import numpy as np
-
         a = np.ones((2, 3), dtype=complex)
         self.assertEqual(check.relative_difference(a, a[:, :2]), math.inf)
         b = a.copy()
@@ -66,13 +69,12 @@ class TestNumerics(unittest.TestCase):
         self.assertEqual(check.relative_difference(np.zeros(3), np.zeros(3)), 0.0)
 
     def test_mismatch(self):
-        import numpy as np
-
         weights = np.array([1.0, 2.0, 0.5])
         a = np.array([1 + 1j, 2 - 1j, 0.5j])
+        orthogonal = (np.array([1.0, 0, 0]), np.array([0, 1.0, 0]))
         self.assertAlmostEqual(check.mismatch(a, a, weights), 0.0, places=15)
         self.assertAlmostEqual(check.mismatch(a, 3.0 * a, weights), 0.0, places=15)
-        self.assertAlmostEqual(check.mismatch(np.array([1.0, 0, 0]), np.array([0, 1.0, 0]), weights), 1.0, places=15)
+        self.assertAlmostEqual(check.mismatch(*orthogonal, weights), 1.0, places=15)
         self.assertTrue(math.isnan(check.mismatch(np.zeros(3), a, weights)))
 
 

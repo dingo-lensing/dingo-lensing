@@ -1,7 +1,7 @@
 """Unit tests for the step 2.1 baseline tools: baseline_run.py's helpers and failure
 reports, make_submit.py, collect_baseline.py and compare_results.py. The job's DINGO
 steps run on the cluster (the launcher's pre-flight and the job). Standard library
-only, except the compare_results.py column checks, which need numpy."""
+only, except compare_results.py's tests, which need numpy as the script does."""
 from __future__ import annotations
 
 import importlib.util
@@ -23,8 +23,8 @@ BASELINE = SPEEDUPS / "baseline"
 run = load_module("baseline_run_under_test", BASELINE / "baseline_run.py")
 make_submit = load_module("make_submit_under_test", BASELINE / "make_submit.py")
 collect = load_module("collect_baseline_under_test", BASELINE / "collect_baseline.py")
-compare = load_module("compare_results_under_test", BASELINE / "compare_results.py")
 HAVE_NUMPY = importlib.util.find_spec("numpy") is not None
+compare = load_module("compare_results_under_test", BASELINE / "compare_results.py") if HAVE_NUMPY else None
 REAL_LOG = (
     SPEEDUPS.parent / "parallelisation/tutorial_reference/ex3_dingo_lensing_application"
     / "dingo_EXP1_lensed/log_data_generation/label_data0_1384782888-63_generation.log"
@@ -159,7 +159,7 @@ class TestSubmitFile(unittest.TestCase):
             tarball="/home/me/run/dingo_dd481d9846.tar.gz",
             model="/home/me/models/model_nonlensed.pt",
             event_data="/home/me/data/event.hdf5",
-            commit="dd481d98467c14114d7cf81981076806c5b2a4bc",
+            commit="dd481d98467c14114d7cf81981076806c5b2a4bc"
         )
         settings.update(changes)
         return make_submit.BaselineJob(**settings)
@@ -174,7 +174,7 @@ class TestSubmitFile(unittest.TestCase):
             'arguments = "-I baseline_run.py --tarball dingo_dd481d9846.tar.gz '
             "--commit dd481d98467c14114d7cf81981076806c5b2a4bc --model model_nonlensed.pt "
             '--event-data event.hdf5 --num-samples 50000 --batch-size 5000 --num-processes 32 --seed 1"',
-            lines,
+            lines
         )
 
     def test_uses_the_image_from_osdf_as_the_smoke_test_did(self):
@@ -185,25 +185,41 @@ class TestSubmitFile(unittest.TestCase):
         self.assertIn("MY.flock_local = True", lines)
         self.assertIn('MY.DESIRED_Sites = "nogrid"', lines)
         transfer = next(line for line in lines if line.startswith("transfer_input_files = "))
-        self.assertEqual(
-            transfer.split(" = ", 1)[1].split(", "),
-            ["osdf:///igwn/cit/staging/me/containers/dingo-deps_recipe-8f44d79_cpu.sif",
-             "/home/me/run/baseline_run.py", "/home/me/run/guard.py", "/home/me/run/dingo_dd481d9846.tar.gz",
-             "/home/me/models/model_nonlensed.pt", "/home/me/data/event.hdf5"],
-        )
+        expected = [
+            "osdf:///igwn/cit/staging/me/containers/dingo-deps_recipe-8f44d79_cpu.sif",
+            "/home/me/run/baseline_run.py",
+            "/home/me/run/guard.py",
+            "/home/me/run/dingo_dd481d9846.tar.gz",
+            "/home/me/models/model_nonlensed.pt",
+            "/home/me/data/event.hdf5"
+        ]
+        self.assertEqual(transfer.split(" = ", 1)[1].split(", "), expected)
         self.assertIn("transfer_output_files = out", lines)
 
     def test_resources_priority_and_threads(self):
         lines = self.lines()
-        for expected in ("request_cpus = 32", "request_memory = 48GB", "request_disk = 12GB", "priority = 50",
-                         'environment = "OMP_NUM_THREADS=1"', "accounting_group = ligo.dev.o4.cbc.explore.test"):
+        expected_lines = (
+            "request_cpus = 32",
+            "request_memory = 48GB",
+            "request_disk = 12GB",
+            "priority = 50",
+            'environment = "OMP_NUM_THREADS=1"',
+            "accounting_group = ligo.dev.o4.cbc.explore.test"
+        )
+        for expected in expected_lines:
             self.assertIn(expected, lines)
         self.assertIn("--num-processes 16", self.lines(cpus=16)[2])
         self.assertIn("priority = 10", self.lines(priority=10))
 
     def test_refuses_bad_inputs(self):
-        for changes in ({"image_url": "/home/me/image.sif"}, {"model": "model.pt"},
-                        {"tarball": "/home/me/a b.tar.gz"}, {"commit": "dd481d98"}, {"cpus": 0}):
+        bad_inputs = (
+            {"image_url": "/home/me/image.sif"},
+            {"model": "model.pt"},
+            {"tarball": "/home/me/a b.tar.gz"},
+            {"commit": "dd481d98"},
+            {"cpus": 0}
+        )
+        for changes in bad_inputs:
             with self.subTest(changes=changes):
                 with self.assertRaises(ValueError):
                     make_submit.submit_text(self.job(**changes))
@@ -211,14 +227,17 @@ class TestSubmitFile(unittest.TestCase):
     def test_a_proposal_replaces_the_model(self):
         lines = self.lines(model=None, proposal="/home/me/runs/out/network_samples.hdf5")
         arguments = next(line for line in lines if line.startswith("arguments = "))
-        self.assertIn("--commit dd481d98467c14114d7cf81981076806c5b2a4bc --proposal network_samples.hdf5 --event-data", arguments)
+        expected = f"--commit {self.job().commit} --proposal network_samples.hdf5 --event-data"
+        self.assertIn(expected, arguments)
         self.assertNotIn("--model", arguments)
-        transfer = next(line for line in lines if line.startswith("transfer_input_files = ")).split(" = ", 1)[1].split(", ")
+        transfer_line = next(line for line in lines if line.startswith("transfer_input_files = "))
+        transfer = transfer_line.split(" = ", 1)[1].split(", ")
         self.assertIn("/home/me/runs/out/network_samples.hdf5", transfer)
         self.assertNotIn("/home/me/models/model_nonlensed.pt", transfer)
 
     def test_refuses_both_or_neither_network_input(self):
-        for changes in ({"proposal": "/home/me/p.hdf5"}, {"model": None}, {"model": None, "proposal": "p.hdf5"}):
+        cases = ({"proposal": "/home/me/p.hdf5"}, {"model": None}, {"model": None, "proposal": "p.hdf5"})
+        for changes in cases:
             with self.subTest(changes=changes):
                 with self.assertRaises(ValueError):
                     make_submit.submit_text(self.job(**changes))
@@ -227,19 +246,20 @@ class TestSubmitFile(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "baseline.sub"
             job = self.job(model=None, proposal="/home/me/runs/out/network_samples.hdf5")
-            args = [f"--{k.replace('_', '-')}={v}" for k, v in vars(job).items()
-                    if k in ("image_url", "run_script", "guard", "tarball", "proposal", "event_data", "commit")]
+            names = ("image_url", "run_script", "guard", "tarball", "proposal", "event_data", "commit")
+            args = [f"--{k.replace('_', '-')}={v}" for k, v in vars(job).items() if k in names]
             self.assertEqual(make_submit.main([*args, "--output", str(output)]), 0)
             self.assertEqual(output.read_text(), make_submit.submit_text(job))
+            both = [*args, "--model", "/home/me/models/model_nonlensed.pt", "--output", str(output)]
             with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
-                make_submit.main([*args, "--model", "/home/me/models/model_nonlensed.pt", "--output", str(output)])
+                make_submit.main(both)
 
     def test_command_line_writes_the_file(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "baseline.sub"
             job = self.job()
-            args = [f"--{k.replace('_', '-')}={v}" for k, v in vars(job).items()
-                    if k in ("image_url", "run_script", "guard", "tarball", "model", "event_data", "commit")]
+            names = ("image_url", "run_script", "guard", "tarball", "model", "event_data", "commit")
+            args = [f"--{k.replace('_', '-')}={v}" for k, v in vars(job).items() if k in names]
             self.assertEqual(make_submit.main([*args, "--priority", "50", "--output", str(output)]), 0)
             self.assertEqual(output.read_text(), make_submit.submit_text(job))
 
@@ -249,14 +269,17 @@ class TestCompare(TempCase):
     def test_identical_columns_agree_with_matching_nans_and_infinities(self):
         # The log prior of samples outside the prior is -inf in both results.
         nan, inf = float("nan"), float("inf")
-        differences = compare.column_differences([1.0, -2.0, nan, -inf, inf], [1.0, -2.0, nan, -inf, inf])
-        self.assertEqual(differences, {"max_abs": 0.0, "max_rel": 0.0, "nonfinite": 3, "nonfinite_mismatch": 0})
+        values = [1.0, -2.0, nan, -inf, inf]
+        differences = compare.column_differences(values, list(values))
+        expected = {"max_abs": 0.0, "max_rel": 0.0, "nonfinite": 3, "nonfinite_mismatch": 0}
+        self.assertEqual(differences, expected)
         self.assertTrue(compare.agrees(differences, 0.0))
 
     @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
     def test_mismatched_infinities_fail(self):
         inf = float("inf")
-        for a, b in (([1.0, -inf], [1.0, inf]), ([1.0, -inf], [1.0, -5.0]), ([1.0, float("nan")], [1.0, -inf])):
+        pairs = (([1.0, -inf], [1.0, inf]), ([1.0, -inf], [1.0, -5.0]), ([1.0, float("nan")], [1.0, -inf]))
+        for a, b in pairs:
             with self.subTest(a=a, b=b):
                 differences = compare.column_differences(a, b)
                 self.assertEqual(differences["nonfinite_mismatch"], 1)
@@ -288,16 +311,13 @@ class TestCompare(TempCase):
         with self.assertRaises(ValueError):
             compare.column_differences([1.0, 2.0], [1.0])
 
+    @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
     def test_a_refused_commit_exits_2(self):
+        # With site-packages for numpy; the guard refuses before DINGO is imported.
         tree = make_tree(self.base / "src")
-        args = [
-            "--tree", str(tree),
-            "--commit", "fedcba9876543210",
-            "a.hdf5",
-            "b.hdf5",
-            "--output", str(self.base / "c.json"),
-        ]
-        result = run_script(BASELINE / "compare_results.py", args)
+        args = ["--tree", str(tree), "--commit", "fedcba9876543210", "--output", str(self.base / "c.json")]
+        args += ["a.hdf5", "b.hdf5"]
+        result = run_script(BASELINE / "compare_results.py", args, site=True)
         self.assertEqual(result.returncode, 2, result.stderr)
         self.assertIn("GUARD FAILED", result.stderr)
         self.assertFalse((self.base / "c.json").exists())
@@ -313,13 +333,15 @@ except ImportError:  # pragma: no cover
 def successful_log() -> str:
     cluster = 600000001
     events = [
-        submitted(cluster, "12:00:00"), job_ad(cluster, "12:00:00"),
+        submitted(cluster, "12:00:00"),
+        job_ad(cluster, "12:00:00"),
         transfer(cluster, "14:00:00", "Started transferring input files"),
         transfer(cluster, "14:01:30", "Finished transferring input files"),
-        executing(cluster, "14:01:31"), job_ad(cluster, "14:01:31"),
+        executing(cluster, "14:01:31"),
+        job_ad(cluster, "14:01:31"),
         transfer(cluster, "14:13:31", "Started transferring output files"),
         transfer(cluster, "14:13:40", "Finished transferring output files"),
-        terminated(cluster, "14:13:41"),
+        terminated(cluster, "14:13:41")
     ]
     return "\n".join(events) + "\n"
 
@@ -329,8 +351,12 @@ class TestCollect(TempCase):
     def run_dir(self, log: str, error=None) -> Path:
         run_dir = self.base / "20261027T120000Z"
         write(run_dir / "baseline.log", log)
-        report = {"stages": {"synthetic_phase": {"seconds": 12.5}}, "evidence": {"log_evidence": -1.0},
-                  "total_seconds": 99.0, "provenance": {"host": {"cpu": {"model": "CPU"}}}}
+        report = {
+            "stages": {"synthetic_phase": {"seconds": 12.5}},
+            "evidence": {"log_evidence": -1.0},
+            "total_seconds": 99.0,
+            "provenance": {"host": {"cpu": {"model": "CPU"}}}
+        }
         if error:
             report["error"] = error
         write(run_dir / "out" / "baseline.json", json.dumps(report))
@@ -359,8 +385,9 @@ class TestCollect(TempCase):
         self.assertEqual(written, {"baseline.log.txt", "launch.json", "baseline.json", "summary.json"})
 
     def test_a_job_that_reported_an_error_is_a_failure(self):
+        run_dir = self.run_dir(successful_log(), error="boom")
         with redirect_stdout(io.StringIO()):
-            code = collect.main([str(self.run_dir(successful_log(), error="boom")), "--results", str(self.base / "r")])
+            code = collect.main([str(run_dir), "--results", str(self.base / "r")])
         self.assertEqual(code, 1)
 
     @unittest.skipUnless(REAL_LOG.is_file(), "needs the Exercise 3 Condor log on this branch")

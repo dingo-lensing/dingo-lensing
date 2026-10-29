@@ -122,9 +122,8 @@ def pack(repo: Union[str, Path], ref: str, output_dir: Union[str, Path]) -> Pack
     if not repo.is_dir():
         raise PackError(f"{repo} is not a folder")
     commit = git(repo, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}")
-    if commit == git(repo, "rev-parse", "HEAD") and git(
-        repo, "status", "--porcelain", "--untracked-files=no"
-    ):
+    checked_out = commit == git(repo, "rev-parse", "HEAD")
+    if checked_out and git(repo, "status", "--porcelain", "--untracked-files=no"):
         raise PackError(
             f"{repo} has uncommitted changes, and {ref} is its checked-out commit: "
             "Commit them first, so the tarball and the commit agree"
@@ -143,9 +142,7 @@ def pack(repo: Union[str, Path], ref: str, output_dir: Union[str, Path]) -> Pack
     target = output_dir / f"{name}.tar.gz"
     with tempfile.TemporaryDirectory() as scratch:
         tar_path = Path(scratch) / f"{name}.tar"
-        tar_path.write_bytes(
-            git(repo, "archive", "--format=tar", f"--prefix={name}/", commit, binary=True)
-        )
+        tar_path.write_bytes(git(repo, "archive", "--format=tar", f"--prefix={name}/", commit, binary=True))
         with tarfile.open(tar_path) as archive:
             members = set(archive.getnames())
         if f"{name}/dingo/__init__.py" not in members:
@@ -163,7 +160,10 @@ def pack(repo: Union[str, Path], ref: str, output_dir: Union[str, Path]) -> Pack
         # only on the commit.
         packed = Path(scratch) / target.name
         with open(packed, "wb") as raw, gzip.GzipFile(
-            filename="", mode="wb", fileobj=raw, mtime=0
+            filename="",
+            mode="wb",
+            fileobj=raw,
+            mtime=0
         ) as compressed:
             compressed.write(tar_path.read_bytes())
         digest = sha256_of(packed)
