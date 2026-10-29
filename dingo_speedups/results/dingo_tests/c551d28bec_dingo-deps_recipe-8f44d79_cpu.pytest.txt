@@ -1,0 +1,68 @@
+INFO:    underlay of /etc/localtime required more than 50 (79) bind mounts
+{
+  "dingo": {
+    "commit": "c551d28bec006abd43db095ded1862afcb0ce24c",
+    "describe": "v0.10.3-3-gc551d28b",
+    "version": "0.10.4.dev3+gc551d28b",
+    "tree": "/local/kailibryan.doney/dingo-tests.5yw8Ye/dingo_c551d28bec",
+    "imported_from": "/local/kailibryan.doney/dingo-tests.5yw8Ye/dingo_c551d28bec/dingo"
+  },
+  "python": {
+    "version": "3.13.13",
+    "executable": "/opt/dingo_env/bin/python",
+    "isolated": true
+  },
+  "packages": {
+    "lalsuite": "7.26.15",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "torch": "2.13.0+cpu",
+    "bilby": "2.6.0",
+    "bilby-pipe": "1.8.0",
+    "pandas": "3.0.5",
+    "h5py": "3.16.0",
+    "pycbc": "2.11.0",
+    "pytest": "9.1.1"
+  },
+  "host": {
+    "name": "ldas-grid",
+    "platform": "Linux-4.18.0-553.179.1.el8_10.x86_64-x86_64-with-glibc2.39",
+    "cpu": {
+      "model": "AMD EPYC 9475F 48-Core Processor",
+      "flags": {
+        "avx2": true,
+        "avx512f": true,
+        "fma": true
+      }
+    },
+    "cpu_count": 24,
+    "usable_cpus": 24
+  },
+  "threads": {
+    "OMP_NUM_THREADS": null,
+    "MKL_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": null
+  }
+}
+============================= test session starts ==============================
+platform linux -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /local/kailibryan.doney/dingo-tests.5yw8Ye/dingo_c551d28bec
+configfile: pyproject.toml
+plugins: anyio-4.14.2
+collected 927 items / 4 deselected / 1 skipped / 923 selected
+
+tests/core/test_amp.py ........sss.                                      [  1%]
+tests/core/test_backward_compatibility.py ....                           [  1%]
+tests/core/test_build_model.py ...................                       [  3%]
+tests/core/test_compile.py .......sF....                                 [  5%]
+tests/core/test_composed_sampler.py ...........                          [  6%]
+tests/core/test_dataset.py ..........                                    [  7%]
+tests/core/test_density_interpolation.py .....                           [  8%]
+tests/core/test_enets.py ..........                                      [  9%]
+tests/core/test_factors.py ........................................s..s. [ 13%]
+.                                                                        [ 14%]
+tests/core/test_gnpeutils.py .....                                       [ 14%]
+tests/core/test_misc.py .........                                        [ 15%]
+tests/core/test_multi_gpu.py .........................                   [ 18%]
+tests/core/test_multiprocessing.py ....                                  [ 18%]
+tests/core/test_nsf.py ...
