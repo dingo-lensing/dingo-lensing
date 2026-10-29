@@ -74,11 +74,14 @@ CONFIGURE_ARGS=(
     "CFLAGS=${CFLAGS:-} -std=gnu17"
 )
 STAMP="$LALBUILD/configure_args.txt"
-if [[ ! -f Makefile || "$(cat "$STAMP" 2> /dev/null || true)" != "${CONFIGURE_ARGS[*]}" ]]; then
+# Configure fixes the SWIG version the bindings require, so new tools also mean a new configuration.
+TOOLS="swig $(swig -version | sed -n 's/^SWIG Version \([0-9.]*\).*/\1/p'), numpy $(python -I -c 'import numpy; print(numpy.__version__)')"
+STAMP_TEXT="${CONFIGURE_ARGS[*]}; $TOOLS"
+if [[ ! -f Makefile || "$(cat "$STAMP" 2> /dev/null || true)" != "$STAMP_TEXT" ]]; then
     BUILT_BEFORE=0
     [[ -f Makefile ]] && BUILT_BEFORE=1
     ./configure "${CONFIGURE_ARGS[@]}"
-    printf '%s\n' "${CONFIGURE_ARGS[*]}" > "$STAMP"
+    printf '%s\n' "$STAMP_TEXT" > "$STAMP"
     if [[ "$BUILT_BEFORE" == 1 ]]; then
         make clean > /dev/null  # objects of the earlier configuration
     fi
