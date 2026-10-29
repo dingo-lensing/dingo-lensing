@@ -20,6 +20,11 @@ For the first sample it also records how long LAL's output is against the domain
 with the reference phase at the nine DFT phases
 (XLALSimIMRPhenomXPCalculateModelParametersFromSourceFrame). Finally it profiles
 phase_grid_terms over the first --profile-samples samples.
+
+With --dump-lal-args FILE it also writes, for lal/check_multiphase.py, the
+XLALSimIMRPhenomXPHM arguments of the samples (as the generator converts them, at
+phase 0) and this LAL's polarisations at the nine DFT phases for the first
+--dump-reference samples.
 """
 from __future__ import annotations
 
@@ -43,6 +48,9 @@ import guard  # noqa: E402
 
 LAL_DICT, APPROXIMANT = 18, 19  # positions in SimInspiralFD's argument tuple
 IN_PLANE_SPINS = (2, 3, 5, 6)  # S1x, S1y, S2x, S2y
+# SimInspiralFD positions of XLALSimIMRPhenomXPHM's arguments other than phiRef and the dictionary:
+# masses, spins, distance, inclination, then f_min, f_max, deltaF, f_ref
+XPHM_ARGUMENTS = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 14, 17)
 
 
 def summary_ms(seconds):
@@ -69,6 +77,8 @@ def main(argv=None) -> int:
     parser.add_argument("--event-data", required=True)
     parser.add_argument("--num-samples", type=int, default=100)
     parser.add_argument("--profile-samples", type=int, default=10)
+    parser.add_argument("--dump-lal-args", help="Also write the samples' XLALSimIMRPhenomXPHM arguments here (.npz)")
+    parser.add_argument("--dump-reference", type=int, default=5, help="Samples whose polarisations go into the dump")
     parser.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
@@ -195,6 +205,33 @@ def main(argv=None) -> int:
     stream = io.StringIO()
     pstats.Stats(profiler, stream=stream).sort_stats("tottime").print_stats(30)
     report["profile_phase_grid_terms"] = stream.getvalue()
+
+    if args.dump_lal_args:
+        dumped = []
+        for row in rows:
+            p, _ = lal_arguments({k: float(v) for k, v in split_off_extrinsic_parameters({k: float(v) for k, v in row.items()})[0].items()}, 0.0)
+            if p[LAL_DICT] is not None:
+                raise SystemExit("The generator passes a LAL dictionary; the dump covers lal_params = None only")
+            dumped.append([float(p[i]) for i in XPHM_ARGUMENTS])
+        reference_hp, reference_hc = [], []
+        for a in dumped[: args.dump_reference]:
+            hp_phases, hc_phases = [], []
+            for phase in phases:
+                hp, hc = LS.SimIMRPhenomXPHM(*a[:10], float(phase), *a[10:], None)
+                hp_phases.append(hp.data.data.copy())
+                hc_phases.append(hc.data.data.copy())
+            reference_hp.append(hp_phases)
+            reference_hc.append(hc_phases)
+        np.savez(
+            args.dump_lal_args,
+            args=np.array(dumped),
+            phases=phases,
+            ref_hp=np.array(reference_hp),
+            ref_hc=np.array(reference_hc),
+            lal_version=lal.__version__,
+            lalsimulation_version=LS.__version__,
+        )
+        report["dump"] = {"file": args.dump_lal_args, "samples": len(dumped), "reference_samples": len(reference_hp)}
 
     Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: report[k] for k in ("generator", "per_sample", "shares", "lal_output", "phase_dependence")}, indent=2))

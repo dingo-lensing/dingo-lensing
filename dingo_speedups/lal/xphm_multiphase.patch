@@ -1,0 +1,838 @@
+diff --git a/lalsimulation/lib/LALSimIMR.h b/lalsimulation/lib/LALSimIMR.h
+index 94a4a31..1d0e011 100644
+--- a/lalsimulation/lib/LALSimIMR.h
++++ b/lalsimulation/lib/LALSimIMR.h
+@@ -862,6 +862,27 @@ int XLALSimIMRPhenomXPHM(
+   LALDict *lalParams                          /**< LAL Dictionary struct */
+ );
+ 
++int XLALSimIMRPhenomXPHMMultiPhase(
++  COMPLEX16VectorSequence **hptilde,          /**< [out] Frequency-domain waveform h+, one row per reference phase */
++  COMPLEX16VectorSequence **hctilde,          /**< [out] Frequency-domain waveform hx, one row per reference phase */
++  REAL8 m1_SI,                                /**< mass of companion 1 (kg) */
++  REAL8 m2_SI,                                /**< mass of companion 2 (kg) */
++  REAL8 chi1x,                                /**< x-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi1y,                                /**< y-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi1z,                                /**< z-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2x,                                /**< x-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2y,                                /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2z,                                /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 distance,                             /**< Distance of source (m) */
++  REAL8 inclination,                          /**< inclination of source (rad) */
++  const REAL8Vector *phiRef,                  /**< Orbital phases (rad) at reference frequency */
++  REAL8 f_min,                                /**< Starting GW frequency (Hz) */
++  REAL8 f_max,                                /**< Ending GW frequency (Hz); Defaults to Mf = 0.3 if no f_max is specified. */
++  REAL8 deltaF,                               /**< Sampling frequency (Hz) */
++  REAL8 fRef_In,                              /**< Reference frequency (Hz) */
++  LALDict *lalParams                          /**< LAL Dictionary struct */
++);
++
+ int XLALSimIMRPhenomXPHMFromModes(
+ COMPLEX16FrequencySeries **hptilde,         /**< [out] Frequency-domain waveform h+ */
+ COMPLEX16FrequencySeries **hctilde,         /**< [out] Frequency-domain waveform hx */
+diff --git a/lalsimulation/lib/LALSimIMRPhenomXPHM.c b/lalsimulation/lib/LALSimIMRPhenomXPHM.c
+index fa9a393..441bb71 100644
+--- a/lalsimulation/lib/LALSimIMRPhenomXPHM.c
++++ b/lalsimulation/lib/LALSimIMRPhenomXPHM.c
+@@ -27,6 +27,7 @@
+ #include <lal/LALDatatypes.h>
+ #include <lal/LALStdlib.h>
+ #include <lal/XLALError.h>
++#include <lal/SeqFactories.h>
+ 
+ #include <stdbool.h>
+ #include <stdio.h>
+@@ -3870,3 +3871,793 @@ INT4 XLALSimIMRPhenomXPHMMultibandingGrid(
+ 
+ /* @} */
+ /* @} */
++
++
++/*********************************************/
++/*                                           */
++/*  POLARIZATIONS AT SEVERAL REFERENCE PHASES */
++/*                                           */
++/*********************************************/
++
++/*
++  XLALSimIMRPhenomXPHMMultiPhase returns the polarizations of XLALSimIMRPhenomXPHM at several
++  reference phases in one call.
++
++  In the default configuration (MSA Euler angles with multibanding, no PNR, twisting up
++  IMRPhenomXHM) the reference phase enters only through constants of the precession: the
++  offset of the Euler angle alpha, the spherical harmonics Y_lm(thetaJN, 0) and the
++  polarization angle zeta. The non-precessing modes, the Euler angles epsilon and beta and
++  the frequency dependence of alpha are the same at every phase. They are computed once, and
++  the twisting up of IMRPhenomXPHMTwistUp is split into sums that do not depend on the phase
++  (U_lm and V_lm below) and the constants that do. The result agrees with one
++  XLALSimIMRPhenomXPHM call per phase to round-off.
++
++  Every other configuration, and any case in which a quantity shared here turns out to
++  depend on the phase, falls back to one XLALSimIMRPhenomXPHM call per phase.
++*/
++
++/* Waveform and precession structs and auxiliary dictionary for one phase, set up as in XLALSimIMRPhenomXPHM. */
++static int IMRPhenomXPHMMultiPhase_Setup(
++  IMRPhenomXWaveformStruct **pWF_out,      /**< [out] IMRPhenomX Waveform Struct */
++  IMRPhenomXPrecessionStruct **pPrec_out,  /**< [out] IMRPhenomXP Precession Struct */
++  LALDict **lalParams_out,                 /**< [out] Auxiliary LAL dictionary with the mode array */
++  REAL8 m1_SI,                             /**< mass of companion 1 (kg) */
++  REAL8 m2_SI,                             /**< mass of companion 2 (kg) */
++  REAL8 chi1x,                             /**< x-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi1y,                             /**< y-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi1z,                             /**< z-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2x,                             /**< x-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2y,                             /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2z,                             /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 distance,                          /**< Distance of source (m) */
++  REAL8 inclination,                       /**< inclination of source (rad) */
++  REAL8 phiRef,                            /**< Orbital phase (rad) at reference frequency */
++  REAL8 f_min,                             /**< Starting GW frequency (Hz) */
++  REAL8 f_max,                             /**< Ending GW frequency (Hz) */
++  REAL8 deltaF,                            /**< Sampling frequency (Hz) */
++  REAL8 fRef_In,                           /**< Reference frequency (Hz) */
++  LALDict *lalParams                       /**< LAL Dictionary struct */
++)
++{
++  UINT4 status;
++
++  const REAL8 m1_SI_init = m1_SI;
++  const REAL8 m2_SI_init = m2_SI;
++  const REAL8 chi1z_init = chi1z;
++  const REAL8 chi2z_init = chi2z;
++
++  status = XLALIMRPhenomXPCheckMassesAndSpins(&m1_SI,&m2_SI,&chi1x,&chi1y,&chi1z,&chi2x,&chi2y,&chi2z);
++  XLAL_CHECK(XLAL_SUCCESS == status, XLAL_EFUNC, "Error: XLALIMRPhenomXPCheckMassesAndSpins failed.\n");
++
++  REAL8 fRef = (fRef_In == 0.0) ? f_min : fRef_In;
++
++  LALDict *lalParams_aux;
++  if (lalParams == NULL)
++  {
++    lalParams_aux = XLALCreateDict();
++  }
++  else
++  {
++    lalParams_aux = XLALDictDuplicate(lalParams);
++  }
++
++  status = IMRPhenomX_Initialize_Powers(&powers_of_lalpi, LAL_PI);
++  XLAL_CHECK(XLAL_SUCCESS == status, status, "Failed to initialize useful powers of LAL_PI.\n");
++
++  IMRPhenomXWaveformStruct *pWF = XLALMalloc(sizeof(IMRPhenomXWaveformStruct));
++  XLAL_CHECK(pWF != NULL, XLAL_ENOMEM, "Failed to allocate the IMRPhenomX Waveform Struct.\n");
++  status = IMRPhenomXSetWaveformVariables(pWF, m1_SI_init, m2_SI_init, chi1z_init, chi2z_init, deltaF, fRef, phiRef, f_min, f_max, distance, inclination, lalParams_aux, PHENOMXDEBUG);
++  XLAL_CHECK(XLAL_SUCCESS == status, XLAL_EFUNC, "Error: IMRPhenomXSetWaveformVariables failed.\n");
++
++  IMRPhenomXPrecessionStruct *pPrec = XLALMalloc(sizeof(IMRPhenomXPrecessionStruct));
++  XLAL_CHECK(pPrec != NULL, XLAL_ENOMEM, "Failed to allocate the IMRPhenomXP Precession Struct.\n");
++
++  lalParams_aux = IMRPhenomXPHM_setup_mode_array(lalParams_aux);
++
++  status = IMRPhenomXGetAndSetPrecessionVariables(pWF, pPrec, m1_SI, m2_SI, chi1x, chi1y, chi1z, chi2x, chi2y, chi2z, lalParams_aux, PHENOMXDEBUG);
++  XLAL_CHECK(XLAL_SUCCESS == status, XLAL_EFUNC, "Error: IMRPhenomXSetPrecessionVariables failed.\n");
++
++  *pWF_out = pWF;
++  *pPrec_out = pPrec;
++  *lalParams_out = lalParams_aux;
++
++  return XLAL_SUCCESS;
++}
++
++/*
++  Wigner-d coefficients of IMRPhenomXPHMTwistUp for the non-precessing mode (l, mprime), for
++  m = -l..l: dplus[m+l] = d^l_{m,mprime} and dminus[m+l] = d^l_{m,-mprime}. Returns the sign
++  with which the d^l_{m,mprime} term enters h_+ in IMRPhenomXPHMTwistUp, or 0 for a mode
++  without coefficients here.
++*/
++static REAL8 IMRPhenomXPHMMultiPhase_WignerD(
++  REAL8 *dplus,                             /**< [out] d^l_{m,mprime} for m = -l..l */
++  REAL8 *dminus,                            /**< [out] d^l_{m,-mprime} for m = -l..l */
++  INT4 l,                                   /**< l index of the non-precessing (l,mprime) mode */
++  INT4 mprime,                              /**< mprime index of the non-precessing (l,mprime) mode */
++  REAL8 cBetah,                             /**< cos(beta/2) */
++  REAL8 sBetah,                             /**< sin(beta/2) */
++  const IMRPhenomXPrecessionStruct *pPrec   /**< IMRPhenomXP Precession Struct */
++)
++{
++  REAL8 cBetah2 = cBetah * cBetah;
++  REAL8 cBetah3 = cBetah * cBetah2;
++  REAL8 cBetah4 = cBetah * cBetah3;
++  REAL8 cBetah5 = cBetah * cBetah4;
++  REAL8 cBetah6 = cBetah * cBetah5;
++  REAL8 cBetah7 = cBetah * cBetah6;
++  REAL8 cBetah8 = cBetah * cBetah7;
++
++  REAL8 sBetah2 = sBetah * sBetah;
++  REAL8 sBetah3 = sBetah * sBetah2;
++  REAL8 sBetah4 = sBetah * sBetah3;
++  REAL8 sBetah5 = sBetah * sBetah4;
++  REAL8 sBetah6 = sBetah * sBetah5;
++  REAL8 sBetah7 = sBetah * sBetah6;
++  REAL8 sBetah8 = sBetah * sBetah7;
++
++  if (l == 2 && mprime == 2)
++  {
++    REAL8 d22[5]   = {sBetah4, 2.0*cBetah*sBetah3, pPrec->sqrt6*sBetah2*cBetah2, 2.0*cBetah3*sBetah, cBetah4};
++    REAL8 d2m2[5]  = {d22[4],    -d22[3],      d22[2],     -d22[1],     d22[0]};
++    memcpy(dplus, d22, sizeof(d22));
++    memcpy(dminus, d2m2, sizeof(d2m2));
++    return pPrec->PolarizationSymmetry;
++  }
++  if (l == 2 && mprime == 1)
++  {
++    REAL8 d21[5]   = {2.0*cBetah*sBetah3, 3.0*cBetah2*sBetah2 - sBetah4, pPrec->sqrt6*(cBetah3*sBetah - cBetah*sBetah3), cBetah2*(cBetah2 - 3.0*sBetah2), -2.0*cBetah3*sBetah};
++    REAL8 d2m1[5]  = {-d21[4],   d21[3],     -d21[2],    d21[1],     -d21[0]};
++    memcpy(dplus, d21, sizeof(d21));
++    memcpy(dminus, d2m1, sizeof(d2m1));
++    return 1.0;
++  }
++  if (l == 3 && mprime == 3)
++  {
++    REAL8 d33[7]   = {sBetah6, pPrec->sqrt6*cBetah*sBetah5, pPrec->sqrt15*cBetah2*sBetah4, 2.0*pPrec->sqrt5*cBetah3*sBetah3, pPrec->sqrt15*cBetah4*sBetah2, pPrec->sqrt6*cBetah5*sBetah, cBetah6};
++    REAL8 d3m3[7]  = {d33[6],    -d33[5],     d33[4],      -d33[3],    d33[2],     -d33[1],    d33[0]};
++    memcpy(dplus, d33, sizeof(d33));
++    memcpy(dminus, d3m3, sizeof(d3m3));
++    return -1.0;
++  }
++  if (l == 3 && mprime == 2)
++  {
++    REAL8 d32[7]   = {pPrec->sqrt6*cBetah*sBetah5, sBetah4*(5.0*cBetah2 - sBetah2), pPrec->sqrt10*sBetah3*(2.0*cBetah3 - cBetah*sBetah2), pPrec->sqrt30*cBetah2*(cBetah2 - sBetah2)*sBetah2, pPrec->sqrt10*cBetah3*(cBetah2*sBetah - 2.0*sBetah3), cBetah4*(cBetah2 - 5.0*sBetah2), -1.0*pPrec->sqrt6*cBetah5*sBetah};
++    REAL8 d3m2[7]  = {-d32[6],   d32[5],      -d32[4],     d32[3],     -d32[2],    d32[1],     -d32[0]};
++    memcpy(dplus, d32, sizeof(d32));
++    memcpy(dminus, d3m2, sizeof(d3m2));
++    return -1.0;
++  }
++  if (l == 4 && mprime == 4)
++  {
++    REAL8 d44[9]   = {sBetah8, 2.0*pPrec->sqrt2*cBetah*sBetah7, 2.0*pPrec->sqrt7*cBetah2*sBetah6, 2.0*pPrec->sqrt14*cBetah3*sBetah5, pPrec->sqrt70*cBetah4*sBetah4, 2.0*pPrec->sqrt14*cBetah5*sBetah3, 2.0*pPrec->sqrt7*cBetah6*sBetah2, 2.0*pPrec->sqrt2*cBetah7*sBetah, cBetah8};
++    REAL8 d4m4[9]  = {d44[8],     -d44[7],     d44[6],      -d44[5],     d44[4],    -d44[3],     d44[2],     -d44[1],    d44[0]};
++    memcpy(dplus, d44, sizeof(d44));
++    memcpy(dminus, d4m4, sizeof(d4m4));
++    return 1.0;
++  }
++  return 0.0;
++}
++
++/*
++  Whether the twisting up can be shared between the phases: The configuration is the default
++  one described above, and every quantity the shared part uses is the same at every phase.
++*/
++static int IMRPhenomXPHMMultiPhase_Shareable(
++  IMRPhenomXWaveformStruct **pWF,         /**< IMRPhenomX Waveform Structs, one per phase */
++  IMRPhenomXPrecessionStruct **pPrec,     /**< IMRPhenomXP Precession Structs, one per phase */
++  LALDict **lalParams_aux,                /**< Auxiliary LAL dictionaries, one per phase */
++  UINT4 nphase                            /**< Number of phases */
++)
++{
++  for (UINT4 p = 0; p < nphase; p++)
++  {
++    if (pPrec[p]->MBandPrecVersion != 1) return 0;
++    if (pPrec[p]->IMRPhenomXPrecVersion < 220 || pPrec[p]->IMRPhenomXPrecVersion > 224) return 0;
++    if (pPrec[p]->precessing_tag == 3) return 0;
++    if (pPrec[p]->IMRPhenomXPNRUseTunedAngles || pPrec[p]->IMRPhenomXAntisymmetricWaveform) return 0;
++    if (pWF[p]->IMRPhenomXReturnCoPrec == 1 || pWF[p]->APPLY_PNR_DEVIATIONS) return 0;
++    if (XLALSimInspiralWaveformParamsLookupPhenomXPHMTwistPhenomHM(lalParams_aux[p]) != 0) return 0;
++  }
++
++  const REAL8 v_ref = cbrt(pWF[0]->piM * pWF[0]->fRef);
++  const vector angles_ref = IMRPhenomX_Return_phi_zeta_costhetaL_MSA(v_ref, pWF[0], pPrec[0]);
++
++  for (UINT4 p = 0; p < nphase; p++)
++  {
++    if (pWF[p]->phi0 != pWF[0]->phi0) return 0;
++    if (pWF[p]->deltaF != pWF[0]->deltaF || pWF[p]->fMin != pWF[0]->fMin || pWF[p]->fMax != pWF[0]->fMax || pWF[p]->f_max_prime != pWF[0]->f_max_prime) return 0;
++    if (pPrec[p]->PolarizationSymmetry != pPrec[0]->PolarizationSymmetry) return 0;
++
++    /* One alpha offset for all modes at each phase, and the same epsilon offsets at every phase. */
++    if (pPrec[p]->alpha_offset_1 != pPrec[p]->alpha_offset || pPrec[p]->alpha_offset_3 != pPrec[p]->alpha_offset || pPrec[p]->alpha_offset_4 != pPrec[p]->alpha_offset) return 0;
++    if (pPrec[p]->epsilon_offset != pPrec[0]->epsilon_offset || pPrec[p]->epsilon_offset_1 != pPrec[0]->epsilon_offset_1 || pPrec[p]->epsilon_offset_3 != pPrec[0]->epsilon_offset_3 || pPrec[p]->epsilon_offset_4 != pPrec[0]->epsilon_offset_4) return 0;
++
++    /* The MSA angles themselves are the same at every phase. */
++    const vector angles = IMRPhenomX_Return_phi_zeta_costhetaL_MSA(v_ref, pWF[p], pPrec[p]);
++    if (angles.x != angles_ref.x || angles.y != angles_ref.y || angles.z != angles_ref.z) return 0;
++  }
++
++  /* Only modes with Wigner-d coefficients in IMRPhenomXPHMMultiPhase_WignerD. */
++  LALValue *ModeArray = XLALSimInspiralWaveformParamsLookupModeArray(lalParams_aux[0]);
++  if (ModeArray == NULL) return 0;
++  int shareable = 1;
++  REAL8 dplus[2 * L_MAX + 1], dminus[2 * L_MAX + 1];
++  for (INT4 ell = 2; ell <= L_MAX; ell++)
++  {
++    for (INT4 emmprime = 1; emmprime <= ell; emmprime++)
++    {
++      if (XLALSimInspiralModeArrayIsModeActive(ModeArray, ell, emmprime) == 1 && IMRPhenomXPHMMultiPhase_WignerD(dplus, dminus, ell, emmprime, 1.0, 0.0, pPrec[0]) == 0.0)
++      {
++        shareable = 0;
++      }
++    }
++  }
++  XLALDestroyValue(ModeArray);
++
++  return shareable;
++}
++
++/*
++  Core of XLALSimIMRPhenomXPHMMultiPhase for the shareable configuration. Follows
++  IMRPhenomXPHM_hplushcross with multibanded MSA angles; the non-precessing modes and the
++  Euler angles are computed once, with the structs of the first phase.
++
++  With alpha the Euler angle at the first phase, and summed over the non-precessing modes
++  (l, mprime) with the same l,
++    U_lm = exp(-i mprime epsilon) h_l-mprime / 2 * exp(-i m alpha) d^l_{m,-mprime},
++    V_lm = sign * exp(-i mprime epsilon) h_l-mprime / 2 * exp(i m alpha) d^l_{m,mprime},
++  where sign is that of IMRPhenomXPHMTwistUp. At a phase whose alpha is alpha + dalpha,
++    h_+ = sum_lm U_lm exp(-i m dalpha) Y_lm + V_lm exp(i m dalpha) conj(Y_lm),
++    h_x = i sum_lm U_lm exp(-i m dalpha) Y_lm - V_lm exp(i m dalpha) conj(Y_lm),
++  which are then rotated by 2 zeta as in IMRPhenomXPHM_hplushcross.
++
++  For tests only, complexQ = 1 makes the steps of the Euler angles between coarse frequencies
++  complex, as in the multibanding of the non-precessing modes; IMRPhenomXPHM_hplushcross keeps
++  only their real parts (Qalpha, Qepsilon and Qbetah are REAL8 there), which complexQ = 0
++  reproduces.
++*/
++static int IMRPhenomXPHMMultiPhase_hplushcross(
++  COMPLEX16VectorSequence **hptilde,    /**< [out] h+, one row per phase */
++  COMPLEX16VectorSequence **hctilde,    /**< [out] hx, one row per phase */
++  IMRPhenomXWaveformStruct **pWFs,      /**< IMRPhenomX Waveform Structs, one per phase */
++  IMRPhenomXPrecessionStruct **pPrecs,  /**< IMRPhenomXP Precession Structs, one per phase */
++  LALDict *lalParams,                   /**< Auxiliary LAL dictionary of the first phase */
++  UINT4 nphase,                         /**< Number of phases */
++  INT4 complexQ                         /**< 1 for complex steps of the Euler angles (tests only) */
++)
++{
++  IMRPhenomXWaveformStruct *pWF = pWFs[0];
++  IMRPhenomXPrecessionStruct *pPrec = pPrecs[0];
++
++  if (pWF->f_max_prime <= pWF->fMin)
++  {
++    XLAL_ERROR(XLAL_EDOM, "(fCut = %g Hz) <= f_min = %g\n", pWF->f_max_prime, pWF->fMin);
++  }
++
++  LIGOTimeGPS ligotimegps_zero = LIGOTIMEGPSZERO;
++  REAL8 deltaF = pWF->deltaF;
++  INT4 status = 0;
++
++  LALValue *ModeArray = XLALSimInspiralWaveformParamsLookupModeArray(lalParams);
++  if (ModeArray == NULL)
++  {
++    XLAL_ERROR(XLAL_EDOM, "ModeArray is NULL when it shouldn't be. Aborting.\n");
++  }
++  REAL8 thresholdMB = XLALSimInspiralWaveformParamsLookupPhenomXHMThresholdMband(lalParams);
++
++  /* Frequency grid of XLALSimIMRPhenomXPHM. */
++  REAL8Sequence *freqs_In = XLALCreateREAL8Sequence(2);
++  XLAL_CHECK(freqs_In != NULL, XLAL_ENOMEM, "Failed to allocate the frequency bounds.");
++  freqs_In->data[0] = pWF->fMin;
++  freqs_In->data[1] = pWF->f_max_prime;
++
++  REAL8Sequence *freqs = NULL;
++  COMPLEX16FrequencySeries *hgrid = NULL;
++  UINT4 offset = SetupWFArrays(&freqs, &hgrid, freqs_In, pWF, ligotimegps_zero);
++  const size_t npts = hgrid->data->length;
++
++  status = IMRPhenomX_Initialize_Powers(&powers_of_lalpiHM, LAL_PI);
++  XLAL_CHECK(XLAL_SUCCESS == status, XLAL_EFUNC, "Failed to initialize useful powers of LAL_PI.");
++
++  /* U_lm and V_lm, real and imaginary parts, indexed [l-2][m+l]; allocated for the l in use. */
++  REAL8 *Ure[L_MAX - 1][2 * L_MAX + 1] = {{NULL}};
++  REAL8 *Uim[L_MAX - 1][2 * L_MAX + 1] = {{NULL}};
++  REAL8 *Vre[L_MAX - 1][2 * L_MAX + 1] = {{NULL}};
++  REAL8 *Vim[L_MAX - 1][2 * L_MAX + 1] = {{NULL}};
++
++  /* Object to store the non-precessing 22 mode waveform and to be recycled when calling the 32 mode in multibanding. */
++  COMPLEX16FrequencySeries *htilde22 = NULL;
++
++  for (UINT4 ell = 2; ell <= L_MAX; ell++)
++  {
++    for (UINT4 emmprime = 1; emmprime <= ell; emmprime++)
++    {
++      if (XLALSimInspiralModeArrayIsModeActive(ModeArray, ell, emmprime) != 1)
++      {
++        continue;
++      }
++
++      /* Skip twisting-up if the non-precessing mode is zero. */
++      if((pWF->q == 1) && (pWF->chi1L == pWF->chi2L) && (emmprime % 2 != 0))
++      {
++        continue;
++      }
++
++      /* Non-precessing mode, as in IMRPhenomXPHM_hplushcross. */
++      COMPLEX16FrequencySeries *htildelm = NULL;
++      if (thresholdMB == 0)
++      {
++        if (ell == 2 && emmprime == 2)
++        {
++          status = IMRPhenomXASGenerateFD(&htildelm, freqs, pWF, lalParams);
++          XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "IMRPhenomXASGenerateFD failed to generate IMRPhenomXHM waveform.");
++        }
++        else
++        {
++          status = IMRPhenomXHMGenerateFDOneMode(&htildelm, freqs, pWF, ell, emmprime, lalParams);
++          XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "IMRPhenomXHMGenerateFDOneMode failed to generate IMRPhenomXHM waveform.");
++        }
++      }
++      else
++      {
++        if (ell == 3 && emmprime == 2)
++        {
++          status = IMRPhenomXHMMultiBandOneModeMixing(&htildelm, htilde22, pWF, ell, emmprime, lalParams);
++          XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "IMRPhenomXHMMultiBandOneModeMixing failed to generate IMRPhenomXHM waveform.");
++        }
++        else
++        {
++          status = IMRPhenomXHMMultiBandOneMode(&htildelm, pWF, ell, emmprime, lalParams);
++          XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "IMRPhenomXHMMultiBandOneMode failed to generate IMRPhenomXHM waveform.");
++        }
++
++        /* IMRPhenomXHMMultiBandOneMode* functions set pWF->deltaF=0 internally, we put it back here. */
++        pWF->deltaF = deltaF;
++
++        if (ell == 2 && emmprime == 2 && XLALSimInspiralModeArrayIsModeActive(ModeArray, 3, 2) == 1)
++        {
++          htilde22 = XLALCreateCOMPLEX16FrequencySeries("hptilde: FD waveform", &(ligotimegps_zero), 0.0, pWF->deltaF, &lalStrainUnit, htildelm->data->length);
++          for (UINT4 idx = 0; idx < htildelm->data->length; idx++)
++          {
++            htilde22->data->data[idx] = htildelm->data->data[idx];
++          }
++        }
++      }
++
++      if (!(htildelm)){ XLAL_ERROR(XLAL_EFUNC); }
++
++      if (htildelm->data->length != npts)
++      {
++        htildelm = XLALResizeCOMPLEX16FrequencySeries(htildelm, 0, npts);
++        XLAL_CHECK (htildelm, XLAL_ENOMEM, "Failed to resize hlm COMPLEX16FrequencySeries" );
++      }
++
++      /* MSA Euler angles on the coarse frequency grid, as in IMRPhenomXPHM_hplushcross. */
++      REAL8Sequence *coarseFreqs;
++      XLALSimIMRPhenomXPHMMultibandingGrid(&coarseFreqs, ell, emmprime, pWF, lalParams);
++      UINT4 lenCoarseArray = coarseFreqs->length;
++
++      REAL8 cBetah       = 0.0;
++      REAL8 sBetah       = 0.0;
++
++      REAL8 *valpha      = (REAL8*)XLALMalloc(lenCoarseArray * sizeof(REAL8));
++      REAL8 *vepsilon    = (REAL8*)XLALMalloc(lenCoarseArray * sizeof(REAL8));
++      REAL8 *vbetah      = (REAL8*)XLALMalloc(lenCoarseArray * sizeof(REAL8));
++
++      for (UINT4 j = 0; j < lenCoarseArray; j++)
++      {
++        REAL8 Mf = coarseFreqs->data[j];
++        const REAL8 v        = cbrt (LAL_PI * Mf * (2.0 / emmprime) );
++        const vector vangles = IMRPhenomX_Return_phi_zeta_costhetaL_MSA(v,pWF,pPrec);
++        REAL8 cos_beta  = 0.0;
++
++        REAL8 alpha_offset_mprime = 0, epsilon_offset_mprime = 0;
++        Get_alpha_epsilon_offset(&alpha_offset_mprime, &epsilon_offset_mprime, emmprime, pPrec);
++
++        valpha[j]   = vangles.x - alpha_offset_mprime;
++        vepsilon[j] = vangles.y - epsilon_offset_mprime;
++        cos_beta    = vangles.z;
++
++        status = IMRPhenomXWignerdCoefficients_cosbeta(&cBetah, &sBetah, cos_beta);
++        XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "Call to IMRPhenomXWignerdCoefficients_cosbeta failed.");
++
++        vbetah[j]   = acos(cBetah);
++      }
++
++      /* Complex exponentials of the Euler angles on the fine grid, as in IMRPhenomXPHM_hplushcross. */
++      UINT4 fine_count = 0, ratio;
++      REAL8 Omega_alpha, Omega_epsilon, Omega_betah, Qalpha, Qepsilon, Qbetah;
++      REAL8 Mfhere, Mfnext, evaldMf;
++      Mfnext = coarseFreqs->data[0];
++      evaldMf = XLALSimIMRPhenomXUtilsHztoMf(pWF->deltaF, pWF->Mtot);
++
++      size_t iStop  = (size_t) (pWF->f_max_prime / pWF->deltaF) + 1 - offset;
++      UINT4 length_fine_grid = iStop + 3;
++
++      COMPLEX16 *cexp_i_alpha   = (COMPLEX16*)XLALMalloc(length_fine_grid * sizeof(COMPLEX16));
++      COMPLEX16 *cexp_i_epsilon = (COMPLEX16*)XLALMalloc(length_fine_grid * sizeof(COMPLEX16));
++      COMPLEX16 *cexp_i_betah   = (COMPLEX16*)XLALMalloc(length_fine_grid * sizeof(COMPLEX16));
++
++      for(UINT4 j = 0; j<lenCoarseArray-1 && fine_count < iStop; j++)
++      {
++        Mfhere = Mfnext;
++        Mfnext = coarseFreqs->data[j+1];
++
++        Omega_alpha   = (valpha[j + 1]   - valpha[j])  /(Mfnext - Mfhere);
++        Omega_epsilon = (vepsilon[j + 1] - vepsilon[j])/(Mfnext - Mfhere);
++        Omega_betah   = (vbetah[j + 1]   - vbetah[j])  /(Mfnext - Mfhere);
++
++        cexp_i_alpha[fine_count]   = cexp(I*valpha[j]);
++        cexp_i_epsilon[fine_count] = cexp(I*vepsilon[j]);
++        cexp_i_betah[fine_count]   = cexp(I*vbetah[j]);
++
++        Qalpha   = cexp(I*evaldMf*Omega_alpha);
++        Qepsilon = cexp(I*evaldMf*Omega_epsilon);
++        Qbetah   = cexp(I*evaldMf*Omega_betah);
++
++        fine_count++;
++
++        REAL8 dratio = (Mfnext-Mfhere)/evaldMf;
++        UINT4 ceil_ratio  = ceil(dratio);
++        UINT4 floor_ratio = floor(dratio);
++
++        /* Make sure the rounding is done correctly. */
++        if(fabs(dratio-ceil_ratio) < fabs(dratio-floor_ratio))
++        {
++          ratio = ceil_ratio;
++        }
++        else
++        {
++          ratio = floor_ratio;
++        }
++
++        if (complexQ)
++        {
++          const COMPLEX16 Qalpha_c   = cexp(I*evaldMf*Omega_alpha);
++          const COMPLEX16 Qepsilon_c = cexp(I*evaldMf*Omega_epsilon);
++          const COMPLEX16 Qbetah_c   = cexp(I*evaldMf*Omega_betah);
++          for(UINT4 kk = 1; kk < ratio && fine_count < iStop; kk++){
++            cexp_i_alpha[fine_count]   = Qalpha_c*cexp_i_alpha[fine_count-1];
++            cexp_i_epsilon[fine_count] = Qepsilon_c*cexp_i_epsilon[fine_count-1];
++            cexp_i_betah[fine_count]   = Qbetah_c*cexp_i_betah[fine_count-1];
++            fine_count++;
++          }
++        }
++        else
++        {
++          for(UINT4 kk = 1; kk < ratio && fine_count < iStop; kk++){
++            cexp_i_alpha[fine_count]   = Qalpha*cexp_i_alpha[fine_count-1];
++            cexp_i_epsilon[fine_count] = Qepsilon*cexp_i_epsilon[fine_count-1];
++            cexp_i_betah[fine_count]   = Qbetah*cexp_i_betah[fine_count-1];
++            fine_count++;
++          }
++        }
++      }
++
++      /* Twisting up without the phase-dependent constants, added to U_lm and V_lm. */
++      const INT4 l = (INT4) ell;
++      const UINT4 il = ell - 2;
++      if (Ure[il][0] == NULL)
++      {
++        for (INT4 k = 0; k < 2 * l + 1; k++)
++        {
++          Ure[il][k] = XLALCalloc(npts, sizeof(REAL8));
++          Uim[il][k] = XLALCalloc(npts, sizeof(REAL8));
++          Vre[il][k] = XLALCalloc(npts, sizeof(REAL8));
++          Vim[il][k] = XLALCalloc(npts, sizeof(REAL8));
++          XLAL_CHECK(Ure[il][k] && Uim[il][k] && Vre[il][k] && Vim[il][k], XLAL_ENOMEM, "Failed to allocate the twisting-up sums.");
++        }
++      }
++
++      REAL8 dplus[2 * L_MAX + 1], dminus[2 * L_MAX + 1];
++      COMPLEX16 cexp_im_alpha[2 * L_MAX + 1];
++
++      for (UINT4 idx = 0; idx < fine_count; idx++)
++      {
++        const COMPLEX16 hlmcoprec = htildelm->data->data[idx + offset];
++
++        /* As in IMRPhenomXPHMTwistUp with multibanding. */
++        cBetah = (cexp_i_betah[idx] + 1./cexp_i_betah[idx])*0.5;
++        sBetah = (cexp_i_betah[idx] - 1./cexp_i_betah[idx])*0.5/I;
++
++        const REAL8 sign = IMRPhenomXPHMMultiPhase_WignerD(dplus, dminus, l, (INT4) emmprime, cBetah, sBetah, pPrec);
++
++        /* exp(i m alpha), m = -l..l */
++        cexp_im_alpha[l]     = 1.0;
++        cexp_im_alpha[l + 1] = cexp_i_alpha[idx];
++        cexp_im_alpha[l - 1] = 1.0 / cexp_i_alpha[idx];
++        for (INT4 k = 2; k <= l; k++)
++        {
++          cexp_im_alpha[l + k] = cexp_i_alpha[idx] * cexp_im_alpha[l + k - 1];
++          cexp_im_alpha[l - k] = cexp_im_alpha[l - 1] * cexp_im_alpha[l - k + 1];
++        }
++
++        COMPLEX16 exp_imprime_epsilon = cexp_i_epsilon[idx];
++        for (UINT4 i = 1; i < emmprime; i++)
++        {
++          exp_imprime_epsilon *= cexp_i_epsilon[idx];
++        }
++        const COMPLEX16 eps_phase_hP_lmprime = 1./exp_imprime_epsilon * hlmcoprec / 2.0;
++
++        for (INT4 m = -l; m <= l; m++)
++        {
++          const COMPLEX16 u = eps_phase_hP_lmprime * (cexp_im_alpha[-m + l] * dminus[m + l]);
++          const COMPLEX16 w = sign * eps_phase_hP_lmprime * (cexp_im_alpha[m + l] * dplus[m + l]);
++          Ure[il][m + l][idx + offset] += creal(u);
++          Uim[il][m + l][idx + offset] += cimag(u);
++          Vre[il][m + l][idx + offset] += creal(w);
++          Vim[il][m + l][idx + offset] += cimag(w);
++        }
++      }
++
++      XLALDestroyREAL8Sequence(coarseFreqs);
++      LALFree(valpha);
++      LALFree(vepsilon);
++      LALFree(vbetah);
++      LALFree(cexp_i_alpha);
++      LALFree(cexp_i_epsilon);
++      LALFree(cexp_i_betah);
++      XLALDestroyCOMPLEX16FrequencySeries(htildelm);
++    }
++  }
++
++  XLALDestroyCOMPLEX16FrequencySeries(htilde22);
++  XLALDestroyValue(ModeArray);
++
++  /* Output length of XLALSimIMRPhenomXPHM. */
++  REAL8 lastfreq;
++  if (pWF->f_max_prime < pWF->fMax)
++  {
++    lastfreq = pWF->fMax;
++    XLAL_PRINT_WARNING("The input f_max = %.2f Hz is larger than the internal cutoff of Mf=0.3 (%.2f Hz). Array will be filled with zeroes between these two frequencies.\n", pWF->fMax, pWF->f_max_prime);
++  }
++  else
++  {
++    lastfreq = pWF->f_max_prime;
++  }
++  const size_t n_full = NextPow2(lastfreq / deltaF) + 1;
++  const size_t ncopy = (n_full < npts) ? n_full : npts;
++
++  *hptilde = XLALCreateCOMPLEX16VectorSequence(nphase, n_full);
++  *hctilde = XLALCreateCOMPLEX16VectorSequence(nphase, n_full);
++  XLAL_CHECK(*hptilde != NULL && *hctilde != NULL, XLAL_ENOMEM, "Failed to allocate the output sequences.");
++  memset((*hptilde)->data, 0, nphase * n_full * sizeof(COMPLEX16));
++  memset((*hctilde)->data, 0, nphase * n_full * sizeof(COMPLEX16));
++
++  REAL8 *restrict Pre = XLALMalloc(npts * sizeof(REAL8));
++  REAL8 *restrict Pim = XLALMalloc(npts * sizeof(REAL8));
++  REAL8 *restrict Qre = XLALMalloc(npts * sizeof(REAL8));
++  REAL8 *restrict Qim = XLALMalloc(npts * sizeof(REAL8));
++  XLAL_CHECK(Pre && Pim && Qre && Qim, XLAL_ENOMEM, "Failed to allocate the polarization sums.");
++
++  for (UINT4 p = 0; p < nphase; p++)
++  {
++    const IMRPhenomXPrecessionStruct *pPrecP = pPrecs[p];
++
++    /* alpha at this phase is alpha at the first phase plus dalpha. */
++    const REAL8 dalpha = pPrec->alpha_offset - pPrecP->alpha_offset;
++    const COMPLEX16 Ylm[L_MAX - 1][2 * L_MAX + 1] = {
++      {pPrecP->Y2m2, pPrecP->Y2m1, pPrecP->Y20, pPrecP->Y21, pPrecP->Y22},
++      {pPrecP->Y3m3, pPrecP->Y3m2, pPrecP->Y3m1, pPrecP->Y30, pPrecP->Y31, pPrecP->Y32, pPrecP->Y33},
++      {pPrecP->Y4m4, pPrecP->Y4m3, pPrecP->Y4m2, pPrecP->Y4m1, pPrecP->Y40, pPrecP->Y41, pPrecP->Y42, pPrecP->Y43, pPrecP->Y44}
++    };
++
++    memset(Pre, 0, npts * sizeof(REAL8));
++    memset(Pim, 0, npts * sizeof(REAL8));
++    memset(Qre, 0, npts * sizeof(REAL8));
++    memset(Qim, 0, npts * sizeof(REAL8));
++
++    for (UINT4 il = 0; il < L_MAX - 1; il++)
++    {
++      if (Ure[il][0] == NULL)
++      {
++        continue;
++      }
++      const INT4 l = (INT4) il + 2;
++      for (INT4 m = -l; m <= l; m++)
++      {
++        const COMPLEX16 K  = cexp(-I * m * dalpha) * Ylm[il][m + l];
++        const COMPLEX16 Kc = cexp(I * m * dalpha) * conj(Ylm[il][m + l]);
++        const REAL8 kre = creal(K), kim = cimag(K), kcre = creal(Kc), kcim = cimag(Kc);
++        const REAL8 *restrict ur = Ure[il][m + l];
++        const REAL8 *restrict ui = Uim[il][m + l];
++        const REAL8 *restrict vr = Vre[il][m + l];
++        const REAL8 *restrict vi = Vim[il][m + l];
++        for (size_t i = offset; i < npts; i++)
++        {
++          Pre[i] += ur[i] * kre - ui[i] * kim;
++          Pim[i] += ur[i] * kim + ui[i] * kre;
++          Qre[i] += vr[i] * kcre - vi[i] * kcim;
++          Qim[i] += vr[i] * kcim + vi[i] * kcre;
++        }
++      }
++    }
++
++    COMPLEX16 *hp = (*hptilde)->data + p * n_full;
++    COMPLEX16 *hc = (*hctilde)->data + p * n_full;
++    for (size_t i = offset; i < ncopy; i++)
++    {
++      hp[i] = (Pre[i] + Qre[i]) + I * (Pim[i] + Qim[i]);
++      hc[i] = -(Pim[i] - Qim[i]) + I * (Pre[i] - Qre[i]);
++    }
++
++    /* Rotate h+ and hx by 2 zeta, as in IMRPhenomXPHM_hplushcross. */
++    if (fabs(pPrecP->zeta_polarization) > 0.0)
++    {
++      const REAL8 cosPolFac = cos(2.0 * pPrecP->zeta_polarization);
++      const REAL8 sinPolFac = sin(2.0 * pPrecP->zeta_polarization);
++      for (size_t i = offset; i < ncopy; i++)
++      {
++        const COMPLEX16 PhPpolp = hp[i];
++        const COMPLEX16 PhPpolc = hc[i];
++        hp[i] = cosPolFac * PhPpolp + sinPolFac * PhPpolc;
++        hc[i] = cosPolFac * PhPpolc - sinPolFac * PhPpolp;
++      }
++    }
++  }
++
++  LALFree(Pre);
++  LALFree(Pim);
++  LALFree(Qre);
++  LALFree(Qim);
++  for (UINT4 il = 0; il < L_MAX - 1; il++)
++  {
++    for (UINT4 k = 0; k < 2 * L_MAX + 1; k++)
++    {
++      if (Ure[il][k] != NULL) LALFree(Ure[il][k]);
++      if (Uim[il][k] != NULL) LALFree(Uim[il][k]);
++      if (Vre[il][k] != NULL) LALFree(Vre[il][k]);
++      if (Vim[il][k] != NULL) LALFree(Vim[il][k]);
++    }
++  }
++  XLALDestroyREAL8Sequence(freqs_In);
++  XLALDestroyREAL8Sequence(freqs);
++  XLALDestroyCOMPLEX16FrequencySeries(hgrid);
++
++  return XLAL_SUCCESS;
++}
++
++/* XLALSimIMRPhenomXPHMMultiPhase by one XLALSimIMRPhenomXPHM call per phase. */
++static int IMRPhenomXPHMMultiPhase_RepeatedCalls(
++  COMPLEX16VectorSequence **hptilde,  /**< [out] h+, one row per phase */
++  COMPLEX16VectorSequence **hctilde,  /**< [out] hx, one row per phase */
++  REAL8 m1_SI,                        /**< mass of companion 1 (kg) */
++  REAL8 m2_SI,                        /**< mass of companion 2 (kg) */
++  REAL8 chi1x,                        /**< x-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi1y,                        /**< y-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi1z,                        /**< z-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2x,                        /**< x-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2y,                        /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2z,                        /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 distance,                     /**< Distance of source (m) */
++  REAL8 inclination,                  /**< inclination of source (rad) */
++  const REAL8Vector *phiRef,          /**< Orbital phases (rad) at reference frequency */
++  REAL8 f_min,                        /**< Starting GW frequency (Hz) */
++  REAL8 f_max,                        /**< Ending GW frequency (Hz) */
++  REAL8 deltaF,                       /**< Sampling frequency (Hz) */
++  REAL8 fRef_In,                      /**< Reference frequency (Hz) */
++  LALDict *lalParams                  /**< LAL Dictionary struct */
++)
++{
++  for (UINT4 p = 0; p < phiRef->length; p++)
++  {
++    COMPLEX16FrequencySeries *hp = NULL;
++    COMPLEX16FrequencySeries *hc = NULL;
++    INT4 status = XLALSimIMRPhenomXPHM(&hp, &hc, m1_SI, m2_SI, chi1x, chi1y, chi1z, chi2x, chi2y, chi2z, distance, inclination, phiRef->data[p], f_min, f_max, deltaF, fRef_In, lalParams);
++    XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "Error: XLALSimIMRPhenomXPHM failed.\n");
++
++    const UINT4 n = hp->data->length;
++    if (p == 0)
++    {
++      *hptilde = XLALCreateCOMPLEX16VectorSequence(phiRef->length, n);
++      *hctilde = XLALCreateCOMPLEX16VectorSequence(phiRef->length, n);
++      XLAL_CHECK(*hptilde != NULL && *hctilde != NULL, XLAL_ENOMEM, "Failed to allocate the output sequences.");
++    }
++    XLAL_CHECK(n == (*hptilde)->vectorLength, XLAL_EBADLEN, "Error: Waveform lengths differ between reference phases.\n");
++
++    memcpy((*hptilde)->data + p * n, hp->data->data, n * sizeof(COMPLEX16));
++    memcpy((*hctilde)->data + p * n, hc->data->data, n * sizeof(COMPLEX16));
++    XLALDestroyCOMPLEX16FrequencySeries(hp);
++    XLALDestroyCOMPLEX16FrequencySeries(hc);
++  }
++
++  return XLAL_SUCCESS;
++}
++
++/**
++ * Returns hptilde and hctilde of XLALSimIMRPhenomXPHM at each of several reference phases,
++ * one row per phase, in an equally spaced grid. The arguments are those of
++ * XLALSimIMRPhenomXPHM, with phiRef a vector of reference phases.
++ *
++ * In the default configuration the non-precessing modes and the Euler angles are computed
++ * once for all phases; the result agrees with one XLALSimIMRPhenomXPHM call per phase to
++ * round-off. Other configurations make one XLALSimIMRPhenomXPHM call per phase.
++ */
++int XLALSimIMRPhenomXPHMMultiPhase(
++  COMPLEX16VectorSequence **hptilde,  /**< [out] Frequency-domain waveform h+, one row per reference phase */
++  COMPLEX16VectorSequence **hctilde,  /**< [out] Frequency-domain waveform hx, one row per reference phase */
++  REAL8 m1_SI,                        /**< mass of companion 1 (kg) */
++  REAL8 m2_SI,                        /**< mass of companion 2 (kg) */
++  REAL8 chi1x,                        /**< x-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi1y,                        /**< y-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi1z,                        /**< z-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2x,                        /**< x-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2y,                        /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 chi2z,                        /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
++  REAL8 distance,                     /**< Distance of source (m) */
++  REAL8 inclination,                  /**< inclination of source (rad) */
++  const REAL8Vector *phiRef,          /**< Orbital phases (rad) at reference frequency */
++  REAL8 f_min,                        /**< Starting GW frequency (Hz) */
++  REAL8 f_max,                        /**< Ending GW frequency (Hz); Defaults to Mf = 0.3 if no f_max is specified. */
++  REAL8 deltaF,                       /**< Sampling frequency (Hz) */
++  REAL8 fRef_In,                      /**< Reference frequency (Hz) */
++  LALDict *lalParams                  /**< LAL Dictionary struct */
++)
++{
++  XLAL_CHECK(NULL != hptilde, XLAL_EFAULT, "Error: hptilde must not be NULL.                     \n");
++  XLAL_CHECK(NULL != hctilde, XLAL_EFAULT, "Error: hctilde must not be NULL.                     \n");
++  XLAL_CHECK(NULL == *hptilde, XLAL_EFAULT, "Error: hptilde already defined.                     \n");
++  XLAL_CHECK(NULL == *hctilde, XLAL_EFAULT, "Error: hctilde already defined.                     \n");
++  XLAL_CHECK(NULL != phiRef && phiRef->length > 0, XLAL_EINVAL, "Error: Give at least one reference phase.\n");
++  XLAL_CHECK(fRef_In  >= 0, XLAL_EFUNC,    "Error: fRef_In must be positive or set to 0 to ignore. \n");
++  XLAL_CHECK(deltaF   >  0, XLAL_EFUNC,    "Error: deltaF must be positive and greater than 0.     \n");
++  XLAL_CHECK(m1_SI    >  0, XLAL_EFUNC,    "Error: m1 must be positive and greater than 0.         \n");
++  XLAL_CHECK(m2_SI    >  0, XLAL_EFUNC,    "Error: m2 must be positive and greater than 0.         \n");
++  XLAL_CHECK(f_min    >  0, XLAL_EFUNC,    "Error: f_min must be positive and greater than 0.      \n");
++  XLAL_CHECK(f_max    >= 0, XLAL_EFUNC,    "Error: f_max must be non-negative.                     \n");
++  XLAL_CHECK(distance >  0, XLAL_EFUNC,    "Error: Distance must be positive and greater than 0.   \n");
++
++  REAL8 mass_ratio = (m1_SI > m2_SI) ? m1_SI / m2_SI : m2_SI / m1_SI;
++  if(mass_ratio > 1000. && fabs(mass_ratio - 1000) > 1e-12) { XLAL_ERROR(XLAL_EDOM, "ERROR: Model not valid at mass ratios beyond 1000.\n"); }
++
++  XLAL_CHECK(check_input_mode_array(lalParams) == XLAL_SUCCESS, XLAL_EFAULT, "Not available mode chosen.\n");
++
++  /* PNR tuned angles: one call per phase, which also checks the reference frequency. */
++  if (XLALSimInspiralWaveformParamsLookupPhenomXPNRUseTunedAngles(lalParams))
++  {
++    return IMRPhenomXPHMMultiPhase_RepeatedCalls(hptilde, hctilde, m1_SI, m2_SI, chi1x, chi1y, chi1z, chi2x, chi2y, chi2z, distance, inclination, phiRef, f_min, f_max, deltaF, fRef_In, lalParams);
++  }
++
++  const UINT4 nphase = phiRef->length;
++  IMRPhenomXWaveformStruct **pWF = XLALCalloc(nphase, sizeof(*pWF));
++  IMRPhenomXPrecessionStruct **pPrec = XLALCalloc(nphase, sizeof(*pPrec));
++  LALDict **lalParams_aux = XLALCalloc(nphase, sizeof(*lalParams_aux));
++  XLAL_CHECK(pWF != NULL && pPrec != NULL && lalParams_aux != NULL, XLAL_ENOMEM, "Failed to allocate the per-phase structs.\n");
++
++  INT4 status = XLAL_SUCCESS;
++  for (UINT4 p = 0; p < nphase && status == XLAL_SUCCESS; p++)
++  {
++    status = IMRPhenomXPHMMultiPhase_Setup(&pWF[p], &pPrec[p], &lalParams_aux[p], m1_SI, m2_SI, chi1x, chi1y, chi1z, chi2x, chi2y, chi2z, distance, inclination, phiRef->data[p], f_min, f_max, deltaF, fRef_In, lalParams);
++  }
++
++  INT4 shareable = (status == XLAL_SUCCESS) && IMRPhenomXPHMMultiPhase_Shareable(pWF, pPrec, lalParams_aux, nphase);
++  if (shareable)
++  {
++    const INT4 complexQ = (lalParams != NULL && XLALDictContains(lalParams, "MultiPhaseComplexQ")) ? XLALDictLookupINT4Value(lalParams, "MultiPhaseComplexQ") : 0;
++    status = IMRPhenomXPHMMultiPhase_hplushcross(hptilde, hctilde, pWF, pPrec, lalParams_aux[0], nphase, complexQ);
++  }
++
++  for (UINT4 p = 0; p < nphase; p++)
++  {
++    if (pWF[p] != NULL && pPrec[p] != NULL && pWF[p]->APPLY_PNR_DEVIATIONS && pWF[p]->IMRPhenomXPNRForceXHMAlignment && pPrec[p]->pWF22AS != NULL)
++    {
++      LALFree(pPrec[p]->pWF22AS);
++    }
++    if (pWF[p] != NULL) LALFree(pWF[p]);
++    if (pPrec[p] != NULL) LALFree(pPrec[p]);
++    if (lalParams_aux[p] != NULL) XLALDestroyDict(lalParams_aux[p]);
++  }
++  LALFree(pWF);
++  LALFree(pPrec);
++  LALFree(lalParams_aux);
++
++  XLAL_CHECK(status == XLAL_SUCCESS, XLAL_EFUNC, "Error: XLALSimIMRPhenomXPHMMultiPhase failed.\n");
++
++  if (!shareable)
++  {
++    return IMRPhenomXPHMMultiPhase_RepeatedCalls(hptilde, hctilde, m1_SI, m2_SI, chi1x, chi1y, chi1z, chi2x, chi2y, chi2z, distance, inclination, phiRef, f_min, f_max, deltaF, fRef_In, lalParams);
++  }
++
++  return XLAL_SUCCESS;
++}
