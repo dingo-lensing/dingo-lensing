@@ -246,11 +246,22 @@ class TestSubmitFile(unittest.TestCase):
 
 class TestCompare(TempCase):
     @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
-    def test_identical_columns_agree_with_matching_nans(self):
-        nan = float("nan")
-        differences = compare.column_differences([1.0, -2.0, nan], [1.0, -2.0, nan])
-        self.assertEqual(differences, {"max_abs": 0.0, "max_rel": 0.0, "nan_mismatch": 0})
+    def test_identical_columns_agree_with_matching_nans_and_infinities(self):
+        # The log prior of samples outside the prior is -inf in both results.
+        nan, inf = float("nan"), float("inf")
+        differences = compare.column_differences([1.0, -2.0, nan, -inf, inf], [1.0, -2.0, nan, -inf, inf])
+        self.assertEqual(differences, {"max_abs": 0.0, "max_rel": 0.0, "nonfinite": 3, "nonfinite_mismatch": 0})
         self.assertTrue(compare.agrees(differences, 0.0))
+
+    @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
+    def test_mismatched_infinities_fail(self):
+        inf = float("inf")
+        for a, b in (([1.0, -inf], [1.0, inf]), ([1.0, -inf], [1.0, -5.0]), ([1.0, float("nan")], [1.0, -inf])):
+            with self.subTest(a=a, b=b):
+                differences = compare.column_differences(a, b)
+                self.assertEqual(differences["nonfinite_mismatch"], 1)
+                self.assertEqual(differences["max_rel"], 0.0)
+                self.assertFalse(compare.agrees(differences, 1.0))
 
     @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
     def test_relative_difference_is_against_the_larger_magnitude(self):
@@ -268,7 +279,7 @@ class TestCompare(TempCase):
     @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
     def test_a_nan_in_only_one_fails(self):
         differences = compare.column_differences([1.0, float("nan")], [1.0, 2.0])
-        self.assertEqual(differences["nan_mismatch"], 1)
+        self.assertEqual(differences["nonfinite_mismatch"], 1)
         self.assertEqual(differences["max_rel"], 0.0)
         self.assertFalse(compare.agrees(differences, 1.0))
 

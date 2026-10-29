@@ -5,7 +5,8 @@ Runs inside the dependencies-only image from a shipped DINGO tree (checked by gu
     python -I compare_results.py --tree DIR --commit SHA A.hdf5 B.hdf5 --output OUT.json
 
 For every numeric sample column the two share it reports the largest absolute and
-relative difference and any NaN mismatch, and the differences in the log evidence,
+relative difference over finite entries and any mismatch in the non-finite ones (which
+must be identical, e.g. -inf log priors), and the differences in the log evidence,
 its error and the effective samples. Exit code 0 if both have the same samples and
 every shared column agrees to --rtol (default 1e-9), 1 otherwise, 2 if the guard refused.
 """
@@ -26,25 +27,28 @@ import guard  # noqa: E402
 
 
 def column_differences(a: np.ndarray, b: np.ndarray) -> dict:
-    """Largest absolute and relative difference of two equally long columns; NaNs must match."""
+    """Largest absolute and relative difference of two equally long columns where both are finite.
+    Entries not finite in either must be identical (the same infinity, or both NaN), e.g. the log
+    prior of samples outside the prior."""
     import numpy as np
 
     a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)
     if a.shape != b.shape:
         raise ValueError(f"Columns differ in shape: {a.shape} and {b.shape}")
-    nan_a, nan_b = np.isnan(a), np.isnan(b)
-    both = ~(nan_a | nan_b)
-    difference = np.abs(a[both] - b[both])
-    scale = np.maximum(np.maximum(np.abs(a[both]), np.abs(b[both])), np.finfo(float).tiny)
+    finite = np.isfinite(a) & np.isfinite(b)
+    same = (a == b) | (np.isnan(a) & np.isnan(b))
+    difference = np.abs(a[finite] - b[finite])
+    scale = np.maximum(np.maximum(np.abs(a[finite]), np.abs(b[finite])), np.finfo(float).tiny)
     return {
         "max_abs": float(difference.max()) if difference.size else 0.0,
         "max_rel": float((difference / scale).max()) if difference.size else 0.0,
-        "nan_mismatch": int(np.sum(nan_a != nan_b)),
+        "nonfinite": int(np.sum(~finite)),
+        "nonfinite_mismatch": int(np.sum(~finite & ~same)),
     }
 
 
 def agrees(differences: dict, rtol: float) -> bool:
-    return differences["nan_mismatch"] == 0 and differences["max_rel"] <= rtol
+    return differences["nonfinite_mismatch"] == 0 and differences["max_rel"] <= rtol
 
 
 def main(argv=None) -> int:
@@ -84,7 +88,7 @@ def main(argv=None) -> int:
     Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     for name, c in columns.items():
-        print(f"{name:28s} max abs {c['max_abs']:10.3e}   max rel {c['max_rel']:10.3e}   NaN mismatches {c['nan_mismatch']}")
+        print(f"{name:28s} max abs {c['max_abs']:10.3e}   max rel {c['max_rel']:10.3e}   non-finite {c['nonfinite']}, mismatched {c['nonfinite_mismatch']}")
     for key, (x, y) in report["summary"].items():
         print(f"{key:28s} {x:.6f} vs {y:.6f}")
     print(f"Identical to rtol {args.rtol:g}: {report['identical_to_rtol']}")
