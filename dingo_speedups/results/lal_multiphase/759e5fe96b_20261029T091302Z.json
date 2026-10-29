@@ -1,0 +1,196 @@
+{
+  "versions": {
+    "lal": "7.7.1",
+    "lalsimulation": "6.2.1",
+    "numpy": "2.2.6",
+    "python": "3.13.18"
+  },
+  "host": {
+    "node": "ldas-grid",
+    "machine": "x86_64",
+    "processor": ""
+  },
+  "built": [
+    "tag lalsuite-v7.26.15",
+    "commit 2c00d8c200308422036d0a23b7c0394f7c73faad",
+    "patch_sha256 759e5fe96bb00dde569e4bfe3de576a2841f6379a586d68eb84d673b59f7c55e",
+    "sync_commit 8197ec5ec3c4318b51caeffaf4e783e4659f11bf",
+    "configure --prefix=/home/kailibryan.doney/dingo-speedups-lal/env --disable-all-lal --enable-lalsimulation --enable-swig-python --disable-doxygen --disable-gcc-flags --with-hdf5=no PYTHON=/home/kailibryan.doney/dingo-speedups-lal/env/bin/python CFLAGS= -std=gnu17; swig 4.3.1, numpy 2.2.6",
+    "compiler cc (conda-forge gcc 15.3.0-7) 15.3.0",
+    "built_utc 2026-10-29T08:22:15Z"
+  ],
+  "rtol": 1e-10,
+  "phases": [
+    0.0,
+    0.6981317007977318,
+    1.3962634015954636,
+    2.0943951023931953,
+    2.792526803190927,
+    3.490658503988659,
+    4.1887902047863905,
+    4.886921905584122,
+    5.585053606381854
+  ],
+  "special_cases": [
+    {
+      "name": "default",
+      "expected": "shared",
+      "difference": 2.2707257886559294e-15,
+      "ok": true
+    },
+    {
+      "name": "one phase",
+      "expected": "shared",
+      "difference": 7.33240623773202e-16,
+      "ok": true
+    },
+    {
+      "name": "three phases off the DFT grid",
+      "expected": "shared",
+      "difference": 1.2847975674103865e-15,
+      "ok": true
+    },
+    {
+      "name": "equal masses and aligned spins (odd modes skipped)",
+      "expected": "shared",
+      "difference": 1.452684961665795e-15,
+      "ok": true
+    },
+    {
+      "name": "only the (2, 2) mode",
+      "expected": "shared",
+      "difference": 1.9391797022320166e-15,
+      "ok": true
+    },
+    {
+      "name": "(2, 2) and (3, 3) modes",
+      "expected": "shared",
+      "difference": 1.8801904754060202e-15,
+      "ok": true
+    },
+    {
+      "name": "mode multibanding off",
+      "expected": "shared",
+      "difference": 1.9375564173876896e-15,
+      "ok": true
+    },
+    {
+      "name": "convention 0",
+      "expected": "shared",
+      "difference": 1.2520245654809621e-15,
+      "ok": true
+    },
+    {
+      "name": "PrecVersion 223 explicitly",
+      "expected": "shared",
+      "difference": 2.2707257886559294e-15,
+      "ok": true
+    },
+    {
+      "name": "convention 6 (phi0 follows the phase)",
+      "expected": "fallback",
+      "difference": 0.0,
+      "ok": true
+    },
+    {
+      "name": "convention 7 (phi0 follows the phase)",
+      "expected": "fallback",
+      "difference": 0.0,
+      "ok": true
+    },
+    {
+      "name": "angle multibanding off",
+      "expected": "fallback",
+      "difference": 0.0,
+      "ok": true
+    },
+    {
+      "name": "NNLO angles (PrecVersion 102)",
+      "expected": "fallback",
+      "difference": 0.0,
+      "ok": true
+    },
+    {
+      "name": "total mass above 500 (multibanding off)",
+      "expected": "fallback",
+      "difference": 0.0,
+      "ok": true
+    },
+    {
+      "name": "nearly aligned spins",
+      "expected": "either",
+      "difference": 1.50056739107644e-15,
+      "ok": true
+    }
+  ],
+  "random": {
+    "n": 200,
+    "max_difference": 3.923599633416573e-15,
+    "exact": 3,
+    "failures": []
+  },
+  "dingo_samples": {
+    "file": "/home/kailibryan.doney/dingo-speedups-runs/xphm_args/xphm_args.npz",
+    "n": 100,
+    "max_difference": 3.761994619725865e-14,
+    "exact": 0,
+    "failures": [],
+    "time_nine_single_calls_ms": {
+      "n": 100,
+      "median": 19.231251993915066,
+      "max": 28.98027200717479,
+      "min": 16.325818985933438
+    },
+    "time_multi_phase_call_ms": {
+      "n": 100,
+      "median": 3.172691009240225,
+      "max": 5.855427996721119,
+      "min": 2.600367006380111
+    },
+    "time_multi_phase_call_one_phase_ms": {
+      "n": 100,
+      "median": 2.066404005745426,
+      "max": 3.1900620087981224,
+      "min": 1.7553619982209057
+    },
+    "speedup_nine_phases": {
+      "n": 100,
+      "median": 5.970877980278656,
+      "max": 7.0791662678530285,
+      "min": 4.399063619363909
+    }
+  },
+  "release_vs_this_build": {
+    "n": 5,
+    "max_difference": 1.3605678307799476e-05,
+    "release": {
+      "lal": "7.7.1",
+      "lalsimulation": "6.2.1"
+    }
+  },
+  "angle_multibanding": {
+    "weighting": "aLIGO design PSD, f_min to f_max, worse of h+ and hx, phase 0, not maximised",
+    "n": 20,
+    "complex_q_took_effect": 20,
+    "mismatch_default_vs_exact": {
+      "n": 20,
+      "median": 3.6944941955718846e-07,
+      "max": 4.822929339121096e-06,
+      "min": 3.38680972156169e-09
+    },
+    "mismatch_complex_q_vs_exact": {
+      "n": 20,
+      "median": 8.890832514651947e-12,
+      "max": 7.237285215566658e-10,
+      "min": 1.3800072196090696e-13
+    },
+    "mismatch_default_vs_complex_q": {
+      "n": 20,
+      "median": 3.6558571309130983e-07,
+      "max": 4.737665176390848e-06,
+      "min": 3.356787958708196e-09
+    }
+  },
+  "failures": 0,
+  "ok": true
+}

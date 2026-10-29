@@ -1,0 +1,78 @@
+{"lal": "7.7.1", "lalsimulation": "6.2.1", "numpy": "2.2.6", "python": "3.13.18"}
+ok   default                                              expected shared   max rel. diff. 2.27e-15
+ok   one phase                                            expected shared   max rel. diff. 7.33e-16
+ok   three phases off the DFT grid                        expected shared   max rel. diff. 1.28e-15
+ok   equal masses and aligned spins (odd modes skipped)   expected shared   max rel. diff. 1.45e-15
+ok   only the (2, 2) mode                                 expected shared   max rel. diff. 1.94e-15
+ok   (2, 2) and (3, 3) modes                              expected shared   max rel. diff. 1.88e-15
+ok   mode multibanding off                                expected shared   max rel. diff. 1.94e-15
+ok   convention 0                                         expected shared   max rel. diff. 1.25e-15
+ok   PrecVersion 223 explicitly                           expected shared   max rel. diff. 2.27e-15
+ok   convention 6 (phi0 follows the phase)                expected fallback max rel. diff. 0.00e+00
+ok   convention 7 (phi0 follows the phase)                expected fallback max rel. diff. 0.00e+00
+ok   angle multibanding off                               expected fallback max rel. diff. 0.00e+00
+ok   NNLO angles (PrecVersion 102)                        expected fallback max rel. diff. 0.00e+00
+ok   total mass above 500 (multibanding off)              expected fallback max rel. diff. 0.00e+00
+ok   nearly aligned spins                                 expected either   max rel. diff. 1.50e-15
+random: 200 sets, max rel. difference 3.92e-15, 3 exact, 0 failed
+dingo_samples {
+ "n": 100,
+ "max_difference": 3.761994619725865e-14,
+ "exact": 0,
+ "time_nine_single_calls_ms": {
+  "n": 100,
+  "median": 19.231251993915066,
+  "max": 28.98027200717479,
+  "min": 16.325818985933438
+ },
+ "time_multi_phase_call_ms": {
+  "n": 100,
+  "median": 3.172691009240225,
+  "max": 5.855427996721119,
+  "min": 2.600367006380111
+ },
+ "time_multi_phase_call_one_phase_ms": {
+  "n": 100,
+  "median": 2.066404005745426,
+  "max": 3.1900620087981224,
+  "min": 1.7553619982209057
+ },
+ "speedup_nine_phases": {
+  "n": 100,
+  "median": 5.970877980278656,
+  "max": 7.0791662678530285,
+  "min": 4.399063619363909
+ }
+}
+release_vs_this_build {
+ "n": 5,
+ "max_difference": 1.3605678307799476e-05,
+ "release": {
+  "lal": "7.7.1",
+  "lalsimulation": "6.2.1"
+ }
+}
+angle_multibanding {
+ "weighting": "aLIGO design PSD, f_min to f_max, worse of h+ and hx, phase 0, not maximised",
+ "n": 20,
+ "complex_q_took_effect": 20,
+ "mismatch_default_vs_exact": {
+  "n": 20,
+  "median": 3.6944941955718846e-07,
+  "max": 4.822929339121096e-06,
+  "min": 3.38680972156169e-09
+ },
+ "mismatch_complex_q_vs_exact": {
+  "n": 20,
+  "median": 8.890832514651947e-12,
+  "max": 7.237285215566658e-10,
+  "min": 1.3800072196090696e-13
+ },
+ "mismatch_default_vs_complex_q": {
+  "n": 20,
+  "median": 3.6558571309130983e-07,
+  "max": 4.737665176390848e-06,
+  "min": 3.356787958708196e-09
+ }
+}
+OK: 0 failures; report /home/kailibryan.doney/dingo-lensing-sync/dingo_speedups/results/lal_multiphase/759e5fe96b_20261029T091302Z.json
