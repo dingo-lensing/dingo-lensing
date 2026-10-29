@@ -13,6 +13,8 @@ one-call route with those of the repeated calls (LS.SimInspiralFDMultiPhase hidd
 that the one-call route was taken, and times both. Then it runs the tree's whole
 tests/gw/waveform_generator/test_wfg_m.py with this LAL: Every IMRPhenomXPHM test of the
 DFT route there takes the one-call route, and the other generators must keep their own.
+NRSur7dq2 and NRSur7dq4 raise during the tests, as with the release LAL in the image
+(raise_for_nrsur). The report is written before the tests and again after them.
 
 Exit code 0 if the two routes agree to --rtol and the tests pass, 1 otherwise, 2 if the
 LAL is not build_lal.sh's or the guard refused.
@@ -20,6 +22,7 @@ LAL is not build_lal.sh's or the guard refused.
 from __future__ import annotations
 
 import argparse
+import faulthandler
 import json
 import os
 import statistics
@@ -62,7 +65,29 @@ def largest_difference(arrays, references) -> float:
     return difference / scale if scale > 0 else (0.0 if difference == 0 else float("inf"))
 
 
+def raise_for_nrsur(LS):
+    """Make LS.SimInspiralChooseTDModes raise for NRSur7dq2 and NRSur7dq4, as the release LAL
+    does in the image, which has no data for them. build_lal.sh builds without HDF5, and at
+    lalsuite-v7.26.15 PrecessingNRSur_LoadData then returns NULL, which its callers dereference
+    (LALSimIMRPrecessingNRSur.c): test_wfg_m.py's probe for NRSur7dq4 data, run when the module
+    is imported, would crash the process."""
+    choose_td_modes = LS.SimInspiralChooseTDModes
+    surrogates = (LS.NRSur7dq2, LS.NRSur7dq4)
+
+    def choose_td_modes_without_nrsur(*args):
+        if args and args[-1] in surrogates:
+            raise RuntimeError("NRSur7dq2 and NRSur7dq4 need HDF5, which this LALSimulation is built without")
+        return choose_td_modes(*args)
+
+    LS.SimInspiralChooseTDModes = choose_td_modes_without_nrsur
+
+
+def write_report(path, report):
+    Path(path).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+
+
 def main(argv=None) -> int:
+    faulthandler.enable()
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--lal-site", required=True, help="site-packages of build_lal.sh's environment")
     parser.add_argument("--tree", required=True)
@@ -176,21 +201,25 @@ def main(argv=None) -> int:
         "speedup_phase_grid_terms": summarise([r / o for r, o in zip(term_times_repeated, term_times)])
     }
     within = max(m_differences) <= args.rtol and max(term_differences) <= args.rtol
-    agree = within and report["one_call_route_taken"]
+    report["routes_agree"] = bool(within and report["one_call_route_taken"])
+    # Written and shown before the tests, so that a crash in them cannot lose it.
+    report["ok"] = False
+    write_report(args.output, report)
+    shown = {k: v for k, v in report.items() if k not in ("provenance", "inputs", "ok")}
+    print(json.dumps(shown, indent=1), flush=True)
 
     tests_passed = True
     if not args.skip_tests:
         import pytest
 
+        raise_for_nrsur(LS)
         os.chdir(args.tree)
         code = pytest.main([DINGO_TESTS, "-q", "-p", "no:cacheprovider", "-rfEs"])
-        report["dingo_tests"] = {"file": DINGO_TESTS, "exit_code": int(code)}
+        report["dingo_tests"] = {"file": DINGO_TESTS, "exit_code": int(code), "nrsur": "raise_for_nrsur"}
         tests_passed = int(code) == 0
 
-    report["ok"] = bool(agree and tests_passed)
-    Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    shown = {k: v for k, v in report.items() if k not in ("provenance", "inputs")}
-    print(json.dumps(shown, indent=1))
+    report["ok"] = bool(report["routes_agree"] and tests_passed)
+    write_report(args.output, report)
     print(f"{'OK' if report['ok'] else 'FAILED'}; report {args.output}")
     return 0 if report["ok"] else 1
 

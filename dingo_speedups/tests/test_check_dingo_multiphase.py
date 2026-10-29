@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -29,6 +30,17 @@ class TestHelpers(unittest.TestCase):
     def test_summarise(self):
         self.assertEqual(check.summarise([3.0, 1.0, 2.0]), {"n": 3, "median": 2.0, "max": 3.0, "min": 1.0})
         self.assertEqual(check.summarise([]), {"n": 0})
+
+    def test_raise_for_nrsur_leaves_other_approximants_alone(self):
+        calls = []
+        LS = SimpleNamespace(NRSur7dq2=1, NRSur7dq4=2, IMRPhenomXPHM=3)
+        LS.SimInspiralChooseTDModes = lambda *args: calls.append(args) or "modes"
+        check.raise_for_nrsur(LS)
+        for surrogate in (LS.NRSur7dq2, LS.NRSur7dq4):
+            with self.assertRaises(RuntimeError):
+                LS.SimInspiralChooseTDModes(0.0, 1e-3, surrogate)
+        self.assertEqual(LS.SimInspiralChooseTDModes(0.0, 1e-3, LS.IMRPhenomXPHM), "modes")
+        self.assertEqual(calls, [(0.0, 1e-3, 3)])
 
 
 @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
