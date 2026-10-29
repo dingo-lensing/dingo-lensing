@@ -27,7 +27,7 @@ CONDA="${CONDA_EXE:-$(command -v conda || true)}"
 [[ -n "$CONDA" ]] || fail "conda not found: Run this from a shell with conda (e.g. the igwn environment)"
 if [[ ! -x "$ENV/bin/python" ]]; then
     "$CONDA" create -y -p "$ENV" -c conda-forge --override-channels \
-        python=3.13 numpy swig gsl fftw zlib hdf5 \
+        python=3.13 numpy swig gsl fftw zlib \
         autoconf automake libtool pkg-config make c-compiler help2man
 fi
 set +u  # conda's activation scripts read unset variables
@@ -49,9 +49,28 @@ git -C "$SRC" diff --stat
 step "Configure (LAL and LALSimulation only, Python bindings)"
 cd "$SRC"
 [[ -x configure ]] || ./00boot
-if [[ ! -f Makefile ]]; then
-    ./configure --prefix="$ENV" --disable-all-lal --enable-lalsimulation --enable-swig-python \
-        --disable-doxygen --disable-gcc-flags PYTHON="$ENV/bin/python"
+# No HDF5: XPHM does not use it, and HDF5 2's multi-line link flags break libtool's link of
+# liblalsupport. C17 rather than GCC 15's default C23, as LALSuite is usually compiled.
+CONFIGURE_ARGS=(
+    --prefix="$ENV"
+    --disable-all-lal
+    --enable-lalsimulation
+    --enable-swig-python
+    --disable-doxygen
+    --disable-gcc-flags
+    --with-hdf5=no
+    PYTHON="$ENV/bin/python"
+    "CFLAGS=${CFLAGS:-} -std=gnu17"
+)
+STAMP="$LALBUILD/configure_args.txt"
+if [[ ! -f Makefile || "$(cat "$STAMP" 2> /dev/null || true)" != "${CONFIGURE_ARGS[*]}" ]]; then
+    BUILT_BEFORE=0
+    [[ -f Makefile ]] && BUILT_BEFORE=1
+    ./configure "${CONFIGURE_ARGS[@]}"
+    printf '%s\n' "${CONFIGURE_ARGS[*]}" > "$STAMP"
+    if [[ "$BUILT_BEFORE" == 1 ]]; then
+        make clean > /dev/null  # objects of the earlier configuration
+    fi
 fi
 
 step "Build and install into the environment ($JOBS jobs)"
@@ -73,6 +92,8 @@ EOF
     echo "commit $(git -C "$SRC" rev-parse HEAD)"
     echo "patch_sha256 $(sha256sum "$PATCH" | cut -d' ' -f1)"
     echo "sync_commit $(git -C "$SYNC" rev-parse HEAD)"
+    echo "configure $(cat "$STAMP")"
+    echo "compiler $(${CC:-cc} --version | head -n 1)"
     echo "built_utc $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 } > "$LALBUILD/BUILT.txt"
 cat "$LALBUILD/BUILT.txt"
