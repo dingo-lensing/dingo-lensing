@@ -1,0 +1,103 @@
+{"lal": "7.7.1", "lalsimulation": "6.2.1", "numpy": "2.2.6", "python": "3.13.18"}
+ok   default                                              expected shared   max rel. diff. 2.27e-15
+ok   one phase                                            expected shared   max rel. diff. 7.33e-16
+ok   three phases off the DFT grid                        expected shared   max rel. diff. 1.28e-15
+ok   equal masses and aligned spins (odd modes skipped)   expected shared   max rel. diff. 1.45e-15
+ok   only the (2, 2) mode                                 expected shared   max rel. diff. 1.94e-15
+ok   (2, 2) and (3, 3) modes                              expected shared   max rel. diff. 1.88e-15
+ok   mode multibanding off                                expected shared   max rel. diff. 1.94e-15
+ok   convention 0                                         expected shared   max rel. diff. 1.25e-15
+ok   PrecVersion 223 explicitly                           expected shared   max rel. diff. 2.27e-15
+ok   convention 6 (phi0 follows the phase)                expected fallback max rel. diff. 0.00e+00
+ok   convention 7 (phi0 follows the phase)                expected fallback max rel. diff. 0.00e+00
+ok   angle multibanding off                               expected fallback max rel. diff. 0.00e+00
+ok   NNLO angles (PrecVersion 102)                        expected fallback max rel. diff. 0.00e+00
+ok   total mass above 500 (multibanding off)              expected fallback max rel. diff. 0.00e+00
+ok   nearly aligned spins                                 expected either   max rel. diff. 1.50e-15
+random: 200 sets, max rel. difference 3.92e-15, 3 exact, 0 failed
+dingo_samples {
+ "n": 100,
+ "max_difference": 3.761994619725865e-14,
+ "exact": 0,
+ "time_nine_single_calls_ms": {
+  "n": 100,
+  "median": 16.768079498433508,
+  "max": 30.8512490009889,
+  "min": 14.759259996935725
+ },
+ "time_multi_phase_call_ms": {
+  "n": 100,
+  "median": 2.660597499925643,
+  "max": 6.168221996631473,
+  "min": 2.263806003611535
+ },
+ "time_multi_phase_call_one_phase_ms": {
+  "n": 100,
+  "median": 1.8141469918191433,
+  "max": 3.7210449809208512,
+  "min": 1.56276099733077
+ },
+ "speedup_nine_phases": {
+  "n": 100,
+  "median": 6.377246619614644,
+  "max": 7.008971309511163,
+  "min": 4.032476861660127
+ }
+}
+fd_level {
+ "n": 100,
+ "max_difference": 3.629685731126946e-15,
+ "exact": 0,
+ "first_phase_series_identical": true,
+ "fallback_IMRPhenomXP_exact": true,
+ "time_nine_SimInspiralFD_ms": {
+  "n": 100,
+  "median": 23.141440993640572,
+  "max": 34.148929989896715,
+  "min": 19.592613010900095
+ },
+ "time_SimInspiralFDMultiPhase_ms": {
+  "n": 100,
+  "median": 3.2378814939875156,
+  "max": 5.107164004584774,
+  "min": 2.623318985570222
+ },
+ "speedup_nine_phases": {
+  "n": 100,
+  "median": 7.2795702020253845,
+  "max": 9.06699341574039,
+  "min": 4.702890285689857
+ }
+}
+release_vs_this_build {
+ "n": 5,
+ "max_difference": 1.3605678307799476e-05,
+ "release": {
+  "lal": "7.7.1",
+  "lalsimulation": "6.2.1"
+ }
+}
+angle_multibanding {
+ "weighting": "aLIGO design PSD, f_min to f_max, worse of h+ and hx, phase 0, not maximised",
+ "n": 20,
+ "complex_q_took_effect": 20,
+ "mismatch_default_vs_exact": {
+  "n": 20,
+  "median": 3.6944941955718846e-07,
+  "max": 4.822929339121096e-06,
+  "min": 3.38680972156169e-09
+ },
+ "mismatch_complex_q_vs_exact": {
+  "n": 20,
+  "median": 8.890832514651947e-12,
+  "max": 7.237285215566658e-10,
+  "min": 1.3800072196090696e-13
+ },
+ "mismatch_default_vs_complex_q": {
+  "n": 20,
+  "median": 3.6558571309130983e-07,
+  "max": 4.737665176390848e-06,
+  "min": 3.356787958708196e-09
+ }
+}
+OK: 0 failures; report /home/kailibryan.doney/dingo-lensing-sync/dingo_speedups/results/lal_multiphase/e21ec9674d_20261029T162700Z.json

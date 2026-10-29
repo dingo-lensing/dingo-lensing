@@ -4,8 +4,8 @@ INFO:    underlay of /etc/localtime required more than 50 (79) bind mounts
     "commit": "c551d28bec006abd43db095ded1862afcb0ce24c",
     "describe": "v0.10.3-3-gc551d28b",
     "version": "0.10.4.dev3+gc551d28b",
-    "tree": "/local/kailibryan.doney/dingo-tests.5yw8Ye/dingo_c551d28bec",
-    "imported_from": "/local/kailibryan.doney/dingo-tests.5yw8Ye/dingo_c551d28bec/dingo"
+    "tree": "/local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec",
+    "imported_from": "/local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo"
   },
   "python": {
     "version": "3.13.13",
@@ -46,7 +46,7 @@ INFO:    underlay of /etc/localtime required more than 50 (79) bind mounts
 }
 ============================= test session starts ==============================
 platform linux -- Python 3.13.13, pytest-9.1.1, pluggy-1.6.0
-rootdir: /local/kailibryan.doney/dingo-tests.5yw8Ye/dingo_c551d28bec
+rootdir: /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec
 configfile: pyproject.toml
 plugins: anyio-4.14.2
 collected 927 items / 4 deselected / 1 skipped / 923 selected
@@ -65,4 +65,545 @@ tests/core/test_gnpeutils.py .....                                       [ 14%]
 tests/core/test_misc.py .........                                        [ 15%]
 tests/core/test_multi_gpu.py .........................                   [ 18%]
 tests/core/test_multiprocessing.py ....                                  [ 18%]
-tests/core/test_nsf.py ...
+tests/core/test_nsf.py ...........                                       [ 19%]
+tests/core/test_posterior_model.py ......                                [ 20%]
+tests/core/test_proxy_offset_reparam.py ...                              [ 20%]
+tests/core/test_resnet.py ..............                                 [ 22%]
+tests/core/test_result.py .............................................. [ 27%]
+.....                                                                    [ 27%]
+tests/core/test_torchutils.py .........                                  [ 28%]
+tests/core/test_trainutils.py .................                          [ 30%]
+tests/core/test_transformer.py ......................                    [ 33%]
+tests/core/test_unconditional_density_estimation.py ....                 [ 33%]
+tests/core/test_utils.py ..............                                  [ 35%]
+tests/gw/conversion/test_spin_conversion.py ..                           [ 35%]
+tests/gw/conversion/test_time_delay_from_geocenter.py ....               [ 35%]
+tests/gw/inference/test_gw_builders.py .......                           [ 36%]
+tests/gw/inference/test_gw_composed_sampler.py ...                       [ 36%]
+tests/gw/noise/test_asd_parameterization.py ........                     [ 37%]
+tests/gw/noise/test_asd_sampling.py ..                                   [ 37%]
+tests/gw/test_bns_chain_builder.py .............                         [ 39%]
+tests/gw/test_bns_end_to_end.py ......                                   [ 39%]
+tests/gw/test_build_domain.py .......                                    [ 40%]
+tests/gw/test_calibration_frequency_range.py ......                      [ 41%]
+tests/gw/test_frequency_updates.py ..................................... [ 45%]
+..........................                                               [ 48%]
+tests/gw/test_gnpe_steps.py ....                                         [ 48%]
+tests/gw/test_gw_result.py ............................................. [ 53%]
+...................                                                      [ 55%]
+tests/gw/test_gw_sampler_context.py ............................         [ 58%]
+tests/gw/test_gwutils.py ................                                [ 60%]
+tests/gw/test_heterodyned_dataset.py ....                                [ 60%]
+tests/gw/test_injection.py ..                                            [ 60%]
+tests/gw/test_likelihood.py ...............                              [ 62%]
+tests/gw/test_likelihood_phase_grid.py ....s....s....s....s....s....s... [ 66%]
+..                                                                       [ 66%]
+tests/gw/test_likelihood_with_frequency_masking.py ..                    [ 66%]
+tests/gw/test_mfd.py ........                                            [ 67%]
+tests/gw/test_multibanded_domain_generation.py ......................... [ 70%]
+.....................                                                    [ 72%]
+tests/gw/test_noise_dataset.py ..                                        [ 72%]
+tests/gw/test_prior_split.py ..                                          [ 72%]
+tests/gw/test_ra_frames.py ....                                          [ 73%]
+tests/gw/test_spin_convention_reparam.py .......                         [ 74%]
+tests/gw/test_svd_basis_io.py .                                          [ 74%]
+tests/gw/test_synthetic_phase.py ............................            [ 77%]
+tests/gw/test_train_builders.py ........                                 [ 78%]
+tests/gw/test_ufd.py ........                                            [ 78%]
+tests/gw/test_waveform_dataset.py .........                              [ 79%]
+tests/gw/transforms/test_batch_transforms.py ...                         [ 80%]
+tests/gw/transforms/test_detector_projection.py ..                       [ 80%]
+tests/gw/transforms/test_general_transforms.py .                         [ 80%]
+tests/gw/transforms/test_gnpe_transforms.py ..                           [ 80%]
+tests/gw/transforms/test_heterodyne.py ..............                    [ 82%]
+tests/gw/transforms/test_parameter_transforms.py .                       [ 82%]
+tests/gw/transforms/test_tokenization_transforms.py .................... [ 84%]
+..........................................                               [ 89%]
+tests/gw/transforms/test_waveform_transforms.py ............             [ 90%]
+tests/gw/waveform_generator/test_wfg.py ......                           [ 91%]
+tests/gw/waveform_generator/test_wfg_m.py ..........s.......             [ 93%]
+tests/gw/waveform_generator/test_wfg_mfd.py .....                        [ 93%]
+tests/gw/waveform_generator/test_wfg_tidal.py ......F.............       [ 95%]
+tests/pipe/test_create_injections.py ...                                 [ 96%]
+tests/pipe/test_dag_creator.py ............                              [ 97%]
+tests/pipe/test_fixed_context_parameters.py ......                       [ 98%]
+tests/pipe/test_importance_sampling_settings.py ....                     [ 98%]
+tests/pipe/test_parser.py ..                                             [ 98%]
+tests/pipe/test_pipe_utils.py ..                                         [ 98%]
+tests/pipe/test_pp_test.py ......                                        [ 99%]
+tests/pipe/test_sampling_seed.py ....                                    [100%]
+
+=================================== FAILURES ===================================
+_ TestResetGraphsOnRequiresGradChange.test_unfreeze_without_reset_gives_no_gradient _
+
+self = <test_compile.TestResetGraphsOnRequiresGradChange object at 0x7ffa7ff74410>
+
+    def test_unfreeze_without_reset_gives_no_gradient(self):
+        net = self._net()
+        self._set_rb(net, False)
+        compiled = torch.compile(net, backend="aot_eager")
+        x = torch.randn(8, 4)
+        compiled(x).sum().backward()
+        self._set_rb(net, True)
+        net.zero_grad(set_to_none=True)
+        compiled(x).sum().backward()
+>       assert net[0].weight.grad is None  # the bug this module guards against
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert tensor([[ 0.0752,  0.0922,  0.0850, -0.0667],\n        [-0.7329, -0.8984, -0.8289,  0.6507],\n        [ 0.2419,  0.2965,...0.9034, -0.8335,  0.6543],\n        [ 0.9020,  1.1057,  1.0201, -0.8008],\n        [ 0.8382,  1.0275,  0.9480, -0.7441]]) is None
+E        +  where tensor([[ 0.0752,  0.0922,  0.0850, -0.0667],\n        [-0.7329, -0.8984, -0.8289,  0.6507],\n        [ 0.2419,  0.2965,...0.9034, -0.8335,  0.6543],\n        [ 0.9020,  1.1057,  1.0201, -0.8008],\n        [ 0.8382,  1.0275,  0.9480, -0.7441]]) = Parameter containing:\ntensor([[-0.0037,  0.2682, -0.4115, -0.3680],\n        [-0.1926,  0.1341, -0.0099,  0.3964],\n    ...3742],\n        [-0.0806,  0.0529,  0.4527, -0.4638],\n        [-0.3148, -0.1266, -0.1949,  0.4320]], requires_grad=True).grad
+E        +    where Parameter containing:\ntensor([[-0.0037,  0.2682, -0.4115, -0.3680],\n        [-0.1926,  0.1341, -0.0099,  0.3964],\n    ...3742],\n        [-0.0806,  0.0529,  0.4527, -0.4638],\n        [-0.3148, -0.1266, -0.1949,  0.4320]], requires_grad=True) = Linear(in_features=4, out_features=8, bias=True).weight
+
+tests/core/test_compile.py:182: AssertionError
+------------------------------ Captured log call -------------------------------
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:guards.py:5400 
+DEBUG    torch.__trace:convert_frame.py:303 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:utils.py:2389 
+DEBUG    torch.__trace:utils.py:2389 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:symbolic_shapes.py:5754 
+DEBUG    torch.__trace:symbolic_shapes.py:5754 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:structured.py:28 
+DEBUG    torch.__trace:symbolic_shapes.py:8058 
+DEBUG    torch.__trace:symbolic_shapes.py:7649 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:output_graph.py:2841 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:graph_compile.py:1797 
+DEBUG    torch.__trace:graph_compile.py:1818 
+DEBUG    torch.__trace:graph_compile.py:1868 
+DEBUG    torch.__trace:graph_compile.py:1886 
+DEBUG    torch.__trace:graph_compile.py:1890 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:guards.py:4552 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2009 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:guards.py:5400 
+DEBUG    torch.__trace:convert_frame.py:303 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:symbolic_shapes.py:5754 
+DEBUG    torch.__trace:symbolic_shapes.py:5754 
+DEBUG    torch.__trace:symbolic_shapes.py:8058 
+DEBUG    torch.__trace:symbolic_shapes.py:7649 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:meta_utils.py:276 
+DEBUG    torch.__trace:meta_utils.py:514 
+DEBUG    torch.__trace:meta_utils.py:2271 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:output_graph.py:2841 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:graph_compile.py:1797 
+DEBUG    torch.__trace:graph_compile.py:1818 
+DEBUG    torch.__trace:graph_compile.py:1868 
+DEBUG    torch.__trace:graph_compile.py:1886 
+DEBUG    torch.__trace:graph_compile.py:1890 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:subclass_codegen.py:333 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:guards.py:4552 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2350 
+DEBUG    torch.__trace:utils.py:2009 
+DEBUG    torch.__trace:utils.py:2350
+__________________________ test_tidal_prior_defaults ___________________________
+
+    def test_tidal_prior_defaults():
+        """The `default` priors for lambda_1/lambda_2 expand to Uniform(0, 5000)."""
+        np.random.seed(42)
+        prior = build_prior_with_defaults({"lambda_1": "default", "lambda_2": "default"})
+>       sample = prior.sample()
+                 ^^^^^^^^^^^^^^
+
+tests/gw/waveform_generator/test_wfg_tidal.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/dingo_env/lib/python3.13/site-packages/bilby/core/prior/dict.py:378: in sample
+    return self.sample_subset_constrained(keys=list(self.keys()), size=size)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/dingo_env/lib/python3.13/site-packages/bilby/core/prior/dict.py:459: in sample_subset_constrained
+    is_valid = self.evaluate_constraints(sample)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/dingo_env/lib/python3.13/site-packages/bilby/core/prior/dict.py:57: in evaluate_constraints
+    out_sample = self.conversion_function(sample)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/dingo_env/lib/python3.13/site-packages/bilby/gw/prior.py:1019: in default_conversion_function
+    out_sample = generate_mass_parameters(out_sample)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+sample = {'lambda_1': 3184.8084366072717, 'lambda_2': 1348.9335688193516, 'phi_jl': 0.0, 'phi_12': 0.0}
+source = False
+
+    def generate_mass_parameters(sample, source=False):
+        """
+        Add the known mass parameters to the data frame/dictionary.  We do
+        not recompute keys already present in the dictionary
+    
+        We add, potentially:
+            chirp_mass, total_mass, symmetric_mass_ratio, mass_ratio, mass_1, mass_2
+        Or if source=True:
+            chirp_mass_source, total_mass_source, symmetric_mass_ratio, mass_ratio, mass_1_source, mass_2_source
+    
+        Parameters
+        ==========
+        sample : dict
+            The input dictionary with two "spanning" mass parameters
+            e.g. (mass_1, mass_2), or (chirp_mass, mass_ratio), but not e.g. only
+            (mass_ratio, symmetric_mass_ratio)
+        source : bool, default False
+            If True, then perform the conversions for source mass parameters
+            i.e. mass_1_source instead of mass_1
+    
+        Returns
+        =======
+        dict: The updated dictionary
+    
+        """
+        # Only add the parameters if they're not already present
+        intermediate_sample = generate_component_masses(sample, source=source)
+        output_sample = intermediate_sample.copy()
+    
+        if source:
+            mass_1_key = 'mass_1_source'
+            mass_2_key = 'mass_2_source'
+            total_mass_key = 'total_mass_source'
+            chirp_mass_key = 'chirp_mass_source'
+        else:
+            mass_1_key = 'mass_1'
+            mass_2_key = 'mass_2'
+            total_mass_key = 'total_mass'
+            chirp_mass_key = 'chirp_mass'
+    
+        if chirp_mass_key not in output_sample.keys():
+            output_sample[chirp_mass_key] = (
+>               component_masses_to_chirp_mass(output_sample[mass_1_key],
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+                                               output_sample[mass_2_key])
+            )
+E           KeyError: 'mass_1'
+
+/opt/dingo_env/lib/python3.13/site-packages/bilby/gw/conversion.py:2047: KeyError
+=============================== warnings summary ===============================
+dingo/gw/domains/base_frequency_domain.py:150
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/domains/base_frequency_domain.py:150: SyntaxWarning: invalid escape sequence '\p'
+    Convention: the phase $\phi(f)$ is defined via $\exp[- i \phi(f)]$.
+
+dingo/gw/transforms/gnpe_transforms.py:35
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/transforms/gnpe_transforms.py:35: SyntaxWarning: invalid escape sequence '\h'
+    \hat g ~ p(\hat g | g).
+
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+  /opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567: PendingDeprecationWarning: The scale 'GPSScale' uses an 'axis' parameter in the constructors. This parameter is pending-deprecated since matplotlib 3.11. It will be fully deprecated in 3.13 and removed in 3.15. Starting with 3.11, 'register_scale()' accepts scales without the *axis* parameter.
+    register_scale(scale_class)
+
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567
+  /opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/gps.py:567: PendingDeprecationWarning: The scale '_gps_scale_factory.<locals>.FixedGPSScale' uses an 'axis' parameter in the constructors. This parameter is pending-deprecated since matplotlib 3.11. It will be fully deprecated in 3.13 and removed in 3.15. Starting with 3.11, 'register_scale()' accepts scales without the *axis* parameter.
+    register_scale(scale_class)
+
+../../../../opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/log.py:194
+  /opt/dingo_env/lib/python3.13/site-packages/gwpy/plot/log.py:194: PendingDeprecationWarning: The scale 'LogScale' uses an 'axis' parameter in the constructors. This parameter is pending-deprecated since matplotlib 3.11. It will be fully deprecated in 3.13 and removed in 3.15. Starting with 3.11, 'register_scale()' accepts scales without the *axis* parameter.
+    register_scale(LogScale)
+
+tests/gw/waveform_generator/test_wfg_m.py:3
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/tests/gw/waveform_generator/test_wfg_m.py:3: SyntaxWarning: invalid escape sequence '\i'
+    polarzations disentangled into contributions m \in [-l_max, ...,0, ...,l_max],
+
+tests/core/test_compile.py: 14 warnings
+  /opt/dingo_env/lib/python3.13/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/core/test_enets.py::test_projection_of_LinearProjectionRB
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/tests/core/test_enets.py:59: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    out_a = np.array(projection_layer(y_batch_a).detach())
+
+tests/core/test_enets.py::test_projection_of_LinearProjectionRB
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/tests/core/test_enets.py:60: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    out_b = np.array(projection_layer(y_batch_b).detach())
+
+tests/core/test_enets.py::test_projection_of_LinearProjectionRB
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/tests/core/test_enets.py:78: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    out_a == np.array(projection_layer(y_batch_a).detach())
+
+tests/core/test_enets.py::test_projection_of_LinearProjectionRB
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/tests/core/test_enets.py:86: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    out_a_1 = np.array(projection_layer(y_batch_a).detach())
+
+tests/core/test_enets.py::test_projection_of_LinearProjectionRB
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/tests/core/test_enets.py:88: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    out_a_2 = np.array(projection_layer(y_batch_a).detach())
+
+tests/core/test_multi_gpu.py::TestBuildTrainAndTestLoaders::test_drop_last_default_keeps_partial_batch
+tests/core/test_multi_gpu.py::TestBuildTrainAndTestLoaders::test_drop_last_drops_partial_batch
+tests/core/test_unconditional_density_estimation.py::test_train_unconditional_density_estimator_basic
+tests/core/test_unconditional_density_estimation.py::test_train_unconditional_density_estimator_uses_all_parameters_by_default
+tests/core/test_unconditional_density_estimation.py::test_train_unconditional_flow_end_to_end
+tests/gw/test_bns_end_to_end.py::test_trained_model_records_bns_settings[IMRPhenomXP_NRTidalv3]
+tests/gw/test_bns_end_to_end.py::test_trained_model_records_bns_settings[IMRPhenomPv2_NRTidal]
+  /opt/dingo_env/lib/python3.13/site-packages/torch/utils/data/dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+    super().__init__(loader)
+
+tests/core/test_multiprocessing.py: 3 warnings
+tests/gw/test_synthetic_phase.py: 4 warnings
+tests/gw/test_waveform_dataset.py: 8 warnings
+  /opt/dingo_env/lib/python3.13/multiprocessing/popen_fork.py:67: DeprecationWarning: This process (pid=3307119) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/core/test_nsf.py: 4 warnings
+tests/core/test_posterior_model.py: 1 warning
+tests/core/test_transformer.py: 11 warnings
+tests/gw/test_train_builders.py: 2 warnings
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/core/nn/transformer.py:200: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+    self.transformer_encoder = TransformerEncoder(
+
+tests/gw/test_bns_end_to_end.py: 2 warnings
+tests/gw/test_heterodyned_dataset.py: 1 warning
+tests/gw/test_waveform_dataset.py: 9 warnings
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/core/dataset.py:125: Pandas4Warning: The copy keyword is deprecated and will be removed in a future version. Copy-on-Write is active in pandas since 3.0 which utilizes a lazy copy mechanism that defers copies until necessary. Use .copy() to make an eager copy if necessary.
+    d[k] = d[k].astype(effective_dtype, copy=False)
+
+tests/gw/test_gw_result.py: 544 warnings
+  /opt/dingo_env/lib/python3.13/site-packages/bilby/core/prior/interpolated.py:166: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
+    if np.trapz(self._yy, self.xx) != 1:
+
+tests/gw/test_gw_result.py: 544 warnings
+  /opt/dingo_env/lib/python3.13/site-packages/bilby/core/prior/interpolated.py:168: DeprecationWarning: `trapz` is deprecated. Use `trapezoid` instead, or one of the numerical integration functions in `scipy.integrate`.
+    self._yy /= np.trapz(self._yy, self.xx)
+
+tests/gw/test_gw_result.py::test_no_exact_route_raises_with_the_way_out[False]
+tests/gw/test_gw_result.py::test_no_exact_route_raises_with_the_way_out[True]
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:1043: UserWarning: use_dft_phase_decomposition is set, but ell_max cannot be determined for IMRPhenomXP_NRTidalv3 (no mode_list, no DEFAULT_ELL_MAX entry). Falling back to the individual-mode path.
+    warnings.warn(
+
+tests/gw/test_gw_result.py::test_calibration_and_synthetic_phase_run_as_one_chain
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/tests/gw/test_gw_result.py:958: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:213.)
+    given = {k: torch.as_tensor(inside[k].to_numpy()) for k in theta_keys + recalib}
+
+tests/gw/test_injection.py::test_signal_m_EOB
+tests/gw/waveform_generator/test_wfg_m.py::test_generate_hplus_hcross_m[SEOBNRv4PHM]
+tests/gw/waveform_generator/test_wfg_mfd.py::test_decimation_m[SEOBNRv4PHM]
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:1043: UserWarning: use_dft_phase_decomposition is set, but ell_max cannot be determined for SEOBNRv4PHM (no mode_list, no DEFAULT_ELL_MAX entry). Falling back to the individual-mode path.
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-2.6190948220230255e+30, -1.9991799351150734e+30, 0.18275018092107723, -0.38289867244092385, 0.7008820622113835, -0.041820679823980064, -0.04690902289134121, 0.09222213546154488, 3.085677581491367e+24, 0.881485012574369, 5.0034529548196325, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-2.9660877650378095e+30, -1.781645477089804e+30, 0.03255535439625366, -0.014526887468300526, 1.93764193367859e-06, 0.6262956593444338, -0.2936947409536037, -0.3172153905069976, 3.085677581491367e+24, 2.2482117697702626, 1.4491677387649573, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-6.27782418376513e+30, -9.692168177391618e+29, -0.006525109342351059, 0.010725969753529142, -0.006357517193373332, 0.11772239603164604, -0.7083010856307148, 0.47204331225194746, 3.085677581491367e+24, 1.416341733041632, 3.6463359209130526, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-2.9710080302449505e+30, -1.778975933028615e+30, 0.03623464210258866, 0.04536955434872864, 0.0032216147145165946, -0.4248550842381487, 0.2238409196395776, 0.5884753108938627, 3.085677581491367e+24, 0.6564383587524001, 5.919471253635685, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-3.2865532331570524e+30, -1.6263552009057993e+30, -0.014012753220389336, 0.04768281138864056, -0.03121186624745681, 0.008478811297481473, 0.013075554532448576, 0.44915145154539354, 3.085677581491367e+24, 1.8561164783004553, 0.662846390572469, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-6.387884330248287e+30, -9.567754768854374e+29, -0.14786634869602241, 0.08122304568205922, -0.2516803236691522, 0.2630676096389304, -0.025754114779696465, -0.14808506382715186, 3.085677581491367e+24, 1.4862696739979717, 3.95280309438121, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-2.3034948758635585e+30, -2.2648673893027705e+30, -0.13837161068482845, 0.04971274474114633, 0.133751651036866, 0.6080330208685362, 0.5702960566080304, 0.12801778688863383, 3.085677581491367e+24, 0.9684213971135951, 6.252375740920343, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-2.3531977354070347e+30, -2.2173901676307668e+30, -0.8408844792921372, 0.0698219629991625, 0.0188276305815521, -0.12380331785395154, -0.47314187236978683, -0.06984118774273687, 3.085677581491367e+24, 2.226786254644432, 0.7221430327460431, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-3.72001088872988e+30, -1.4626852744436812e+30, 0.5577611447229612, -0.27195285027817623, -0.37254191992345664, -0.16874886697234312, -0.4704180610614516, 0.3869089641197003, 3.085677581491367e+24, 1.2670179015003864, 4.251231222230473, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-2.9876328253674484e+30, -1.7700294778130955e+30, 0.05926238699007912, -0.1821598448302234, 0.27506411502699873, -0.4618066090177894, 0.6387589674994737, 0.151568074528033, 3.085677581491367e+24, 2.2703482577779464, 4.451633543531379, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-2.5073248576776474e+30, -2.084268795722874e+30, -0.11674927423639325, 0.1822756216237026, -0.1422918886134929, 0.18296711712202396, -0.6762675481436011, 0.08711040076364897, 3.085677581491367e+24, 1.21790939684143, 0.9036808375337698, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-3.446775302034091e+30, -1.5606347136315654e+30, -0.7714382616873663, 0.046973570380391384, 0.346020003477047, -0.048640773439165466, 0.09669560728820145, -0.016542797531207867, 3.085677581491367e+24, 1.1695596195952163, 4.201742759418627, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-4.204500548771191e+30, -1.3221567577390753e+30, 0.5535159330661643, -0.5783889162132732, 0.24120746045900127, 0.15581092603611044, 0.13676158912561467, 0.11823162195103464, 3.085677581491367e+24, 1.4324801276296233, 0.8593341944695003, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-3.6477048036977e+30, -1.48706704513229e+30, 0.38021254618893935, 0.15559068075118218, 0.18089143667691704, 0.47889943470310475, -0.33104851190899526, -0.36704847388509887, 3.085677581491367e+24, 1.0335852969118968, 4.753023033176108, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/test_waveform_dataset.py::test_wfd_size
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:510: UserWarning: Evaluating the waveform failed with error: Internal function call failed: Input domain error
+  The parameters were (-2.4034081128069113e+30, -2.171796733789189e+30, -0.36603651090260614, -0.7764307766554869, 0.10539155585131318, -0.05802546151651516, 0.7439249615550513, 0.006533435282228464, 3.085677581491367e+24, 2.3363956853639336, 1.9868805927936632, 0.0, 0.0, 0.0, 1.0, 10.0, 1024.0, 20.0, None, 79)
+  
+    warnings.warn(
+
+tests/gw/transforms/test_waveform_transforms.py::test_DecimateWaveformsAndASDS_infinite_asd
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/tests/gw/transforms/test_waveform_transforms.py:407: RuntimeWarning: invalid value encountered in divide
+    waveform[partial], (domain.decimate(strain * covered) / coverage)[partial]
+
+tests/gw/waveform_generator/test_wfg.py::test_waveform_generator_FD_f_max_failure
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:954: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(8193 vs 7169). Truncating lalsim array.
+    warnings.warn(
+
+tests/gw/waveform_generator/test_wfg_mfd.py::test_decimation[IMRPhenomXPHM]
+tests/gw/waveform_generator/test_wfg_mfd.py::test_decimation[SEOBNRv4PHM]
+tests/gw/waveform_generator/test_wfg_mfd.py::test_decimation_m[IMRPhenomXPHM]
+  /local/kailibryan.doney/dingo-tests.RCgUpW/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:954: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(32769 vs 16608). Truncating lalsim array.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+--- generated xml file: /local/kailibryan.doney/dingo-tests.RCgUpW/junit.xml ---
+=========================== short test summary info ============================
+FAILED tests/core/test_compile.py::TestResetGraphsOnRequiresGradChange::test_unfreeze_without_reset_gives_no_gradient
+FAILED tests/gw/waveform_generator/test_wfg_tidal.py::test_tidal_prior_defaults
+SKIPPED [1] tests/asimov/test_network_choice.py:12: Could not import Asimov.
+SKIPPED [1] tests/core/test_amp.py:125: CUDA not available
+SKIPPED [1] tests/core/test_amp.py:132: CUDA not available
+SKIPPED [1] tests/core/test_amp.py:138: CUDA not available
+SKIPPED [1] tests/core/test_compile.py:141: requires the static-shape RQ spline (glasflow compile-friendly-rqs fork)
+SKIPPED [1] tests/core/test_factors.py:740: needs an accelerator (MPS) for mixed devices
+SKIPPED [1] tests/core/test_factors.py:860: needs CUDA
+SKIPPED [1] tests/gw/test_likelihood_phase_grid.py:106: pyseobnr is not installed
+SKIPPED [1] tests/gw/test_likelihood_phase_grid.py:138: pyseobnr is not installed
+SKIPPED [1] tests/gw/test_likelihood_phase_grid.py:148: pyseobnr is not installed
+SKIPPED [1] tests/gw/test_likelihood_phase_grid.py:179: pyseobnr is not installed
+SKIPPED [1] tests/gw/test_likelihood_phase_grid.py:211: pyseobnr is not installed
+SKIPPED [1] tests/gw/test_likelihood_phase_grid.py:231: pyseobnr is not installed
+SKIPPED [1] tests/gw/waveform_generator/test_wfg_m.py:594: needs LALSimulation with XLALSimInspiralFDMultiPhase
+= 2 failed, 908 passed, 14 skipped, 4 deselected, 1199 warnings in 1492.11s (0:24:52) =

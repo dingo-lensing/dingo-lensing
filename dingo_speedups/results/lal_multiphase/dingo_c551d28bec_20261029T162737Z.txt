@@ -1,0 +1,52 @@
+INFO:    underlay of /etc/localtime required more than 50 (79) bind mounts
+/local/kailibryan.doney/dingo-multiphase.SWJR8L/dingo_c551d28bec/dingo/gw/domains/base_frequency_domain.py:150: SyntaxWarning: invalid escape sequence '\p'
+  Convention: the phase $\phi(f)$ is defined via $\exp[- i \phi(f)]$.
+/local/kailibryan.doney/dingo-multiphase.SWJR8L/dingo_c551d28bec/dingo/gw/transforms/gnpe_transforms.py:35: SyntaxWarning: invalid escape sequence '\h'
+  \hat g ~ p(\hat g | g).
+PyCBC.libutils: pkg-config call failed, setting NO_PKGCONFIG=1
+/local/kailibryan.doney/dingo-multiphase.SWJR8L/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:954: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+Fatal Python error: Segmentation fault
+
+Current thread 0x00007fa977ac2740 (most recent call first):
+  File "/local/kailibryan.doney/dingo-multiphase.SWJR8L/dingo_c551d28bec/tests/gw/waveform_generator/test_wfg_m.py", line 193 in _nrsur7dq4_data_available
+  File "/local/kailibryan.doney/dingo-multiphase.SWJR8L/dingo_c551d28bec/tests/gw/waveform_generator/test_wfg_m.py", line 216 in <module>
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/assertion/rewrite.py", line 188 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1395 in _gcd_import
+  File "/opt/dingo_env/lib/python3.13/importlib/__init__.py", line 88 in import_module
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/pathlib.py", line 596 in import_path
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/python.py", line 508 in importtestmodule
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/python.py", line 561 in _getobj
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/python.py", line 290 in obj
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/python.py", line 577 in _register_setup_module_fixture
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/python.py", line 564 in collect
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/runner.py", line 406 in collect
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/runner.py", line 361 in from_call
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/runner.py", line 408 in pytest_make_collect_report
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/runner.py", line 589 in collect_one_node
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/main.py", line 895 in _collect_one_node
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/main.py", line 1032 in genitems
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/main.py", line 869 in perform_collect
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/main.py", line 394 in pytest_collection
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/main.py", line 383 in _main
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/main.py", line 330 in wrap_session
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/main.py", line 377 in pytest_cmdline_main
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/opt/dingo_env/lib/python3.13/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/config/__init__.py", line 229 in _main
+  File "/opt/dingo_env/lib/python3.13/site-packages/_pytest/config/__init__.py", line 201 in main
+  File "/srv/sync/dingo_speedups/lal/check_dingo_multiphase.py", line 186 in main
+  File "/srv/sync/dingo_speedups/lal/check_dingo_multiphase.py", line 199 in <module>
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg, lal._lal, lalsimulation._lalsimulation, cython.cimports.libc.math, scipy._lib._ccallback_c, scipy.special._ufuncs_cxx, scipy.special._ellip_harm_2, scipy.special._special_ufuncs, scipy.special._gufuncs, scipy.special._ufuncs, charset_normalizer.md, charset_normalizer.cd, numpy.random._common, numpy.random.bit_generator, numpy.random._bounded_integers, numpy.random._pcg64, numpy.random._mt19937, numpy.random._generator, numpy.random._philox, numpy.random._sfc64, numpy.random.mtrand, scipy.special._specfun, scipy.special._comb, scipy.linalg._fblas, scipy.linalg._flapack, _cyutility, scipy._cyutility, scipy.linalg.cython_lapack, scipy.linalg._cythonized_array_utils, scipy.linalg._solve_toeplitz, scipy.linalg._decomp_lu_cython, scipy.linalg._matfuncs_schur_sqrtm, scipy.linalg._matfuncs_expm, scipy.linalg._linalg_pythran, scipy.linalg.cython_blas, scipy.linalg._decomp_update, scipy.sparse._sparsetools, _csparsetools, scipy.sparse._csparsetools, scipy.spatial._ckdtree, scipy._lib.messagestream, scipy.spatial._qhull, scipy.spatial._voronoi, scipy.spatial._hausdorff, scipy.spatial._distance_wrap, scipy.spatial.transform._rotation, scipy.spatial.transform._rigid_transform, scipy.sparse.linalg._dsolve._superlu, scipy.sparse.linalg._eigen.arpack._arpack, scipy.sparse.linalg._propack._spropack, scipy.sparse.linalg._propack._dpropack, scipy.sparse.linalg._propack._cpropack, scipy.sparse.linalg._propack._zpropack, scipy.optimize._group_columns, scipy.optimize._trlib._trlib, scipy.optimize._lbfgsb, _moduleTNC, scipy.optimize._moduleTNC, scipy.optimize._slsqplib, scipy.optimize._minpack, scipy.optimize._lsq.givens_elimination, scipy.optimize._zeros, scipy._lib._uarray._uarray, scipy.linalg._decomp_interpolative, scipy.optimize._bglu_dense, scipy.optimize._lsap, scipy.optimize._direct, scipy.integrate._odepack, scipy.integrate._quadpack, scipy.integrate._vode, scipy.integrate._dop, scipy.integrate._lsoda, scipy.interpolate._fitpack, scipy.interpolate._dfitpack, scipy.interpolate._dierckx, scipy.interpolate._ppoly, scipy.interpolate._interpnd, scipy.interpolate._rbfinterp_pythran, scipy.interpolate._rgi_cython, scipy.special.cython_special, scipy.stats._stats, scipy.stats._biasedurn, scipy.stats._stats_pythran, scipy.stats._levy_stable.levyst, scipy.stats._ansari_swilk_statistics, scipy.sparse.csgraph._tools, scipy.sparse.csgraph._shortest_path, scipy.sparse.csgraph._traversal, scipy.sparse.csgraph._min_spanning_tree, scipy.sparse.csgraph._flow, scipy.sparse.csgraph._matching, scipy.sparse.csgraph._reordering, scipy.stats._sobol, scipy.stats._qmc_cy, scipy.stats._rcont.rcont, scipy.stats._qmvnt_cy, scipy.ndimage._nd_image, scipy.ndimage._rank_filter_1d, _ni_label, scipy.ndimage._ni_label, pandas._libs._cyutility, pandas._libs.tslibs.ccalendar, pandas._libs.tslibs.np_datetime, pandas._libs.tslibs.dtypes, pandas._libs.tslibs.base, pandas._libs.tslibs.nattype, pandas._libs.tslibs.timezones, pandas._libs.properties, pandas._libs.tslibs.fields, pandas._libs.tslibs.timedeltas, pandas._libs.tslibs.tzconversion, pandas._libs.tslibs.timestamps, pandas._libs.tslibs.offsets, pandas._libs.tslibs.strptime, pandas._libs.tslibs.parsing, pandas._libs.tslibs.conversion, pandas._libs.tslibs.period, pandas._libs.tslibs.vectorized, pandas._libs.ops_dispatch, pandas._libs.missing, pandas._libs.hashtable, pandas._libs.algos, pandas._libs.interval, pandas._libs.lib, pandas._libs.ops, numexpr.interpreter, pandas._libs.hashing, pandas._libs.arrays, pandas._libs.tslib, pandas._libs.sparse, pandas._libs.internals, pandas._libs.indexing, pandas._libs.index, pandas._libs.writers, pandas._libs.join, pandas._libs.window.aggregations, pandas._libs.window.indexers, pandas._libs.reshape, pandas._libs.groupby, pandas._libs.json, pandas._libs.parsers, pandas._libs.testing, bilby_cython.time, bilby_cython.geometry, h5py._errors, h5py.defs, h5py._objects, h5py.h5, h5py.utils, h5py.h5t, h5py.h5s, h5py.h5ac, h5py.h5p, h5py.h5r, h5py._npystrings, h5py._proxy, h5py._conv, h5py.h5z, h5py.h5a, h5py.h5d, h5py.h5ds, h5py.h5g, h5py.h5i, h5py.h5o, h5py.h5f, h5py.h5fd, h5py.h5pl, h5py.h5l, h5py._selector, torch._C, torch._C._dynamo.autograd_compiler, torch._C._dynamo.eval_frame, torch._C._dynamo.guards, torch._C._dynamo.utils, torch._C._fft, torch._C._linalg, torch._C._nested, torch._C._nn, torch._C._sparse, torch._C._special, astropy.table._column_mixins, astropy.table._np_utils, yaml._yaml, astropy.io.ascii.cparser, astropy.utils.xml._iterparser, astropy.io.fits._utils, astropy.io.fits.hdu.compressed._compression, erfa.ufunc, astropy.time._parse_times, astropy.io.votable.fast_converters, astropy.io.votable.tablewriter, astropy.wcs._wcs, astropy.cosmology._src.flrw.scalar_inv_efuncs, requests.packages.charset_normalizer.md, requests.packages.chardet.md, requests.packages.charset_normalizer.cd, requests.packages.chardet.cd, markupsafe._speedups, PIL._imaging, kiwisolver._cext, scipy.signal._sigtools, scipy.signal._max_len_seq_inner, scipy.signal._upfirdn_apply, scipy.signal._spline, scipy.signal._sosfilt, scipy.signal._peak_finding_utils, PIL._imagingft, sklearn.__check_build._check_build, sklearn._cyutility, sklearn.utils._isfinite, sklearn.utils.sparsefuncs_fast, sklearn.utils.murmurhash, sklearn.utils._openmp_helpers, regex._regex, _cffi_backend, scipy.io.matlab._mio_utils, scipy.io.matlab._streams, scipy.io.matlab._mio5_utils (total: 219)
+/home/kailibryan.doney/dingo-lensing-sync/dingo_speedups/lal/../common.sh: line 52: 3298171 Segmentation fault      (core dumped) apptainer exec --cleanenv --contain "${binds[@]}" "$image" "$@"
