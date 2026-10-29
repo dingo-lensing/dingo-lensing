@@ -19,7 +19,12 @@ JOBS="${JOBS:-8}"
 ENV="$LALBUILD/env"
 SRC="$LALBUILD/lalsuite"
 PATCH="$SPEEDUPS/lal/xphm_multiphase.patch"
-PATCHED_FILES=(lalsimulation/lib/LALSimIMRPhenomXPHM.c lalsimulation/lib/LALSimIMR.h)
+PATCHED_FILES=(
+    lalsimulation/lib/LALSimIMRPhenomXPHM.c
+    lalsimulation/lib/LALSimIMR.h
+    lalsimulation/lib/LALSimInspiral.c
+    lalsimulation/lib/LALSimInspiral.h
+)
 # This LAL release's Python bindings do not build with SWIG 4.5 ("Fragment
 # '%swiglal_new_copy_array' not found"); numpy kept at a version of the same period.
 SWIG_PIN=4.3

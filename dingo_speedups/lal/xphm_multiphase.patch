@@ -836,3 +836,282 @@ index fa9a393..441bb71 100644
 +
 +  return XLAL_SUCCESS;
 +}
+diff --git a/lalsimulation/lib/LALSimInspiral.c b/lalsimulation/lib/LALSimInspiral.c
+index f30d351..89b30a2 100644
+--- a/lalsimulation/lib/LALSimInspiral.c
++++ b/lalsimulation/lib/LALSimInspiral.c
+@@ -34,6 +34,7 @@
+ #include <lal/LALStdlib.h>
+ #include <lal/LALString.h>
+ #include <lal/Sequence.h>
++#include <lal/SeqFactories.h>
+ #include <lal/TimeSeries.h>
+ #include <lal/FrequencySeries.h>
+ #include <lal/TimeFreqFFT.h>
+@@ -1399,6 +1400,254 @@ int XLALSimInspiralFD(
+     return ret;
+ }
+ 
++/* XLALSimInspiralFDMultiPhase by one XLALSimInspiralFD call per phase. */
++static int SimInspiralFDMultiPhaseByRepeatedCalls(
++    COMPLEX16FrequencySeries **hptilde,
++    COMPLEX16FrequencySeries **hctilde,
++    COMPLEX16VectorSequence **hptildes,
++    COMPLEX16VectorSequence **hctildes,
++    REAL8 m1, REAL8 m2,
++    REAL8 S1x, REAL8 S1y, REAL8 S1z,
++    REAL8 S2x, REAL8 S2y, REAL8 S2z,
++    REAL8 distance, REAL8 inclination,
++    const REAL8Vector *phiRef,
++    REAL8 longAscNodes, REAL8 eccentricity, REAL8 meanPerAno,
++    REAL8 deltaF, REAL8 f_min, REAL8 f_max, REAL8 f_ref,
++    LALDict *LALparams, Approximant approximant
++    )
++{
++    for (UINT4 p = 0; p < phiRef->length; p++) {
++        COMPLEX16FrequencySeries *hp = NULL;
++        COMPLEX16FrequencySeries *hc = NULL;
++        int ret = XLALSimInspiralFD(&hp, &hc, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, distance, inclination, phiRef->data[p], longAscNodes, eccentricity, meanPerAno, deltaF, f_min, f_max, f_ref, LALparams, approximant);
++        XLAL_CHECK(ret == XLAL_SUCCESS, XLAL_EFUNC);
++
++        const UINT4 n = hp->data->length;
++        if (p == 0) {
++            *hptildes = XLALCreateCOMPLEX16VectorSequence(phiRef->length, n);
++            *hctildes = XLALCreateCOMPLEX16VectorSequence(phiRef->length, n);
++            XLAL_CHECK(*hptildes && *hctildes, XLAL_ENOMEM);
++        }
++        XLAL_CHECK(n == (*hptildes)->vectorLength, XLAL_EBADLEN, "waveform lengths differ between reference phases");
++        memcpy((*hptildes)->data + p * n, hp->data->data, n * sizeof(COMPLEX16));
++        memcpy((*hctildes)->data + p * n, hc->data->data, n * sizeof(COMPLEX16));
++        if (p == 0) {
++            *hptilde = hp;
++            *hctilde = hc;
++        } else {
++            XLALDestroyCOMPLEX16FrequencySeries(hp);
++            XLALDestroyCOMPLEX16FrequencySeries(hc);
++        }
++    }
++    return XLAL_SUCCESS;
++}
++
++/*
++ * XLALSimInspiralFDMultiPhase for IMRPhenomXPHM. Follows XLALSimInspiralFD, that is
++ * generate_conditioned_fd_waveform_from_fd in LALSimInspiralGeneratorConditioning.c around
++ * the IMRPhenomXPHM case of XLALSimInspiralChooseFDWaveform_legacy in
++ * LALSimInspiralGeneratorLegacy.c, with XLALSimIMRPhenomXPHMMultiPhase in place of
++ * XLALSimIMRPhenomXPHM. The conditioning does not depend on the phase and is computed once.
++ */
++static int SimInspiralFDMultiPhaseIMRPhenomXPHM(
++    COMPLEX16FrequencySeries **hptilde,
++    COMPLEX16FrequencySeries **hctilde,
++    COMPLEX16VectorSequence **hptildes,
++    COMPLEX16VectorSequence **hctildes,
++    REAL8 m1, REAL8 m2,
++    REAL8 S1x, REAL8 S1y, REAL8 S1z,
++    REAL8 S2x, REAL8 S2y, REAL8 S2z,
++    REAL8 distance, REAL8 inclination,
++    const REAL8Vector *phiRef,
++    REAL8 longAscNodes,
++    REAL8 deltaF, REAL8 f_min, REAL8 f_max, REAL8 f_ref,
++    LALDict *LALparams
++    )
++{
++    const double extra_time_fraction = 0.1; /* fraction of waveform duration to add as extra time for tapering */
++    const double extra_cycles = 3.0; /* more extra time measured in cycles at the starting frequency */
++    double chirplen, deltaT, f_nyquist;
++    double tchirp, tmerge, textra, tshift;
++    double fstart, fisco, s;
++    size_t k, k0, k1;
++    int chirplen_exp;
++    size_t n;
++    int ret;
++
++    /* As generate_conditioned_fd_waveform_from_fd (the redshift is zero here) */
++    FIX_REFERENCE_FREQUENCY(f_ref, f_min, IMRPhenomXPHM);
++
++    f_nyquist = f_max;
++    if (deltaF != 0) {
++        n = round(f_max / deltaF);
++        if ((n & (n - 1))) { /* not a power of 2 */
++            frexp(n, &chirplen_exp);
++            f_nyquist = ldexp(1.0, chirplen_exp) * deltaF;
++            XLAL_PRINT_WARNING("f_max/deltaF = %g/%g = %g is not a power of two: changing f_max to %g", f_max, deltaF, f_max/deltaF, f_nyquist);
++        }
++    }
++    deltaT = 0.5 / f_nyquist;
++
++    fisco = 1.0 / (pow(9.0, 1.5) * LAL_PI * (m1 + m2) * LAL_MTSUN_SI / LAL_MSUN_SI);
++    if (f_min > fisco)
++        f_min = fisco;
++
++    tchirp = XLALSimInspiralChirpTimeBound(f_min, m1, m2, S1z, S2z);
++    s = XLALSimInspiralFinalBlackHoleSpinBound(S1z, S2z);
++    tmerge = XLALSimInspiralMergeTimeBound(m1, m2) + XLALSimInspiralRingdownTimeBound(m1 + m2, s);
++    textra = extra_cycles / f_min;
++    fstart = XLALSimInspiralChirpStartFrequencyBound((1.0 + extra_time_fraction) * tchirp, m1, m2);
++    tchirp = XLALSimInspiralChirpTimeBound(fstart, m1, m2, S1z, S2z);
++    chirplen = round((tchirp + tmerge + 2.0 * textra) / deltaT);
++    frexp(chirplen, &chirplen_exp);
++    chirplen = ldexp(1.0, chirplen_exp);
++    if (deltaF == 0.0)
++        deltaF = 1.0 / (chirplen * deltaT);
++    else if (deltaF > 1.0 / (chirplen * deltaT))
++        XLAL_PRINT_WARNING("Specified frequency interval of %g Hz is too large for a chirp of duration %g s", deltaF, chirplen * deltaT);
++
++    /* As XLALSimInspiralChooseFDWaveform_legacy for IMRPhenomXPHM, called from fstart */
++    FIX_REFERENCE_FREQUENCY(f_ref, fstart, IMRPhenomXPHM);
++    if (f_ref == 0.0)
++        f_ref = fstart;
++
++    COMPLEX16VectorSequence *hps = NULL;
++    COMPLEX16VectorSequence *hcs = NULL;
++    ret = XLALSimIMRPhenomXPHMMultiPhase(&hps, &hcs, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, distance, inclination, phiRef, fstart, f_max, deltaF, f_ref, LALparams);
++    if (ret == XLAL_FAILURE)
++        XLAL_ERROR(XLAL_EFUNC);
++
++    const size_t length = hps->vectorLength;
++    const UINT4 nphase = phiRef->length;
++
++    REAL8 polariz = longAscNodes;
++    if (polariz) {
++        COMPLEX16 tmpP, tmpC;
++        for (UINT4 p = 0; p < nphase; p++) {
++            COMPLEX16 *hp = hps->data + p * length;
++            COMPLEX16 *hc = hcs->data + p * length;
++            for (UINT4 idx = 0; idx < length; idx++) {
++                tmpP = hp[idx];
++                tmpC = hc[idx];
++                hp[idx] = cos(2. * polariz) * tmpP + sin(2. * polariz) * tmpC;
++                hc[idx] = cos(2. * polariz) * tmpC - sin(2. * polariz) * tmpP;
++            }
++        }
++    }
++
++    /* As generate_conditioned_fd_waveform_from_fd: taper between fstart and f_min, zero the
++     * Nyquist bin, shift backwards in time by tshift; the factors are the same for every phase */
++    k0 = round(fstart / deltaF);
++    k1 = round(f_min / deltaF);
++    tshift = round(tmerge / deltaT) * deltaT; /* integer number of time samples */
++    REAL8 *taper = XLALMalloc((k1 > k0 ? k1 - k0 : 1) * sizeof(REAL8));
++    COMPLEX16 *phasefacs = XLALMalloc(length * sizeof(COMPLEX16));
++    XLAL_CHECK(taper && phasefacs, XLAL_ENOMEM);
++    for (k = k0; k < k1; ++k)
++        taper[k - k0] = 0.5 - 0.5 * cos(LAL_PI * (k - k0) / (double)(k1 - k0));
++    for (k = 0; k < length; ++k)
++        phasefacs[k] = cexp(2.0 * LAL_PI * I * k * deltaF * tshift);
++
++    for (UINT4 p = 0; p < nphase; p++) {
++        COMPLEX16 *hp = hps->data + p * length;
++        COMPLEX16 *hc = hcs->data + p * length;
++        for (k = 0; k < k0; ++k) {
++            hp[k] = 0.0;
++            hc[k] = 0.0;
++        }
++        for ( ; k < k1; ++k) {
++            double w = taper[k - k0];
++            hp[k] *= w;
++            hc[k] *= w;
++        }
++        hp[length - 1] = 0.0;
++        hc[length - 1] = 0.0;
++        for (k = 0; k < length; ++k) {
++            double complex phasefac = phasefacs[k];
++            hp[k] *= phasefac;
++            hc[k] *= phasefac;
++        }
++    }
++    XLALFree(taper);
++    XLALFree(phasefacs);
++
++    /* The first phase as a frequency series, with the epoch of IMRPhenomXPHM (-1/deltaF) plus tshift */
++    LIGOTimeGPS epoch = LIGOTIMEGPSZERO;
++    XLAL_CHECK(XLALGPSAdd(&epoch, -1. / deltaF), XLAL_EFUNC);
++    XLAL_CHECK(XLALGPSAdd(&epoch, tshift), XLAL_EFUNC);
++    *hptilde = XLALCreateCOMPLEX16FrequencySeries("hptilde: FD waveform", &epoch, 0.0, deltaF, &lalStrainUnit, length);
++    *hctilde = XLALCreateCOMPLEX16FrequencySeries("hctilde: FD waveform", &epoch, 0.0, deltaF, &lalStrainUnit, length);
++    XLAL_CHECK(*hptilde && *hctilde, XLAL_ENOMEM);
++    XLALUnitMultiply(&((*hptilde)->sampleUnits), &((*hptilde)->sampleUnits), &lalSecondUnit);
++    XLALUnitMultiply(&((*hctilde)->sampleUnits), &((*hctilde)->sampleUnits), &lalSecondUnit);
++    memcpy((*hptilde)->data->data, hps->data, length * sizeof(COMPLEX16));
++    memcpy((*hctilde)->data->data, hcs->data, length * sizeof(COMPLEX16));
++
++    *hptildes = hps;
++    *hctildes = hcs;
++    return XLAL_SUCCESS;
++}
++
++/**
++ * @brief Generates the polarizations of XLALSimInspiralFD() at several reference phases
++ * @details The arguments are those of XLALSimInspiralFD(), with phiRef a vector of
++ * reference phases. hptilde and hctilde are the polarizations at the first phase, as
++ * XLALSimInspiralFD() returns them; hptildes and hctildes hold the polarizations at every
++ * phase, one row per phase.
++ *
++ * For IMRPhenomXPHM with default settings the polarizations come from
++ * XLALSimIMRPhenomXPHMMultiPhase(), conditioned as XLALSimInspiralFD() conditions them, and
++ * agree with one XLALSimInspiralFD() call per phase to round-off. Otherwise
++ * XLALSimInspiralFD() is called once per phase.
++ */
++int XLALSimInspiralFDMultiPhase(
++    COMPLEX16FrequencySeries **hptilde,     /**< [out] FD plus polarization at the first reference phase */
++    COMPLEX16FrequencySeries **hctilde,     /**< [out] FD cross polarization at the first reference phase */
++    COMPLEX16VectorSequence **hptildes,     /**< [out] FD plus polarization, one row per reference phase */
++    COMPLEX16VectorSequence **hctildes,     /**< [out] FD cross polarization, one row per reference phase */
++    REAL8 m1,                               /**< mass of companion 1 (kg) */
++    REAL8 m2,                               /**< mass of companion 2 (kg) */
++    REAL8 S1x,                              /**< x-component of the dimensionless spin of object 1 */
++    REAL8 S1y,                              /**< y-component of the dimensionless spin of object 1 */
++    REAL8 S1z,                              /**< z-component of the dimensionless spin of object 1 */
++    REAL8 S2x,                              /**< x-component of the dimensionless spin of object 2 */
++    REAL8 S2y,                              /**< y-component of the dimensionless spin of object 2 */
++    REAL8 S2z,                              /**< z-component of the dimensionless spin of object 2 */
++    REAL8 distance,                         /**< distance of source (m) */
++    REAL8 inclination,                      /**< inclination of source (rad) */
++    const REAL8Vector *phiRef,              /**< reference orbital phases (rad) */
++    REAL8 longAscNodes,                     /**< longitude of ascending nodes, degenerate with the polarization angle, Omega in documentation */
++    REAL8 eccentricity,                     /**< eccentricity at reference epoch */
++    REAL8 meanPerAno,                       /**< mean anomaly of periastron */
++    REAL8 deltaF,                           /**< sampling interval (Hz) */
++    REAL8 f_min,                            /**< starting GW frequency (Hz) */
++    REAL8 f_max,                            /**< ending GW frequency (Hz) */
++    REAL8 f_ref,                            /**< Reference frequency (Hz) */
++    LALDict *LALparams,                     /**< LAL dictionary containing accessory parameters */
++    Approximant approximant                 /**< post-Newtonian approximant to use for waveform production */
++    )
++{
++    XLAL_CHECK(hptilde && hctilde && hptildes && hctildes, XLAL_EFAULT);
++    XLAL_CHECK(*hptilde == NULL && *hctilde == NULL && *hptildes == NULL && *hctildes == NULL, XLAL_EINVAL, "outputs must be pointers to NULL");
++    XLAL_CHECK(phiRef != NULL && phiRef->length > 0, XLAL_EINVAL, "give at least one reference phase");
++
++    /* Settings under which XLALSimInspiralFD is the conditioned XLALSimIMRPhenomXPHM call of
++     * SimInspiralFDMultiPhaseIMRPhenomXPHM; anything else goes through XLALSimInspiralFD */
++    int shared = approximant == IMRPhenomXPHM
++        && XLALSimInspiralWaveformParamsLookupPhenomXPHMUseModes(LALparams) == 0
++        && XLALSimInspiralWaveformParamsLookupEnableLIV(LALparams) == 0
++        && XLALSimInspiralWaveformParamsFrameAxisIsDefault(LALparams)
++        && XLALSimInspiralWaveformParamsModesChoiceIsDefault(LALparams)
++        && XLALSimInspiralWaveformParamsLookupTidalLambda1(LALparams) == 0
++        && XLALSimInspiralWaveformParamsLookupTidalLambda2(LALparams) == 0
++        && XLALSimInspiralWaveformParamsNonGRAreDefault(LALparams)
++        && XLALSimInspiralWaveformParamsLookupRedshift(LALparams) == 0;
++
++    if (shared)
++        return SimInspiralFDMultiPhaseIMRPhenomXPHM(hptilde, hctilde, hptildes, hctildes, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, distance, inclination, phiRef, longAscNodes, deltaF, f_min, f_max, f_ref, LALparams);
++    return SimInspiralFDMultiPhaseByRepeatedCalls(hptilde, hctilde, hptildes, hctildes, m1, m2, S1x, S1y, S1z, S2x, S2y, S2z, distance, inclination, phiRef, longAscNodes, eccentricity, meanPerAno, deltaF, f_min, f_max, f_ref, LALparams, approximant);
++}
++
+ /**
+  * @deprecated Use XLALSimInspiralChooseTDWaveform() instead
+  *
+diff --git a/lalsimulation/lib/LALSimInspiral.h b/lalsimulation/lib/LALSimInspiral.h
+index 2954016..74c954b 100644
+--- a/lalsimulation/lib/LALSimInspiral.h
++++ b/lalsimulation/lib/LALSimInspiral.h
+@@ -563,6 +563,7 @@ int XLALSimInspiralPolarizationsFromChooseFDModes(COMPLEX16FrequencySeries **hpt
+ int XLALSimInspiralTD(REAL8TimeSeries **hplus, REAL8TimeSeries **hcross, REAL8 m1, REAL8 m2, REAL8 S1x, REAL8 S1y, REAL8 S1z, REAL8 S2x, REAL8 S2y, REAL8 S2z, REAL8 distance, REAL8 inclination, REAL8 phiRef, REAL8 longAscNodes, REAL8 eccentricity, REAL8 meanPerAno, REAL8 deltaT, REAL8 f_min, REAL8 f_ref, LALDict *LALparams, Approximant approximant);
+ SphHarmTimeSeries * XLALSimInspiralTDModesFromPolarizations(REAL8 m1, REAL8 m2, REAL8 S1x, REAL8 S1y, REAL8 S1z, REAL8 S2x, REAL8 S2y, REAL8 S2z, REAL8 distance, REAL8 phiRef, REAL8 longAscNodes, REAL8 eccentricity, REAL8 meanPerAno, REAL8 deltaT, REAL8 f_min, REAL8 f_ref, LALDict *LALparams, Approximant approximant);
+ int XLALSimInspiralFD(COMPLEX16FrequencySeries **hptilde, COMPLEX16FrequencySeries **hctilde, REAL8 m1, REAL8 m2, REAL8 S1x, REAL8 S1y, REAL8 S1z, REAL8 S2x, REAL8 S2y, REAL8 S2z, REAL8 distance, REAL8 inclination, REAL8 phiRef, REAL8 longAscNodes, REAL8 eccentricity, REAL8 meanPerAno, REAL8 deltaF, REAL8 f_min, REAL8 f_max, REAL8 f_ref, LALDict *LALparams, Approximant approximant);
++int XLALSimInspiralFDMultiPhase(COMPLEX16FrequencySeries **hptilde, COMPLEX16FrequencySeries **hctilde, COMPLEX16VectorSequence **hptildes, COMPLEX16VectorSequence **hctildes, REAL8 m1, REAL8 m2, REAL8 S1x, REAL8 S1y, REAL8 S1z, REAL8 S2x, REAL8 S2y, REAL8 S2z, REAL8 distance, REAL8 inclination, const REAL8Vector *phiRef, REAL8 longAscNodes, REAL8 eccentricity, REAL8 meanPerAno, REAL8 deltaF, REAL8 f_min, REAL8 f_max, REAL8 f_ref, LALDict *LALparams, Approximant approximant);
+ int XLALSimInspiralChooseWaveform(REAL8TimeSeries **hplus, REAL8TimeSeries **hcross, const REAL8 m1, const REAL8 m2, const REAL8 s1x, const REAL8 s1y, const REAL8 s1z, const REAL8 s2x, const REAL8 s2y, const REAL8 s2z, const REAL8 inclination, const REAL8 phiRef, const REAL8 distance, const REAL8 longAscNodes, const REAL8 eccentricity, const REAL8 meanPerAno, const REAL8 deltaT, const REAL8 f_min, const REAL8 f_ref, LALDict *LALpars, const Approximant approximant);
+ /* DEPRECATED */
+ 

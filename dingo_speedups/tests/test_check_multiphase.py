@@ -82,15 +82,22 @@ class TestPatch(unittest.TestCase):
     def setUp(self):
         self.lines = PATCH.read_text(encoding="utf-8").splitlines()
 
-    def test_only_adds_code_to_the_two_files(self):
+    def test_only_adds_code_to_the_four_files(self):
         removed = [line for line in self.lines if line.startswith("-") and not line.startswith("---")]
         self.assertEqual(removed, [])
         files = [line.split(" b/")[-1] for line in self.lines if line.startswith("diff --git")]
-        self.assertEqual(files, ["lalsimulation/lib/LALSimIMR.h", "lalsimulation/lib/LALSimIMRPhenomXPHM.c"])
+        expected = [
+            "lalsimulation/lib/LALSimIMR.h",
+            "lalsimulation/lib/LALSimIMRPhenomXPHM.c",
+            "lalsimulation/lib/LALSimInspiral.c",
+            "lalsimulation/lib/LALSimInspiral.h"
+        ]
+        self.assertEqual(files, expected)
 
-    def test_declares_the_function_and_keeps_lals_real_steps_by_default(self):
+    def test_declares_the_functions_and_keeps_lals_real_steps_by_default(self):
         added = [line[1:] for line in self.lines if line.startswith("+") and not line.startswith("+++")]
         self.assertIn("int XLALSimIMRPhenomXPHMMultiPhase(", added)
+        self.assertTrue(any(line.startswith("int XLALSimInspiralFDMultiPhase(") for line in added))
         # IMRPhenomXPHM_hplushcross keeps only the real parts of the steps; the default path must too.
         self.assertIn("      REAL8 Omega_alpha, Omega_epsilon, Omega_betah, Qalpha, Qepsilon, Qbetah;", added)
         self.assertIn("            cexp_i_alpha[fine_count]   = Qalpha*cexp_i_alpha[fine_count-1];", added)

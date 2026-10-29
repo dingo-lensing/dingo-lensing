@@ -13,6 +13,10 @@ two (max |dh| / max |h| over frequency, for h+ and hx), and the time of nine sin
 against one call of the new function. A shared case must agree to --rtol (default 1e-10) and
 not exactly; a case handed to single calls must agree exactly.
 
+On the DINGO samples it also checks XLALSimInspiralFDMultiPhase, the level DINGO calls, against
+one XLALSimInspiralFD call per phase: the rows to --rtol, the first phase's frequency series
+(epoch, deltaF, f0, length) exactly, another approximant's fallback exactly, and the time.
+
 Also, for scale: the release LAL's polarisations in the dump against this build's, and, on the
 DINGO samples, the mismatch of the default multibanded Euler angles, and of the same with
 complex steps between coarse frequencies (MultiPhaseComplexQ), against angles evaluated at
@@ -297,6 +301,58 @@ def main(argv=None) -> int:
                 }
             }
 
+        # The same at the level DINGO calls: SimInspiralFDMultiPhase against SimInspiralFD.
+        def fd_tail(a, approximant):
+            # longAscNodes, eccentricity, meanPerAno, deltaF, f_min, f_max, f_ref, dictionary, approximant
+            return (0.0, 0.0, 0.0, a[12], a[10], a[11], a[13], None, approximant)
+
+        def fd_single(a, phase_list, approximant):
+            hp, hc, first = [], [], None
+            for phase in phase_list:
+                p, c = LS.SimInspiralFD(*a[:10], float(phase), *fd_tail(a, approximant))
+                first = p if first is None else first
+                hp.append(p.data.data.copy())
+                hc.append(c.data.data.copy())
+            return np.array(hp), np.array(hc), first
+
+        def fd_multi(a, phase_list, approximant):
+            vector = lal.CreateREAL8Vector(len(phase_list))
+            vector.data[:] = np.asarray(phase_list, dtype=float)
+            p0, _, p, c = LS.SimInspiralFDMultiPhase(*a[:10], vector, *fd_tail(a, approximant))
+            return np.array(p.data, copy=True), np.array(c.data, copy=True), p0
+
+        def metadata(series):
+            epoch = series.epoch
+            return (epoch.gpsSeconds, epoch.gpsNanoSeconds, series.deltaF, series.f0, series.data.length)
+
+        fd_differences, fd_metadata, fd_single_times, fd_multi_times = [], [], [], []
+        for a in sample_args:
+            hp1, hc1, first = fd_single(a, phases, LS.IMRPhenomXPHM)
+            hp9, hc9, first9 = fd_multi(a, phases, LS.IMRPhenomXPHM)
+            fd_differences.append(max(relative_difference(hp1, hp9), relative_difference(hc1, hc9)))
+            same_series = metadata(first) == metadata(first9) and np.array_equal(first9.data.data, hp9[0])
+            fd_metadata.append(same_series)
+            fd_single_times.append(best_time(lambda: fd_single(a, phases, LS.IMRPhenomXPHM), args.repeats))
+            fd_multi_times.append(best_time(lambda: fd_multi(a, phases, LS.IMRPhenomXPHM), args.repeats))
+        fallback = []
+        for a in sample_args[:3]:
+            hp1, hc1, first = fd_single(a, phases, LS.IMRPhenomXP)
+            hp9, hc9, first9 = fd_multi(a, phases, LS.IMRPhenomXP)
+            exact = relative_difference(hp1, hp9) == 0.0 and relative_difference(hc1, hc9) == 0.0
+            fallback.append(exact and metadata(first) == metadata(first9))
+        report["fd_level"] = {
+            "n": len(fd_differences),
+            "max_difference": max(fd_differences),
+            "exact": sum(d == 0.0 for d in fd_differences),
+            "first_phase_series_identical": all(fd_metadata),
+            "fallback_IMRPhenomXP_exact": all(fallback),
+            "time_nine_SimInspiralFD_ms": summarise([1e3 * t for t in fd_single_times]),
+            "time_SimInspiralFDMultiPhase_ms": summarise([1e3 * t for t in fd_multi_times]),
+            "speedup_nine_phases": summarise([s / m for s, m in zip(fd_single_times, fd_multi_times)])
+        }
+        if not (max(fd_differences) <= args.rtol and all(fd_metadata) and all(fallback)):
+            failures.append({"name": "fd_level", "report": report["fd_level"]})
+
         angle = {
             "default_vs_exact": [],
             "complex_q_vs_exact": [],
@@ -345,7 +401,7 @@ def main(argv=None) -> int:
         f"random: {r['n']} sets, max rel. difference {r['max_difference']:.2e},",
         f"{r['exact']} exact, {len(r['failures'])} failed"
     )
-    for key in ("dingo_samples", "release_vs_this_build", "angle_multibanding"):
+    for key in ("dingo_samples", "fd_level", "release_vs_this_build", "angle_multibanding"):
         if key in report:
             shown = {k: v for k, v in report[key].items() if k not in ("failures", "file")}
             print(key, json.dumps(shown, indent=1))
