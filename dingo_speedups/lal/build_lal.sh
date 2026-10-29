@@ -61,7 +61,9 @@ step "Configure (LAL and LALSimulation only, Python bindings)"
 cd "$SRC"
 [[ -x configure ]] || ./00boot
 # No HDF5: XPHM does not use it, and HDF5 2's multi-line link flags break libtool's link of
-# liblalsupport. C17 rather than GCC 15's default C23, as LALSuite is usually compiled.
+# liblalsupport. C17 rather than GCC 15's default C23, as LALSuite is usually compiled. An explicit
+# CFLAGS replaces autoconf's default -g -O2, so that default is kept when conda sets none.
+DEFAULT_CFLAGS="-g -O2"
 CONFIGURE_ARGS=(
     --prefix="$ENV"
     --disable-all-lal
@@ -71,7 +73,7 @@ CONFIGURE_ARGS=(
     --disable-gcc-flags
     --with-hdf5=no
     PYTHON="$ENV/bin/python"
-    "CFLAGS=${CFLAGS:-} -std=gnu17"
+    "CFLAGS=${CFLAGS:-$DEFAULT_CFLAGS} -std=gnu17"
 )
 STAMP="$LALBUILD/configure_args.txt"
 # Configure fixes the SWIG version the bindings require, so new tools also mean a new configuration.
