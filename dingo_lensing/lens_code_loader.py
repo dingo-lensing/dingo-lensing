@@ -6,7 +6,8 @@ from typing import Any, Dict, Optional
 
 _LENS_CODE_MODULES = {
     "modwaveforms": "dingo_lensing.modwaveforms_amplification",
-    "gravelamps": "dingo_lensing.gravelamps_amplification"
+    "gravelamps": "dingo_lensing.gravelamps_amplification",
+    "gwlens": "dingo_lensing.gwlens_amplification",
 }
 # FIXME: To integrate another lensing code, add a package-specific
 # <code>_amplification.py module exposing get_model(amplification_factor_function,
