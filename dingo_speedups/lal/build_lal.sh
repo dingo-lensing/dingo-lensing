@@ -105,8 +105,9 @@ import lalsimulation as ls
 
 print("lal", lal.__version__, lal.__file__)
 print("lalsimulation", ls.__version__, ls.__file__)
-assert hasattr(ls, "SimIMRPhenomXPHMMultiPhase"), "the patched function is missing"
-print("SimIMRPhenomXPHMMultiPhase: present")
+for name in ("SimIMRPhenomXPHMMultiPhase", "SimInspiralFDMultiPhase"):
+    assert hasattr(ls, name), f"the patched function {name} is missing"
+    print(f"{name}: present")
 EOF
 {
     echo "tag $LAL_TAG"
@@ -120,4 +121,4 @@ EOF
 cat "$LALBUILD/BUILT.txt"
 
 step "Done"
-echo "Next: bash $SPEEDUPS/lal/run_multiphase_check.sh"
+echo "Next: bash $SPEEDUPS/lal/run_multiphase_check.sh, then bash $SPEEDUPS/lal/run_check_dingo_multiphase.sh"
