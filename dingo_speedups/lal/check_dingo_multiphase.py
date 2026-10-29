@@ -10,8 +10,9 @@ the LAL and LALSimulation of build_lal.sh first on sys.path (--lal-site), on one
 For --num-samples network samples it compares the m-components (generate_hplus_hcross_m)
 and the per-sample terms of the synthetic phase (likelihood.phase_grid_terms) from the
 one-call route with those of the repeated calls (LS.SimInspiralFDMultiPhase hidden), checks
-that the one-call route was taken, and times both. Then it runs the IMRPhenomXPHM DFT
-tests of the tree's tests/gw/waveform_generator/test_wfg_m.py with this LAL.
+that the one-call route was taken, and times both. Then it runs the tree's whole
+tests/gw/waveform_generator/test_wfg_m.py with this LAL: Every IMRPhenomXPHM test of the
+DFT route there takes the one-call route, and the other generators must keep their own.
 
 Exit code 0 if the two routes agree to --rtol and the tests pass, 1 otherwise, 2 if the
 LAL is not build_lal.sh's or the guard refused.
@@ -36,7 +37,6 @@ for folder in (HERE, HERE.parent):
 import guard  # noqa: E402
 
 DINGO_TESTS = "tests/gw/waveform_generator/test_wfg_m.py"
-DINGO_TEST_SELECTION = "IMRPhenomXPHM and (dft or multi_phase or one_call)"
 
 
 def summarise(values) -> dict:
@@ -72,7 +72,7 @@ def main(argv=None) -> int:
     parser.add_argument("--num-samples", type=int, default=50)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--rtol", type=float, default=1e-10)
-    parser.add_argument("--skip-tests", action="store_true", help="Do not run the tree's DFT tests")
+    parser.add_argument("--skip-tests", action="store_true", help="Do not run the tree's test_wfg_m.py")
     parser.add_argument("--output", required=True)
     args = parser.parse_args(argv)
 
@@ -183,12 +183,8 @@ def main(argv=None) -> int:
         import pytest
 
         os.chdir(args.tree)
-        code = pytest.main([DINGO_TESTS, "-q", "-p", "no:cacheprovider", "-k", DINGO_TEST_SELECTION])
-        report["dingo_tests"] = {
-            "file": DINGO_TESTS,
-            "selection": DINGO_TEST_SELECTION,
-            "exit_code": int(code)
-        }
+        code = pytest.main([DINGO_TESTS, "-q", "-p", "no:cacheprovider", "-rfEs"])
+        report["dingo_tests"] = {"file": DINGO_TESTS, "exit_code": int(code)}
         tests_passed = int(code) == 0
 
     report["ok"] = bool(agree and tests_passed)

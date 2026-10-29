@@ -2,7 +2,7 @@
 # Step 5.6: Runs check_dingo_multiphase.py in the dependencies-only image on this access point,
 # with build_lal.sh's LAL and LALSimulation bound in at their own path and put first: DINGO's
 # one-call route against its nine-call route on the 2.1 run's network samples, and the tree's
-# XPHM DFT tests. One process, OMP_NUM_THREADS=1. Writes results/lal_multiphase/.
+# test_wfg_m.py. One process, OMP_NUM_THREADS=1. Writes results/lal_multiphase/.
 #
 #     bash ~/dingo-lensing-sync/dingo_speedups/lal/run_check_dingo_multiphase.sh [DINGO_COMMIT]
 #
