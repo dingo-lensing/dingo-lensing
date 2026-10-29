@@ -1,0 +1,2 @@
+# The patch applies to LAL's LF sources byte for byte, so it is checked out with LF on Windows too.
+*.patch text eol=lf
