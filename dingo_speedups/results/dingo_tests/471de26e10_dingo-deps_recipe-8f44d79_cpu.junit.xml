@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="4.512" timestamp="2026-11-02T01:23:37.633195-08:00" hostname="ldas-grid"><testcase classname="tests.core.test_compile.TestResetGraphsOnRequiresGradChange" name="test_unfreeze_without_reset_gives_no_gradient" time="2.170"><failure message="assert tensor([[ 0.0752,  0.0922,  0.0850, -0.0667],\n        [-0.7329, -0.8984, -0.8289,  0.6507],\n        [ 0.2419,  0.2965,...0.9034, -0.8335,  0.6543],\n        [ 0.9020,  1.1057,  1.0201, -0.8008],\n        [ 0.8382,  1.0275,  0.9480, -0.7441]]) is None&#10; +  where tensor([[ 0.0752,  0.0922,  0.0850, -0.0667],\n        [-0.7329, -0.8984, -0.8289,  0.6507],\n        [ 0.2419,  0.2965,...0.9034, -0.8335,  0.6543],\n        [ 0.9020,  1.1057,  1.0201, -0.8008],\n        [ 0.8382,  1.0275,  0.9480, -0.7441]]) = Parameter containing:\ntensor([[-0.0037,  0.2682, -0.4115, -0.3680],\n        [-0.1926,  0.1341, -0.0099,  0.3964],\n    ...3742],\n        [-0.0806,  0.0529,  0.4527, -0.4638],\n        [-0.3148, -0.1266, -0.1949,  0.4320]], requires_grad=True).grad&#10; +    where Parameter containing:\ntensor([[-0.0037,  0.2682, -0.4115, -0.3680],\n        [-0.1926,  0.1341, -0.0099,  0.3964],\n    ...3742],\n        [-0.0806,  0.0529,  0.4527, -0.4638],\n        [-0.3148, -0.1266, -0.1949,  0.4320]], requires_grad=True) = Linear(in_features=4, out_features=8, bias=True).weight">self = &lt;test_compile.TestResetGraphsOnRequiresGradChange object at 0x7fd614ff42d0&gt;
+
+    def test_unfreeze_without_reset_gives_no_gradient(self):
+        net = self._net()
+        self._set_rb(net, False)
+        compiled = torch.compile(net, backend="aot_eager")
+        x = torch.randn(8, 4)
+        compiled(x).sum().backward()
+        self._set_rb(net, True)
+        net.zero_grad(set_to_none=True)
+        compiled(x).sum().backward()
+&gt;       assert net[0].weight.grad is None  # the bug this module guards against
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert tensor([[ 0.0752,  0.0922,  0.0850, -0.0667],\n        [-0.7329, -0.8984, -0.8289,  0.6507],\n        [ 0.2419,  0.2965,...0.9034, -0.8335,  0.6543],\n        [ 0.9020,  1.1057,  1.0201, -0.8008],\n        [ 0.8382,  1.0275,  0.9480, -0.7441]]) is None
+E        +  where tensor([[ 0.0752,  0.0922,  0.0850, -0.0667],\n        [-0.7329, -0.8984, -0.8289,  0.6507],\n        [ 0.2419,  0.2965,...0.9034, -0.8335,  0.6543],\n        [ 0.9020,  1.1057,  1.0201, -0.8008],\n        [ 0.8382,  1.0275,  0.9480, -0.7441]]) = Parameter containing:\ntensor([[-0.0037,  0.2682, -0.4115, -0.3680],\n        [-0.1926,  0.1341, -0.0099,  0.3964],\n    ...3742],\n        [-0.0806,  0.0529,  0.4527, -0.4638],\n        [-0.3148, -0.1266, -0.1949,  0.4320]], requires_grad=True).grad
+E        +    where Parameter containing:\ntensor([[-0.0037,  0.2682, -0.4115, -0.3680],\n        [-0.1926,  0.1341, -0.0099,  0.3964],\n    ...3742],\n        [-0.0806,  0.0529,  0.4527, -0.4638],\n        [-0.3148, -0.1266, -0.1949,  0.4320]], requires_grad=True) = Linear(in_features=4, out_features=8, bias=True).weight
+
+tests/core/test_compile.py:182: AssertionError</failure></testcase><testcase classname="tests.gw.waveform_generator.test_wfg_tidal" name="test_tidal_prior_defaults" time="0.002"><failure message="KeyError: 'mass_1'">def test_tidal_prior_defaults():
+        """The `default` priors for lambda_1/lambda_2 expand to Uniform(0, 5000)."""
+        np.random.seed(42)
+        prior = build_prior_with_defaults({"lambda_1": "default", "lambda_2": "default"})
+&gt;       sample = prior.sample()
+                 ^^^^^^^^^^^^^^
+
+tests/gw/waveform_generator/test_wfg_tidal.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/dingo_env/lib/python3.13/site-packages/bilby/core/prior/dict.py:378: in sample
+    return self.sample_subset_constrained(keys=list(self.keys()), size=size)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/dingo_env/lib/python3.13/site-packages/bilby/core/prior/dict.py:459: in sample_subset_constrained
+    is_valid = self.evaluate_constraints(sample)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/dingo_env/lib/python3.13/site-packages/bilby/core/prior/dict.py:57: in evaluate_constraints
+    out_sample = self.conversion_function(sample)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/dingo_env/lib/python3.13/site-packages/bilby/gw/prior.py:1019: in default_conversion_function
+    out_sample = generate_mass_parameters(out_sample)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+sample = {'lambda_1': 3184.8084366072717, 'lambda_2': 1348.9335688193516, 'phi_jl': 0.0, 'phi_12': 0.0}
+source = False
+
+    def generate_mass_parameters(sample, source=False):
+        """
+        Add the known mass parameters to the data frame/dictionary.  We do
+        not recompute keys already present in the dictionary
+    
+        We add, potentially:
+            chirp_mass, total_mass, symmetric_mass_ratio, mass_ratio, mass_1, mass_2
+        Or if source=True:
+            chirp_mass_source, total_mass_source, symmetric_mass_ratio, mass_ratio, mass_1_source, mass_2_source
+    
+        Parameters
+        ==========
+        sample : dict
+            The input dictionary with two "spanning" mass parameters
+            e.g. (mass_1, mass_2), or (chirp_mass, mass_ratio), but not e.g. only
+            (mass_ratio, symmetric_mass_ratio)
+        source : bool, default False
+            If True, then perform the conversions for source mass parameters
+            i.e. mass_1_source instead of mass_1
+    
+        Returns
+        =======
+        dict: The updated dictionary
+    
+        """
+        # Only add the parameters if they're not already present
+        intermediate_sample = generate_component_masses(sample, source=source)
+        output_sample = intermediate_sample.copy()
+    
+        if source:
+            mass_1_key = 'mass_1_source'
+            mass_2_key = 'mass_2_source'
+            total_mass_key = 'total_mass_source'
+            chirp_mass_key = 'chirp_mass_source'
+        else:
+            mass_1_key = 'mass_1'
+            mass_2_key = 'mass_2'
+            total_mass_key = 'total_mass'
+            chirp_mass_key = 'chirp_mass'
+    
+        if chirp_mass_key not in output_sample.keys():
+            output_sample[chirp_mass_key] = (
+&gt;               component_masses_to_chirp_mass(output_sample[mass_1_key],
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+                                               output_sample[mass_2_key])
+            )
+E           KeyError: 'mass_1'
+
+/opt/dingo_env/lib/python3.13/site-packages/bilby/gw/conversion.py:2047: KeyError</failure></testcase></testsuite></testsuites>

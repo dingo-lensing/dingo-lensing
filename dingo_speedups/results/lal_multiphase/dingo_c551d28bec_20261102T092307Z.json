@@ -1,0 +1,107 @@
+{
+  "provenance": {
+    "dingo": {
+      "commit": "c551d28bec006abd43db095ded1862afcb0ce24c",
+      "describe": "v0.10.3-3-gc551d28b",
+      "version": "0.10.4.dev3+gc551d28b",
+      "tree": "/local/kailibryan.doney/dingo-multiphase.XjrgeK/dingo_c551d28bec",
+      "imported_from": "/local/kailibryan.doney/dingo-multiphase.XjrgeK/dingo_c551d28bec/dingo"
+    },
+    "python": {
+      "version": "3.13.13",
+      "executable": "/opt/dingo_env/bin/python",
+      "isolated": true
+    },
+    "packages": {
+      "lalsuite": "7.26.15",
+      "numpy": "2.2.6",
+      "scipy": "1.16.3",
+      "torch": "2.13.0+cpu",
+      "bilby": "2.6.0",
+      "bilby-pipe": "1.8.0",
+      "pandas": "3.0.5",
+      "h5py": "3.16.0",
+      "pycbc": "2.11.0",
+      "pytest": "9.1.1"
+    },
+    "host": {
+      "name": "ldas-grid",
+      "platform": "Linux-4.18.0-553.179.1.el8_10.x86_64-x86_64-with-glibc2.39",
+      "cpu": {
+        "model": "AMD EPYC 9475F 48-Core Processor",
+        "flags": {
+          "avx2": true,
+          "avx512f": true,
+          "fma": true
+        }
+      },
+      "cpu_count": 24,
+      "usable_cpus": 24
+    },
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "lal": {
+    "lal": "7.7.1",
+    "lal_file": "/home/kailibryan.doney/dingo-speedups-lal/env/lib/python3.13/site-packages/lal/__init__.py",
+    "lalsimulation": "6.2.1",
+    "lalsimulation_file": "/home/kailibryan.doney/dingo-speedups-lal/env/lib/python3.13/site-packages/lalsimulation/__init__.py"
+  },
+  "inputs": {
+    "lal_site": "/home/kailibryan.doney/dingo-speedups-lal/env/lib/python3.13/site-packages",
+    "tree": "/local/kailibryan.doney/dingo-multiphase.XjrgeK/dingo_c551d28bec",
+    "commit": "c551d28bec006abd43db095ded1862afcb0ce24c",
+    "proposal": "/home/kailibryan.doney/dingo-speedups-runs/baseline/20261027T070059Z/out/network_samples.hdf5",
+    "event_data": "/home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5",
+    "num_samples": "50",
+    "repeats": "3",
+    "rtol": "1e-10",
+    "skip_tests": "False",
+    "output": "/local/kailibryan.doney/dingo-multiphase.XjrgeK/report.json"
+  },
+  "n": 50,
+  "one_call_route_taken": true,
+  "multi_phase_calls": 400,
+  "m_components_max_difference": 1.1334638234741207e-15,
+  "phase_grid_terms_max_difference": 4.63856788611585e-14,
+  "time_m_components_one_call_ms": {
+    "n": 50,
+    "median": 2.8588304994627833,
+    "max": 4.229274985846132,
+    "min": 2.578659012215212
+  },
+  "time_m_components_repeated_ms": {
+    "n": 50,
+    "median": 18.767389497952536,
+    "max": 20.664567011408508,
+    "min": 17.198464018292725
+  },
+  "time_phase_grid_terms_one_call_ms": {
+    "n": 50,
+    "median": 9.17647899768781,
+    "max": 11.699793016305193,
+    "min": 8.52315200609155
+  },
+  "time_phase_grid_terms_repeated_ms": {
+    "n": 50,
+    "median": 25.520265015074983,
+    "max": 27.553911990253255,
+    "min": 23.780388990417123
+  },
+  "speedup_phase_grid_terms": {
+    "n": 50,
+    "median": 2.815563165480124,
+    "max": 2.9319914982752637,
+    "min": 2.2479028459738815
+  },
+  "routes_agree": true,
+  "ok": true,
+  "dingo_tests": {
+    "file": "tests/gw/waveform_generator/test_wfg_m.py",
+    "exit_code": 0,
+    "nrsur": "raise_for_nrsur"
+  }
+}

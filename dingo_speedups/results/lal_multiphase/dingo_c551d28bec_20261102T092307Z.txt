@@ -1,0 +1,68 @@
+INFO:    underlay of /etc/localtime required more than 50 (79) bind mounts
+/local/kailibryan.doney/dingo-multiphase.XjrgeK/dingo_c551d28bec/dingo/gw/domains/base_frequency_domain.py:150: SyntaxWarning: invalid escape sequence '\p'
+  Convention: the phase $\phi(f)$ is defined via $\exp[- i \phi(f)]$.
+/local/kailibryan.doney/dingo-multiphase.XjrgeK/dingo_c551d28bec/dingo/gw/transforms/gnpe_transforms.py:35: SyntaxWarning: invalid escape sequence '\h'
+  \hat g ~ p(\hat g | g).
+PyCBC.libutils: pkg-config call failed, setting NO_PKGCONFIG=1
+/local/kailibryan.doney/dingo-multiphase.XjrgeK/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:954: UserWarning: LALsimulation waveform longer than domain's `frequency_array`(4097 vs 3585). Truncating lalsim array.
+  warnings.warn(
+Loading dataset from /home/kailibryan.doney/dingo-speedups-runs/baseline/20261027T070059Z/out/network_samples.hdf5.
+Loading dataset from /home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5.
+Setting spin_conversion_phase = 0.0. Using this value for the phase parameter for conversion to cartesian spins.
+{
+ "lal": {
+  "lal": "7.7.1",
+  "lal_file": "/home/kailibryan.doney/dingo-speedups-lal/env/lib/python3.13/site-packages/lal/__init__.py",
+  "lalsimulation": "6.2.1",
+  "lalsimulation_file": "/home/kailibryan.doney/dingo-speedups-lal/env/lib/python3.13/site-packages/lalsimulation/__init__.py"
+ },
+ "n": 50,
+ "one_call_route_taken": true,
+ "multi_phase_calls": 400,
+ "m_components_max_difference": 1.1334638234741207e-15,
+ "phase_grid_terms_max_difference": 4.63856788611585e-14,
+ "time_m_components_one_call_ms": {
+  "n": 50,
+  "median": 2.8588304994627833,
+  "max": 4.229274985846132,
+  "min": 2.578659012215212
+ },
+ "time_m_components_repeated_ms": {
+  "n": 50,
+  "median": 18.767389497952536,
+  "max": 20.664567011408508,
+  "min": 17.198464018292725
+ },
+ "time_phase_grid_terms_one_call_ms": {
+  "n": 50,
+  "median": 9.17647899768781,
+  "max": 11.699793016305193,
+  "min": 8.52315200609155
+ },
+ "time_phase_grid_terms_repeated_ms": {
+  "n": 50,
+  "median": 25.520265015074983,
+  "max": 27.553911990253255,
+  "min": 23.780388990417123
+ },
+ "speedup_phase_grid_terms": {
+  "n": 50,
+  "median": 2.815563165480124,
+  "max": 2.9319914982752637,
+  "min": 2.2479028459738815
+ },
+ "routes_agree": true
+}
+..................                                                       [100%]
+=============================== warnings summary ===============================
+tests/gw/waveform_generator/test_wfg_m.py:3
+  /local/kailibryan.doney/dingo-multiphase.XjrgeK/dingo_c551d28bec/tests/gw/waveform_generator/test_wfg_m.py:3: SyntaxWarning: invalid escape sequence '\i'
+    polarzations disentangled into contributions m \in [-l_max, ...,0, ...,l_max],
+
+tests/gw/waveform_generator/test_wfg_m.py::test_generate_hplus_hcross_m[SEOBNRv4PHM]
+  /local/kailibryan.doney/dingo-multiphase.XjrgeK/dingo_c551d28bec/dingo/gw/waveform_generator/waveform_generator.py:1043: UserWarning: use_dft_phase_decomposition is set, but ell_max cannot be determined for SEOBNRv4PHM (no mode_list, no DEFAULT_ELL_MAX entry). Falling back to the individual-mode path.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+18 passed, 2 warnings in 6.54s
+OK; report /local/kailibryan.doney/dingo-multiphase.XjrgeK/report.json
