@@ -10,7 +10,9 @@ The tarball, lal_<patch10>.tar.gz, holds under the folder lal_<patch10>/:
   The files are the build's own, unmodified. Their run paths still name the environment on /home,
   so a job finds them through LD_LIBRARY_PATH (xphm_job.py). ldd runs as a job resolves them,
   with the environment's lib/ as LD_LIBRARY_PATH and nothing from this shell steering it; any
-  other library but glibc's is left to the image, and listed.
+  other library but glibc's is left to the image, and listed. ldd shows each library once, under
+  the first name it was asked for by, so every other name lib/ has for the same file goes in too,
+  as a link: GSL asks for libcblas.so.3, which in a conda environment is libopenblas.so.0.
 * BUILT.txt and MANIFEST.json: What was built, and the sha256 of each library.
 
     python -I pack_lal.py --env ENV --built BUILT.txt --output-dir DIR
@@ -75,6 +77,26 @@ def libraries_in_env(extensions: List[Path], env: Path, ldd: Callable[[Path], st
     return inside, outside
 
 
+def other_names(lib: Path, libraries: Dict[str, Path]) -> Dict[str, Path]:
+    """The entries of lib/ that are the same file as one of libraries (a symbolic or hard link) under
+    a name not among them."""
+    files = set()
+    for library in libraries.values():
+        status = library.stat()
+        files.add((status.st_dev, status.st_ino))
+    found = {}
+    for entry in sorted(lib.iterdir()):
+        if ".so" not in entry.name or entry.name in libraries:
+            continue
+        try:
+            status = entry.stat()
+        except OSError:  # a dangling link
+            continue
+        if (status.st_dev, status.st_ino) in files:
+            found[entry.name] = entry
+    return found
+
+
 def patch_hash(built: Path) -> str:
     for line in built.read_text(encoding="utf-8").splitlines():
         key, _, value = line.partition(" ")
@@ -104,6 +126,7 @@ def pack(env: Path, built: Path, output_dir: Path, ldd: Optional[Callable[[Path]
     if len(extensions) != 2:
         raise ValueError(f"Expected the lal and lalsimulation extension modules in {site}, found {extensions}")
     libraries, outside = libraries_in_env(extensions, env, ldd or (lambda path: run_ldd(path, env)))
+    libraries.update(other_names(env / "lib", libraries))
     # Both extension modules load liblal; liblalsimulation can be linked into _lalsimulation itself
     # (conda-forge's packages are), so it is not required.
     if not any(name.startswith("liblal.so") for name in libraries):
@@ -121,13 +144,15 @@ def pack(env: Path, built: Path, output_dir: Path, ldd: Optional[Callable[[Path]
         for name, library in sorted(libraries.items()):
             real = library.resolve()
             hashes[name] = sha256(real)
+            status = real.stat()
+            real = (status.st_dev, status.st_ino)  # the same for a hard link
             if real in packed:  # one file under two names, such as libcblas and libopenblas
                 link = tarfile.TarInfo(f"{top}/lib/{name}")
                 link.type = tarfile.SYMTYPE
                 link.linkname = packed[real]
                 archive.addfile(link)
             else:
-                archive.add(real, f"{top}/lib/{name}")
+                archive.add(library.resolve(), f"{top}/lib/{name}")
                 packed[real] = name
         manifest = json.dumps({"patch_sha256": patch, "libraries": hashes}, indent=2).encode("utf-8")
         info = tarfile.TarInfo(f"{top}/MANIFEST.json")

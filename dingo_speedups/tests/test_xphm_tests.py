@@ -164,6 +164,20 @@ class TestPack(TempCase):
         with tarfile.open(record["path"]) as archive:
             self.assertEqual(archive.extractfile("lal_e21ec9674d/lib/libgfortran.so.5").read(), b"gfortran")
 
+    def test_every_name_of_a_packed_file_goes_in(self):
+        # ldd lists OpenBLAS once, as libopenblas.so.0, where GSL asks for it as libcblas.so.3.
+        env, built, _ = self.make_env()
+        lib = env / "lib"
+        os.link(lib / "libopenblas.so.0", lib / "libcblas.so.3")
+        write(lib / "libunrelated.so.1", "unrelated")
+        output = f"\tliblal.so.20 => {lib.as_posix()}/liblal.so.20 (0x1)\n\tlibopenblas.so.0 => {lib.as_posix()}/libopenblas.so.0 (0x2)\n"
+        record = pack.pack(env, built, self.base / "out", ldd=lambda path: output)
+        self.assertIn("libcblas.so.3", record["libraries"])
+        self.assertNotIn("libunrelated.so.1", record["libraries"])
+        root = driver.unpack(Path(record["path"]), self.base / "unpacked")
+        self.assertEqual((root / "lib" / "libcblas.so.3").read_text(), "libopenblas.so.0")
+        self.assertEqual((root / "lib" / "libopenblas.so.0").read_text(), "libopenblas.so.0")
+
     def test_ldd_runs_as_a_job_resolves_the_libraries(self):
         calls = []
 
