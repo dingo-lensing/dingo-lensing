@@ -12,9 +12,13 @@
 # The jobs carry on if this script dies, e.g. with a login node restart: Then run
 #     bash ~/dingo-lensing-sync/dingo_speedups/lal/finish_xphm_tests.sh RUN_DIR
 #
+# Every pre-flight runs, and if any fails, the log shows how (show_job.py) and nothing is
+# submitted. PREFLIGHT_ONLY=1 stops after the pre-flights in any case.
+#
 # Settings, from the environment: UPSTREAM, BRANCH and COMBINED (the DINGO commits), LALBUILD,
-# PRIORITY (default 50), RUNS (default ~/dingo-speedups-runs/xphm), WAIT_HOURS (default 48);
-# PROPOSAL, MODEL and EVENT_DATA as in ../baseline/launch_baseline.sh; the rest in ../common.sh.
+# PRIORITY (default 50), RUNS (default ~/dingo-speedups-runs/xphm), WAIT_HOURS (default 48),
+# PREFLIGHT_ONLY; PROPOSAL, MODEL and EVENT_DATA as in ../baseline/launch_baseline.sh; the rest
+# in ../common.sh.
 set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../common.sh"
@@ -108,6 +112,7 @@ BINDS=(
     "$(dirname "$EVENT_DATA"):$(dirname "$EVENT_DATA"):ro"
     "$(dirname "$PROPOSAL"):$(dirname "$PROPOSAL"):ro"
 )
+FAILED=()
 for job in $(cat "$RUN_DIR/preflight_jobs.txt"); do
     echo "--- $job"
     set +e
@@ -119,11 +124,18 @@ for job in $(cat "$RUN_DIR/preflight_jobs.txt"); do
     if [[ $STATUS -eq 3 ]]; then
         echo "WARNING: The $job pre-flight ran but disagrees; submitting anyway, for the full numbers: See $RUN_DIR/preflight/$job"
     elif [[ $STATUS -ne 0 ]]; then
-        fail "The $job pre-flight failed (exit $STATUS); its reports are in $RUN_DIR/preflight/$job. Nothing was submitted."
+        echo "FAILED: The $job pre-flight (exit $STATUS); its reports are in $RUN_DIR/preflight/$job"
+        "$PYTHON" -I "$HERE/show_job.py" "$RUN_DIR/preflight/$job" || true
+        FAILED+=("$job")
     fi
 done
 rm -rf "$PRE"
 trap - EXIT
+[[ ${#FAILED[@]} -eq 0 ]] || fail "Pre-flights failed: ${FAILED[*]}. Nothing was submitted."
+if [[ "${PREFLIGHT_ONLY:-0}" == 1 ]]; then
+    step "Every pre-flight passed; nothing submitted (PREFLIGHT_ONLY=1). Run folder: $RUN_DIR"
+    exit 0
+fi
 
 step "Submit (priority $PRIORITY)"
 for job in $(cat "$RUN_DIR/jobs.txt"); do

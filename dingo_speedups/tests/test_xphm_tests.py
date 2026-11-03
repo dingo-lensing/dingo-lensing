@@ -31,6 +31,7 @@ pack = load_module("pack_lal_under_test", LAL / "pack_lal.py")
 jobs = load_module("make_xphm_jobs_under_test", LAL / "make_xphm_jobs.py")
 driver = load_module("xphm_job_under_test", LAL / "xphm_job.py")
 collect = load_module("collect_xphm_tests_under_test", LAL / "collect_xphm_tests.py")
+show = load_module("show_job_under_test", LAL / "show_job.py")
 run = load_module("baseline_run_for_xphm", SPEEDUPS / "baseline" / "baseline_run.py")
 guard = load_module("guard_for_xphm", SPEEDUPS / "guard.py")
 compare = load_module("compare_results_for_xphm", SPEEDUPS / "baseline" / "compare_results.py") if HAVE_NUMPY else None
@@ -710,6 +711,34 @@ class TestDryRun(TempCase):
         finished = subprocess.run([sys.executable, "-I", "xphm_job.py", "manifest.json"], cwd=scratch, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         self.assertEqual(finished.returncode, 1)
         self.assertIn("JSONDecodeError", json.loads((scratch / "out" / "job.json").read_text(encoding="utf-8"))["error"])
+
+
+class TestShowJob(TempCase):
+    def test_shows_every_verdict_and_the_end_of_what_failed(self):
+        report = {
+            "job": "ladder_forward",
+            "host": "node1",
+            "exit_code": 1,
+            "tasks": {
+                "upstream_release": {"verdict": "passed", "exit_code": 0, "seconds": 30.0},
+                "combined_patched_one": {"verdict": "failed", "exit_code": 1, "seconds": 9.0},
+                "compare_a_vs_b": {"verdict": "skipped", "reason": "No result from combined_patched_one"}
+            }
+        }
+        write(self.base / "job.json", json.dumps(report))
+        write(self.base / "upstream_release" / "output.txt", "fine\n")
+        write(self.base / "combined_patched_one" / "output.txt", "".join(f"line {k}\n" for k in range(50)) + "ValueError: broken\n")
+        text = "\n".join(show.describe(self.base, lines=5))
+        self.assertIn("ladder_forward on node1: exit 1", text)
+        self.assertIn("upstream_release: passed, exit 0", text)
+        self.assertIn("compare_a_vs_b: skipped, exit None, None s No result from combined_patched_one", text)
+        self.assertIn("ValueError: broken", text)
+        self.assertIn("line 49", text)
+        self.assertNotIn("line 40", text)
+        self.assertNotIn("fine", text)
+
+    def test_a_job_that_never_started(self):
+        self.assertIn("did not start", show.describe(self.base)[0])
 
 
 class TestCollectPieces(TempCase):
