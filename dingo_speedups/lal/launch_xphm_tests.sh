@@ -15,7 +15,7 @@
 # Every pre-flight runs, and if any fails, the log shows how (show_job.py) and nothing is
 # submitted. PREFLIGHT_ONLY=1 stops after the pre-flights in any case.
 #
-# Settings, from the environment: UPSTREAM, BRANCH and COMBINED (the DINGO commits), LALBUILD,
+# Settings, from the environment: UPSTREAM, PR454, BRANCH and COMBINED (the DINGO commits), LALBUILD,
 # PRIORITY (default 50), RUNS (default ~/dingo-speedups-runs/xphm), WAIT_HOURS (default 48),
 # PREFLIGHT_ONLY; PROPOSAL, MODEL and EVENT_DATA as in ../baseline/launch_baseline.sh; the rest
 # in ../common.sh.
@@ -25,6 +25,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../common.sh"
 HERE="$SPEEDUPS/lal"
 LALBUILD="${LALBUILD:-$HOME/dingo-speedups-lal}"
 UPSTREAM="${UPSTREAM:-471de26e10cef69bb59a0d2680cc299b4c9c2323}"
+PR454="${PR454:-e92d71fbd83fd6e1dd9795655082ed95abdbcda5}"  # its head, as run in 3.5
 BRANCH="${BRANCH:-origin/kailib-xphm-multiphase}"
 COMBINED="${COMBINED:-origin/kailib-xphm-multiphase-with-pr454}"
 EX3="${EX3:-$HOME/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application}"
@@ -44,6 +45,7 @@ MODEL="$(realpath "$MODEL")"
 EVENT_DATA="$(realpath "$EVENT_DATA")"
 PROPOSAL="$(realpath "$PROPOSAL")"
 UPSTREAM="$(git -C "$DINGO_REPO" rev-parse "$UPSTREAM^{commit}")" || fail "$DINGO_REPO has no $UPSTREAM"
+PR454="$(git -C "$DINGO_REPO" rev-parse "$PR454^{commit}")" || fail "$DINGO_REPO has no $PR454"
 BRANCH="$(git -C "$DINGO_REPO" rev-parse "$BRANCH^{commit}")" || fail "$DINGO_REPO has no $BRANCH: Run git -C $DINGO_REPO fetch origin"
 COMBINED="$(git -C "$DINGO_REPO" rev-parse "$COMBINED^{commit}")" || fail "$DINGO_REPO has no $COMBINED: Run git -C $DINGO_REPO fetch origin"
 IMAGE="${IMAGE:-$(newest_image)}"
@@ -51,6 +53,7 @@ IMAGE="${IMAGE:-$(newest_image)}"
 URL="$(cat "$IMAGE.url")"
 [[ "$URL" == osdf:///* ]] || fail "Expected an osdf:/// URL in $IMAGE.url, got $URL"
 echo "Upstream: $UPSTREAM"
+echo "PR #454:  $PR454"
 echo "Branch:   $BRANCH"
 echo "Combined: $COMBINED"
 echo "Image:    $IMAGE"
@@ -68,6 +71,8 @@ pack_commit() {
 }
 pack_commit "$UPSTREAM"
 UPSTREAM_TARBALL="$PACKED"
+pack_commit "$PR454"
+PR454_TARBALL="$PACKED"
 pack_commit "$BRANCH"
 BRANCH_TARBALL="$PACKED"
 pack_commit "$COMBINED"
@@ -81,6 +86,7 @@ cp "$HERE/xphm_job.py" "$HERE/stress_multiphase.py" "$HERE/check_multiphase.py" 
 step "Manifests and submit files"
 "$PYTHON" -I "$HERE/make_xphm_jobs.py" --run-dir "$RUN_DIR" --image-url "$URL" \
     --upstream-tarball "$UPSTREAM_TARBALL" --upstream-commit "$UPSTREAM" \
+    --pr454-tarball "$PR454_TARBALL" --pr454-commit "$PR454" \
     --branch-tarball "$BRANCH_TARBALL" --branch-commit "$BRANCH" \
     --combined-tarball "$COMBINED_TARBALL" --combined-commit "$COMBINED" \
     --lal-tarball "$LAL_TARBALL" --proposal "$PROPOSAL" --model "$MODEL" --event-data "$EVENT_DATA" \
@@ -88,6 +94,7 @@ step "Manifests and submit files"
 cat > "$RUN_DIR/launch.json" <<EOF
 {
   "upstream": "$UPSTREAM",
+  "pr454": "$PR454",
   "branch": "$BRANCH",
   "combined": "$COMBINED",
   "lal_tarball": "$LAL_TARBALL",

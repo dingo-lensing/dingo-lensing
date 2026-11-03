@@ -2,7 +2,7 @@
 
 The jobs (each runs xphm_job.py on its manifest):
 
-* ladder_forward, ladder_reverse: Five setups on the 2.1 run's network samples, one after the
+* ladder_forward, ladder_reverse: Six setups on the 2.1 run's network samples, one after the
   other on one node, so that their timings compare directly, in both orders to show any effect of
   the order. In LADDER and COMPARISONS below.
 * full: The whole job on a fresh draw of the network, DINGO as it is against DINGO with everything
@@ -42,6 +42,7 @@ SCRIPTS = (
 # Task name, DINGO, patched LAL, waveform route. On the release LAL the function does not exist.
 LADDER = (
     ("upstream_release", "upstream", False, "nine"),
+    ("pr454_release", "pr454", False, "nine"),
     ("combined_release", "combined", False, "nine"),
     ("combined_patched_nine", "combined", True, "nine"),
     ("combined_patched_one", "combined", True, "one"),
@@ -56,12 +57,15 @@ EXACT = (0.0, 0.0)
 ROUND_OFF = (1e-9, 1e-7)
 # First task, second task, tolerances, must it agree?
 COMPARISONS = (
-    # The branch changes nothing without the patched LAL, bit for bit (PR #454 did not either).
-    ("upstream_release", "combined_release", EXACT, True),
+    # PR #454 on its own: Bit for bit on 3.5's nodes (AVX2), to round-off where numpy takes other
+    # SIMD paths for its other array shapes (the login node's AVX-512, 3 November).
+    ("upstream_release", "pr454_release", ROUND_OFF, True),
+    # The branch changes nothing without the patched LAL, bit for bit: The same code path and shapes.
+    ("pr454_release", "combined_release", EXACT, True),
     # The route itself, on one LAL, to round-off.
     ("combined_patched_nine", "combined_patched_one", ROUND_OFF, True),
-    # PR #454 changes nothing on the patched LAL either.
-    ("combined_patched_one", "branch_patched_one", EXACT, True),
+    # The route without PR #454, which agrees to round-off as above.
+    ("combined_patched_one", "branch_patched_one", ROUND_OFF, True),
     # For scale: The release and this build differ by more than round-off, before any new route.
     ("upstream_release", "combined_patched_nine", ROUND_OFF, False)
 )
@@ -112,6 +116,8 @@ class Inputs:
     image_url: str
     upstream_tarball: str
     upstream_commit: str
+    pr454_tarball: str
+    pr454_commit: str
     branch_tarball: str
     branch_commit: str
     combined_tarball: str
@@ -126,11 +132,11 @@ class Inputs:
     def check(self) -> None:
         if not self.image_url.startswith("osdf:///") or not self.image_url.endswith(".sif"):
             raise ValueError(f"Expected an osdf:///...sif image URL, got {self.image_url!r}")
-        for field in ("upstream", "branch", "combined"):
+        for field in ("upstream", "pr454", "branch", "combined"):
             commit = getattr(self, f"{field}_commit")
             if len(commit) != 40 or any(c not in "0123456789abcdef" for c in commit):
                 raise ValueError(f"{field}_commit must be a full 40-character hash, got {commit!r}")
-        paths = ("run_dir", "upstream_tarball", "branch_tarball", "combined_tarball", "lal_tarball", "proposal", "model", "event_data")
+        paths = ("run_dir", "upstream_tarball", "pr454_tarball", "branch_tarball", "combined_tarball", "lal_tarball", "proposal", "model", "event_data")
         for field in paths:
             path = getattr(self, field)
             if not PurePosixPath(path).is_absolute():
@@ -226,6 +232,7 @@ def needed_inputs(job_manifest: dict, inputs: Inputs) -> List[str]:
     """The absolute paths of the tarballs and data files this job's tasks use."""
     paths = (
         inputs.upstream_tarball,
+        inputs.pr454_tarball,
         inputs.branch_tarball,
         inputs.combined_tarball,
         inputs.lal_tarball,
@@ -305,6 +312,8 @@ def main(argv=None) -> int:
         "image_url",
         "upstream_tarball",
         "upstream_commit",
+        "pr454_tarball",
+        "pr454_commit",
         "branch_tarball",
         "branch_commit",
         "combined_tarball",

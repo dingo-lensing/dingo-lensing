@@ -39,7 +39,7 @@ stress = load_module("stress_multiphase_under_test", LAL / "stress_multiphase.py
 if HAVE_NUMPY:
     import numpy as np
 
-COMMITS = {name: character * 40 for name, character in (("upstream", "a"), ("branch", "b"), ("combined", "c"))}
+COMMITS = {name: character * 40 for name, character in (("upstream", "a"), ("branch", "b"), ("combined", "c"), ("pr454", "d"))}
 
 
 class TempCase(unittest.TestCase):
@@ -55,6 +55,8 @@ def inputs_at(base: str = "/runs/x") -> "jobs.Inputs":
         image_url="osdf:///igwn/cit/staging/me/containers/image.sif",
         upstream_tarball=f"{base}/dingo_aaaaaaaaaa.tar.gz",
         upstream_commit=COMMITS["upstream"],
+        pr454_tarball=f"{base}/dingo_dddddddddd.tar.gz",
+        pr454_commit=COMMITS["pr454"],
         branch_tarball=f"{base}/dingo_bbbbbbbbbb.tar.gz",
         branch_commit=COMMITS["branch"],
         combined_tarball=f"{base}/dingo_cccccccccc.tar.gz",
@@ -96,15 +98,17 @@ class TestPack(TempCase):
         for library in ("liblal.so.20", "liblalsimulation.so.37", "libopenblas.so.0"):
             write(env / "lib" / library, library)
         built = write(self.base / "BUILT.txt", "tag x\npatch_sha256 e21ec9674dc6b108\n")
+        return env, built, self.make_env_output(env, extra_ldd)
+
+    def make_env_output(self, env, extra_ldd=""):
         lib = (env / "lib").as_posix()
-        output = f"""\
+        return f"""\
 \tliblal.so.20 => {lib}/liblal.so.20 (0x1)
 \tliblalsimulation.so.37 => {lib}/liblalsimulation.so.37 (0x2)
 \tlibcblas.so.3 => {lib}/libopenblas.so.0 (0x3)
 \tlibopenblas.so.0 => {lib}/libopenblas.so.0 (0x3)
 \tlibm.so.6 => /lib64/libm.so.6 (0x4)
 {extra_ldd}"""
-        return env, built, output
 
     def test_the_tarball_holds_the_packages_and_the_libraries_of_the_environment(self):
         env, built, output = self.make_env()
@@ -148,6 +152,32 @@ class TestPack(TempCase):
         next(env.glob("lib/python3.*/site-packages/lalsimulation/_lalsimulation*")).unlink()
         with self.assertRaisesRegex(ValueError, "extension modules"):
             pack.pack(env, built, self.base / "out", ldd=lambda path: output)
+
+    def test_a_library_the_environment_has_comes_from_it_and_the_rest_is_listed(self):
+        env, built, _ = self.make_env()
+        write(env / "lib" / "libgfortran.so.5", "gfortran")
+        steered = "\tlibgfortran.so.5 => /cvmfs/other/lib/libgfortran.so.5 (0x9)\n\tlibfoo.so.1 => /usr/lib64/libfoo.so.1 (0xa)\n"
+        output = self.make_env_output(env, steered)
+        record = pack.pack(env, built, self.base / "out", ldd=lambda path: output)
+        self.assertIn("libgfortran.so.5", record["libraries"])
+        self.assertEqual(record["left_to_the_image"], {"libfoo.so.1": "/usr/lib64/libfoo.so.1"})
+        with tarfile.open(record["path"]) as archive:
+            self.assertEqual(archive.extractfile("lal_e21ec9674d/lib/libgfortran.so.5").read(), b"gfortran")
+
+    def test_ldd_runs_as_a_job_resolves_the_libraries(self):
+        calls = []
+
+        def fake_run(command, **options):
+            calls.append((command, options["env"]))
+            return SimpleNamespace(stdout="")
+
+        environment = {"LD_LIBRARY_PATH": "/cvmfs/other/lib", "LD_PRELOAD": "/x.so"}
+        with mock.patch.dict(os.environ, environment), mock.patch.object(pack.subprocess, "run", fake_run):
+            pack.run_ldd(Path("/env/lib/python3.13/site-packages/lal/_lal.so"), Path("/env"))
+        command, used = calls[0]
+        self.assertEqual(command[0], "ldd")
+        self.assertEqual(used["LD_LIBRARY_PATH"], str(Path("/env") / "lib"))
+        self.assertNotIn("LD_PRELOAD", used)
 
     def test_refuses_a_built_file_without_the_patch_hash(self):
         env, _, output = self.make_env()
@@ -266,12 +296,14 @@ class TestJobs(unittest.TestCase):
         forward = [task["name"] for task in self.tasks("ladder_forward", "importance_sampling")]
         backward = [task["name"] for task in self.tasks("ladder_reverse", "importance_sampling")]
         self.assertEqual(forward, list(reversed(backward)))
-        self.assertEqual(len(forward), 5)
+        self.assertEqual(len(forward), 6)
 
     def test_the_ladder_uses_the_right_dingo_lal_and_route(self):
         setups = {task["name"]: task for task in self.tasks("ladder_forward", "importance_sampling")}
         self.assertEqual(setups["upstream_release"]["commit"], COMMITS["upstream"])
         self.assertFalse(setups["upstream_release"]["lal"])
+        self.assertEqual(setups["pr454_release"]["commit"], COMMITS["pr454"])
+        self.assertFalse(setups["pr454_release"]["lal"])
         self.assertEqual(setups["combined_patched_nine"]["commit"], COMMITS["combined"])
         self.assertTrue(setups["combined_patched_nine"]["lal"])
         self.assertEqual(setups["combined_patched_nine"]["route"], "nine")
@@ -287,13 +319,16 @@ class TestJobs(unittest.TestCase):
 
     def test_what_must_agree_and_how_closely(self):
         comparisons = {(task["first"], task["second"]): task for task in self.tasks("ladder_forward", "compare")}
-        unchanged = comparisons[("upstream_release", "combined_release")]
-        self.assertTrue(unchanged["must_pass"])
-        self.assertEqual((unchanged["rtol"], unchanged["atol"]), (0.0, 0.0))
-        route = comparisons[("combined_patched_nine", "combined_patched_one")]
-        self.assertTrue(route["must_pass"])
-        self.assertEqual((route["rtol"], route["atol"]), jobs.ROUND_OFF)
-        self.assertFalse(comparisons[("upstream_release", "combined_patched_nine")]["must_pass"])
+
+        def tolerances(pair):
+            return comparisons[pair]["rtol"], comparisons[pair]["atol"]
+
+        # Bit for bit only where the code path and array shapes are the same: The branch on the release LAL.
+        self.assertEqual(tolerances(("pr454_release", "combined_release")), (0.0, 0.0))
+        for pair in (("upstream_release", "pr454_release"), ("combined_patched_nine", "combined_patched_one"), ("combined_patched_one", "branch_patched_one")):
+            self.assertEqual(tolerances(pair), jobs.ROUND_OFF, pair)
+        for pair in comparisons:
+            self.assertEqual(comparisons[pair]["must_pass"], pair != ("upstream_release", "combined_patched_nine"), pair)
 
     def test_compared_tasks_exist_and_come_first(self):
         for job in ("ladder_forward", "ladder_reverse", "full"):
@@ -335,7 +370,7 @@ class TestJobs(unittest.TestCase):
             return {Path(path).name for path in jobs.needed_inputs(manifest, inputs_at())}
 
         ladder = inputs_of("ladder_forward")
-        self.assertEqual(len([name for name in ladder if name.startswith("dingo_")]), 3)
+        self.assertEqual(len([name for name in ladder if name.startswith("dingo_")]), 4)
         self.assertIn("lal_e21ec9674d.tar.gz", ladder)
         self.assertIn("network_samples.hdf5", ladder)
         self.assertNotIn("model_nonlensed.pt", ladder)
@@ -343,6 +378,7 @@ class TestJobs(unittest.TestCase):
         self.assertIn("model_nonlensed.pt", full)
         self.assertNotIn("network_samples.hdf5", full)
         self.assertNotIn("dingo_bbbbbbbbbb.tar.gz", full)
+        self.assertNotIn("dingo_dddddddddd.tar.gz", full)
         self.assertEqual(inputs_of("stress"), {"lal_e21ec9674d.tar.gz"})
         self.assertEqual(inputs_of("suite_release"), {"dingo_cccccccccc.tar.gz"})
         self.assertEqual(inputs_of("suite_patched"), {"dingo_cccccccccc.tar.gz", "lal_e21ec9674d.tar.gz"})
@@ -544,7 +580,7 @@ class TestDryRun(TempCase):
         }
         for script, text in scripts.items():
             write(run_dir / "scripts" / script, text)
-        for commit in ("aaaaaaaaaa", "bbbbbbbbbb", "cccccccccc"):
+        for commit in ("aaaaaaaaaa", "bbbbbbbbbb", "cccccccccc", "dddddddddd"):
             self.tarball(run_dir, f"dingo_{commit}", {"COMMIT.json": "{}"})
         self.tarball(run_dir, "lal_e21ec9674d", {"python/lal/__init__.py": "", "lib/liblal.so.20": "library"})
         write(run_dir / "network_samples.hdf5", "samples")
@@ -649,7 +685,7 @@ class TestDryRun(TempCase):
         self.assertTrue((results / "job.json").is_file())
         self.assertTrue((results / "manifest.json").is_file())
         self.assertTrue((results / "combined_patched_one" / "baseline.json").is_file())
-        self.assertTrue((results / "compare_upstream_release_vs_combined_release" / "compare.json").is_file())
+        self.assertTrue((results / "compare_pr454_release_vs_combined_release" / "compare.json").is_file())
         self.assertFalse(list(results.rglob("*.hdf5")))
         self.assertTrue((run_dir / "ladder_forward" / "out" / "combined_patched_one" / "importance_sampling.hdf5").is_file())
 

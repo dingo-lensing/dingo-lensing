@@ -6,9 +6,11 @@ The tarball, lal_<patch10>.tar.gz, holds under the folder lal_<patch10>/:
 
 * python/: The lal and lalsimulation Python packages, to go first on sys.path.
 * lib/: The shared libraries those packages load from the environment, as ldd finds them: LAL's
-  own and their dependencies (GSL, FFTW and so on), under the names they are asked for by. The
-  files are the build's own, unmodified. Their run paths still name the environment on /home, so
-  a job finds them through LD_LIBRARY_PATH (xphm_job.py).
+  own and their dependencies (GSL, FFTW, CBLAS and so on), under the names they are asked for by.
+  The files are the build's own, unmodified. Their run paths still name the environment on /home,
+  so a job finds them through LD_LIBRARY_PATH (xphm_job.py). ldd runs as a job resolves them,
+  with the environment's lib/ as LD_LIBRARY_PATH and nothing from this shell steering it; any
+  other library but glibc's is left to the image, and listed.
 * BUILT.txt and MANIFEST.json: What was built, and the sha256 of each library.
 
     python -I pack_lal.py --env ENV --built BUILT.txt --output-dir DIR
@@ -21,14 +23,17 @@ import argparse
 import hashlib
 import io
 import json
+import os
 import re
 import subprocess
 import sys
 import tarfile
 from pathlib import Path
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional, Tuple
 
 LDD_LINE = re.compile(r"^\s*(\S+)\s+=>\s+(\S*/\S+)(\s+\(0x[0-9a-f]+\))?\s*$")
+# glibc's, which every image has and must provide itself.
+GLIBC = ("ld-linux", "linux-vdso", "libc.so", "libm.so", "libmvec.so", "libdl.so", "libpthread.so", "librt.so", "libutil.so", "libresolv.so", "libanl.so")
 
 
 def parse_ldd(text: str) -> Dict[str, str]:
@@ -43,20 +48,31 @@ def parse_ldd(text: str) -> Dict[str, str]:
     return found
 
 
-def run_ldd(path: Path) -> str:
-    return subprocess.run(["ldd", str(path)], check=True, stdout=subprocess.PIPE, universal_newlines=True).stdout
+def run_ldd(path: Path, env: Path) -> str:
+    """ldd as a job resolves the libraries: With the environment's lib/ as LD_LIBRARY_PATH, as a job
+    has the tarball's copy of it, and nothing from this shell (an activated environment, say)
+    steering it to other copies."""
+    environment = {key: value for key, value in os.environ.items() if key not in ("LD_LIBRARY_PATH", "LD_PRELOAD")}
+    environment["LD_LIBRARY_PATH"] = str(env / "lib")
+    return subprocess.run(["ldd", str(path)], check=True, stdout=subprocess.PIPE, universal_newlines=True, env=environment).stdout
 
 
-def libraries_in_env(extensions: List[Path], env: Path, ldd: Callable[[Path], str] = run_ldd) -> Dict[str, Path]:
-    """The libraries the extension modules load from the environment. ldd lists what they load
-    directly and indirectly, so this is the whole closure; the rest (libc, libm) is the image's."""
+def libraries_in_env(extensions: List[Path], env: Path, ldd: Callable[[Path], str]) -> Tuple[Dict[str, Path], Dict[str, str]]:
+    """The libraries the extension modules load, as ldd lists them (what they load directly and
+    indirectly, so the whole closure): Those from the environment, for the tarball, and the others
+    but glibc's, which are left to the image. A name the environment has is taken from it, wherever
+    ldd found it."""
     env = env.resolve()
-    libraries = {}
+    inside, outside = {}, {}
     for extension in extensions:
         for name, path in parse_ldd(ldd(extension)).items():
             if env in Path(path).resolve().parents:
-                libraries[name] = Path(path)
-    return libraries
+                inside[name] = Path(path)
+            elif (env / "lib" / name).is_file():
+                inside[name] = env / "lib" / name
+            elif not name.startswith(GLIBC):
+                outside[name] = path
+    return inside, outside
 
 
 def patch_hash(built: Path) -> str:
@@ -79,7 +95,7 @@ def without_bytecode(info: tarfile.TarInfo):
     return None if "__pycache__" in info.name.split("/") else info
 
 
-def pack(env: Path, built: Path, output_dir: Path, ldd: Callable[[Path], str] = run_ldd) -> dict:
+def pack(env: Path, built: Path, output_dir: Path, ldd: Optional[Callable[[Path], str]] = None) -> dict:
     sites = sorted(env.glob("lib/python3.*/site-packages"))
     if len(sites) != 1:
         raise ValueError(f"Expected one site-packages in {env}, found {len(sites)}")
@@ -87,7 +103,7 @@ def pack(env: Path, built: Path, output_dir: Path, ldd: Callable[[Path], str] = 
     extensions = sorted(site.glob("lal/_lal*.so")) + sorted(site.glob("lalsimulation/_lalsimulation*.so"))
     if len(extensions) != 2:
         raise ValueError(f"Expected the lal and lalsimulation extension modules in {site}, found {extensions}")
-    libraries = libraries_in_env(extensions, env, ldd)
+    libraries, outside = libraries_in_env(extensions, env, ldd or (lambda path: run_ldd(path, env)))
     # Both extension modules load liblal; liblalsimulation can be linked into _lalsimulation itself
     # (conda-forge's packages are), so it is not required.
     if not any(name.startswith("liblal.so") for name in libraries):
@@ -122,6 +138,7 @@ def pack(env: Path, built: Path, output_dir: Path, ldd: Callable[[Path], str] = 
         "top": top,
         "patch_sha256": patch,
         "libraries": sorted(libraries),
+        "left_to_the_image": outside,
         "bytes": tarball.stat().st_size
     }
 
@@ -138,6 +155,8 @@ def main(argv=None) -> int:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
     print(json.dumps(record, indent=2))
+    if record["left_to_the_image"]:
+        print(f"Left to the image, not in the tarball: {record['left_to_the_image']}", file=sys.stderr)
     return 0
 
 
