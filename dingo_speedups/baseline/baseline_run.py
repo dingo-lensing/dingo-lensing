@@ -22,6 +22,12 @@ Timing the parts wraps four DINGO functions with timers that call the originals
 unchanged. Seeds follow dingo_pipe: SeedSequence([seed, 0]) for sampling, [seed, 1]
 for importance sampling.
 
+For the multi-phase XPHM test (../lal/xphm_job.py): --lal-site puts a LAL and LALSimulation
+first on sys.path, and --route says which waveform route the run must take, "one" call of
+SimInspiralFDMultiPhase per sample or "nine" calls of SimInspiralFD, hiding the first function
+if it is there. The calls are counted in the workers too, and a run that took the other route
+fails.
+
 Exit code 0 on success, 1 on any failure (the traceback is in baseline.json),
 2 if the guard refused or the tarball could not be unpacked.
 """
@@ -31,6 +37,7 @@ import argparse
 import functools
 import gc
 import json
+import multiprocessing
 import os
 import sys
 import tarfile
@@ -51,6 +58,9 @@ import guard  # noqa: E402
 
 OUT = Path("out")
 SYNTHETIC_PHASE = {"n_grid_phase": 5001, "uniform_weight": 0.01}  # dingo_pipe's PhaseRecoveryDefault
+SINGLE_CALL = "SimInspiralFD"
+MULTI_PHASE_CALL = "SimInspiralFDMultiPhase"
+NUM_PHASES = 9  # 2 ell_max + 1 waveform calls per sample, for XPHM's ell_max = 4
 
 
 def parse_status(text: str, field: str) -> Optional[int]:
@@ -143,6 +153,59 @@ def wrap_timed(owner, name: str, records: Dict[str, dict], label: str) -> None:
     setattr(owner, name, timed)
 
 
+def count_calls(owner, name: str, counters: Dict[str, object]) -> None:
+    """Replace owner.name by a wrapper that calls it unchanged and counts the calls, in the Pool
+    workers too: They are forked, so they inherit the wrapper and its shared counter."""
+    original = getattr(owner, name, None)
+    if original is None:
+        return
+    counter = counters[name] = multiprocessing.Value("Q", 0)
+
+    @functools.wraps(original)
+    def counted(*args, **kwargs):
+        with counter.get_lock():
+            counter.value += 1
+        return original(*args, **kwargs)
+
+    setattr(owner, name, counted)
+
+
+def lal_record(LS, lal_site: Optional[str], route: str) -> dict:
+    """What this run's LALSimulation is. Refuses one from outside --lal-site, and one without the
+    multi-phase function on the one-call route."""
+    origin = Path(LS.__file__).resolve()
+    if lal_site is not None and Path(lal_site).resolve() not in origin.parents:
+        raise ValueError(f"lalsimulation is {origin}, not from {lal_site}")
+    if lal_site is not None:
+        # The libraries come with the packages, in the tarball's folder above python/.
+        outside = guard.lal_libraries_outside(Path(lal_site).resolve().parent)
+        if outside:
+            raise ValueError(f"LAL's libraries are not those shipped with {lal_site}: {outside}")
+    has_function = hasattr(LS, MULTI_PHASE_CALL)
+    if route == "one" and not has_function:
+        raise ValueError(f"The one-call route needs {MULTI_PHASE_CALL}, which {origin} does not have")
+    return {
+        "version": LS.__version__,
+        "file": str(origin),
+        "has_multi_phase": has_function,
+        "start_method": multiprocessing.get_start_method(),
+        "libraries": guard.mapped_libraries()
+    }
+
+
+def route_problem(route: str, calls: Dict[str, int], num_samples: int) -> Optional[str]:
+    """Why the calls counted do not fit the route, or None if they do. Samples outside the prior
+    are not evaluated, hence 90% of num_samples. A few single calls are fine on the one-call
+    route: DINGO goes back to them for a waveform flagged as numerically unstable."""
+    one_call, single = calls.get(MULTI_PHASE_CALL, 0), calls.get(SINGLE_CALL, 0)
+    evaluated = 0.9 * num_samples
+    if route == "one" and (one_call < evaluated or single > one_call):
+        return f"Expected one {MULTI_PHASE_CALL} call per sample, counted {one_call}, and {single} {SINGLE_CALL} calls"
+    if route == "nine" and (one_call != 0 or single < NUM_PHASES * evaluated):
+        return f"Expected {NUM_PHASES} {SINGLE_CALL} calls per sample, counted {single}, and {one_call} {MULTI_PHASE_CALL} calls"
+    return None
+
+
 def unpack(tarball: Path, destination: Path) -> Path:
     """Unpack a pack_dingo.py tarball; refuse members that would land outside destination."""
     destination = destination.resolve()
@@ -179,6 +242,8 @@ def parse_args(argv=None):
     parser.add_argument("--batch-size", type=int, default=5_000)
     parser.add_argument("--num-processes", type=int, default=32)
     parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument("--lal-site", help="A folder with the lal and lalsimulation packages, put first on sys.path")
+    parser.add_argument("--route", choices=("one", "nine"), help="The waveform route the run must take")
     return parser.parse_args(argv)
 
 
@@ -186,6 +251,8 @@ def main(argv=None) -> int:
     started = time.perf_counter()
     OUT.mkdir(exist_ok=True)  # first, so Condor always has the folder to transfer back
     args = parse_args(argv)
+    if args.lal_site:
+        sys.path.insert(0, str(Path(args.lal_site).resolve()))  # before anything imports LAL
     stages = Stages()
     report = {
         "inputs": {k: str(v) for k, v in vars(args).items()},
@@ -220,6 +287,15 @@ def main(argv=None) -> int:
             from dingo.gw.likelihood import StationaryGaussianGWLikelihood
             from dingo.gw.result import Result
         report["torch_threads"] = torch.get_num_threads()
+        counters: Dict[str, object] = {}
+        if args.route is not None:
+            import lalsimulation as LS
+
+            report["lal"] = lal_record(LS, args.lal_site, args.route)
+            if args.route == "nine" and report["lal"]["has_multi_phase"]:
+                delattr(LS, MULTI_PHASE_CALL)
+            for function in (SINGLE_CALL, MULTI_PHASE_CALL):
+                count_calls(LS, function, counters)
 
         with stages.stage("event_data"):
             event = EventDataset(file_name=args.event_data)
@@ -281,6 +357,12 @@ def main(argv=None) -> int:
             "n_eff": float(result.n_eff),
             "sample_efficiency": float(result.sample_efficiency)
         }
+        if args.route is not None:
+            calls = {function: counter.value for function, counter in counters.items()}
+            report["route"] = {"requested": args.route, "calls": calls}
+            problem = route_problem(args.route, calls, min(args.num_samples, len(result.samples)))
+            if problem:
+                raise ValueError(problem)
     except Exception as error:  # recorded for the report, then a failed exit
         report["error"] = f"{type(error).__name__}: {error}"
         report["traceback"] = traceback.format_exc()

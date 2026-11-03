@@ -16,6 +16,7 @@ import json
 import shutil
 import sys
 from pathlib import Path
+from typing import Optional
 
 SPEEDUPS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SPEEDUPS.parent / "parallelisation" / "option_a"))
@@ -25,31 +26,35 @@ from condor_logs import job_timing, read_events  # noqa: E402
 COPIED = ("baseline.log", "baseline.out", "baseline.err", "baseline.sub", "launch.json")
 
 
+def condor_record(log: Path) -> Optional[dict]:
+    """Condor's view of the job in log, or None if there is no such log or job in it yet."""
+    events = read_events(log) if log.is_file() else None
+    if not events:
+        return None
+    timing = job_timing(events)
+    # Condor names the row "Memory (MB)".
+    memory = next((row for key, row in timing.resources.items() if key.startswith("Memory")), {})
+    return {
+        "succeeded": timing.succeeded,
+        "return_value": timing.return_value,
+        "attempts": timing.attempts,
+        "host": timing.host,
+        "wait_seconds": timing.wait_seconds,
+        "input_transfer_seconds": timing.input_seconds,
+        "run_seconds": timing.run_seconds,
+        "output_transfer_seconds": timing.output_seconds,
+        "cpu_seconds": timing.cpu_seconds,
+        "cores_used": timing.cores_used,
+        "memory_usage_mb": memory.get("Usage"),
+        "memory_request_mb": memory.get("Request"),
+        "bytes_received": timing.bytes_received,
+    }
+
+
 def summarise(run_dir: Path) -> dict:
     report_path = run_dir / "out" / "baseline.json"
     report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.is_file() else None
-    log = run_dir / "baseline.log"
-    timing = job_timing(read_events(log)) if log.is_file() else None
-    condor = None
-    if timing is not None:
-        # Condor names the row "Memory (MB)".
-        memory = next((row for key, row in timing.resources.items() if key.startswith("Memory")), {})
-        condor = {
-            "succeeded": timing.succeeded,
-            "return_value": timing.return_value,
-            "attempts": timing.attempts,
-            "host": timing.host,
-            "wait_seconds": timing.wait_seconds,
-            "input_transfer_seconds": timing.input_seconds,
-            "run_seconds": timing.run_seconds,
-            "output_transfer_seconds": timing.output_seconds,
-            "cpu_seconds": timing.cpu_seconds,
-            "cores_used": timing.cores_used,
-            "memory_usage_mb": memory.get("Usage"),
-            "memory_request_mb": memory.get("Request"),
-            "bytes_received": timing.bytes_received,
-        }
-    summary = {"run": run_dir.name, "condor": condor}
+    summary = {"run": run_dir.name, "condor": condor_record(run_dir / "baseline.log")}
     if report is not None:
         summary["error"] = report.get("error")
         summary["evidence"] = report.get("evidence")

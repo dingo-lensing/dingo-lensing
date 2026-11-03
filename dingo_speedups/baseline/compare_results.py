@@ -8,7 +8,9 @@ For every numeric sample column the two share it reports the largest absolute an
 relative difference over finite entries and any mismatch in the non-finite ones (which
 must be identical, e.g. -inf log priors), and the differences in the log evidence,
 its error and the effective samples. Exit code 0 if both have the same samples and
-every shared column agrees to --rtol (default 1e-9), 1 otherwise, 2 if the guard refused.
+every shared column agrees to --rtol (default 1e-9) or to --atol (default 0, an absolute
+bound, for columns that pass through zero, such as a phase), 1 otherwise, 2 if the guard
+refused.
 """
 from __future__ import annotations
 
@@ -46,8 +48,9 @@ def column_differences(a: np.ndarray, b: np.ndarray) -> dict:
     }
 
 
-def agrees(differences: dict, rtol: float) -> bool:
-    return differences["nonfinite_mismatch"] == 0 and differences["max_rel"] <= rtol
+def agrees(differences: dict, rtol: float, atol: float = 0.0) -> bool:
+    within = differences["max_rel"] <= rtol or differences["max_abs"] <= atol
+    return differences["nonfinite_mismatch"] == 0 and within
 
 
 def main(argv=None) -> int:
@@ -57,6 +60,7 @@ def main(argv=None) -> int:
     parser.add_argument("first")
     parser.add_argument("second")
     parser.add_argument("--rtol", type=float, default=1e-9)
+    parser.add_argument("--atol", type=float, default=0.0)
     parser.add_argument("--output", required=True)
     args = parser.parse_args(argv)
     try:
@@ -67,7 +71,13 @@ def main(argv=None) -> int:
     from dingo.gw.result import Result
 
     first, second = Result(file_name=args.first), Result(file_name=args.second)
-    report = {"provenance": provenance, "first": args.first, "second": args.second, "rtol": args.rtol}
+    report = {
+        "provenance": provenance,
+        "first": args.first,
+        "second": args.second,
+        "rtol": args.rtol,
+        "atol": args.atol
+    }
     same_length = len(first.samples) == len(second.samples)
     report["num_samples"] = [len(first.samples), len(second.samples)]
     columns = {}
@@ -85,7 +95,7 @@ def main(argv=None) -> int:
         key: [float(getattr(first, key)), float(getattr(second, key))]
         for key in ("log_evidence", "log_evidence_std", "n_eff", "sample_efficiency")
     }
-    report["identical_to_rtol"] = same_length and all(agrees(c, args.rtol) for c in columns.values())
+    report["identical_to_rtol"] = same_length and all(agrees(c, args.rtol, args.atol) for c in columns.values())
     Path(args.output).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
     for name, c in columns.items():
@@ -93,7 +103,7 @@ def main(argv=None) -> int:
         print(f"{name:28s} {differences}   non-finite {c['nonfinite']}, mismatched {c['nonfinite_mismatch']}")
     for key, (x, y) in report["summary"].items():
         print(f"{key:28s} {x:.6f} vs {y:.6f}")
-    print(f"Identical to rtol {args.rtol:g}: {report['identical_to_rtol']}")
+    print(f"Identical to rtol {args.rtol:g}, atol {args.atol:g}: {report['identical_to_rtol']}")
     return 0 if report["identical_to_rtol"] else 1
 
 

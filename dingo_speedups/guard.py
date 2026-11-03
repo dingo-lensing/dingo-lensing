@@ -56,6 +56,8 @@ FORBIDDEN_MODULES = ("dingo_lensing",)
 PACKAGES = ("lalsuite", "numpy", "scipy", "torch", "bilby", "bilby-pipe", "pandas", "h5py", "pycbc", "pytest")
 THREAD_VARIABLES = ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS")
 CPU_FLAGS = ("avx2", "avx512f", "fma")
+# The shared libraries of a LAL build and its dependencies, by the start of their names.
+LAL_LIBRARIES = ("liblal", "libgsl", "libfftw", "libgomp", "libcblas", "libopenblas", "libhdf5")
 
 
 class GuardError(RuntimeError):
@@ -136,6 +138,28 @@ def use_dingo(tree, expected_commit: str) -> dict:
             "Is dingo/_version.py from pack_dingo.py?"
         )
     return provenance(tree, record, origin)
+
+
+def mapped_libraries(names=LAL_LIBRARIES, maps="/proc/self/maps") -> Optional[List[str]]:
+    """The files of the shared libraries this process has loaded whose names start with one of
+    names, or None where there is no maps file to tell (not Linux)."""
+    try:
+        lines = Path(maps).read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    files = {line.split(maxsplit=5)[5] for line in lines if len(line.split(maxsplit=5)) == 6}
+    return sorted(path for path in files if Path(path).name.startswith(tuple(names)))
+
+
+def lal_libraries_outside(folder, maps="/proc/self/maps") -> Optional[List[str]]:
+    """The loaded liblal* libraries that are not under folder: A LAL shipped as a pack_lal.py
+    tarball must run its own libraries, which the dynamic loader can find elsewhere first (in the
+    run path of the Python executable, for instance). None where this cannot be told."""
+    mapped = mapped_libraries(("liblal",), maps)
+    if mapped is None:
+        return None
+    folder = Path(folder).resolve()
+    return [path for path in mapped if not is_inside(Path(path).resolve(), folder)]
 
 
 def package_versions() -> Dict[str, Optional[str]]:
