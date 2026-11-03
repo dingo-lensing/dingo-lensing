@@ -7,6 +7,21 @@ import dingo.gw.waveform_generator.wfg_utils as wfg_utils
 from dingo_lensing.dev_mode import plot_amplification_factor, plot_waveform_overlay
 from dingo_lensing.lens_code_loader import load_amplification_model
 
+
+LENS_SETTING_KEYS = {
+    "dev_mode", "dev_plot_dir", "fdsm_function", "lens_model_code",
+    "amplification_factor_function", "lens_model_defaults",
+    "lens_model_settings",
+}
+
+
+def split_waveform_settings(settings):
+    """Separate local lens settings from upstream generator settings."""
+    lens = {k: v for k, v in settings.items() if k in LENS_SETTING_KEYS}
+    base = {k: v for k, v in settings.items() if k not in LENS_SETTING_KEYS}
+    return base, lens
+
+
 class LensedWaveformGenerator(WaveformGenerator):
     def __init__(
         self,
