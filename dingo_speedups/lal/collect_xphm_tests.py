@@ -37,6 +37,9 @@ OVERHEAD_SECONDS = 87 + 29  # 2.1: Job and container start-up, and input transfe
 CORES = 32
 MODELS_PER_INJECTION = 2
 CORE_HOURS_PER_WEEK_AT_500_CORES = 500 * 168
+# 2.1 (node798): The whole script and its synthetic phase, in seconds.
+BASELINE_SCRIPT_SECONDS = 307.342
+BASELINE_SYNTHETIC_SECONDS = 222.673
 LADDERS = ("ladder_forward", "ladder_reverse")
 REFERENCE_SETUPS = ("upstream_release", "full_upstream_release")
 # They fail on upstream main 471de26e too, with the same errors (see the test log, 2 November).
@@ -78,6 +81,8 @@ def setup_row(baseline: dict) -> dict:
         "main_peak_gb": (stages.get("synthetic_phase", {}).get("main_peak_bytes") or 0) / GIGA,
         "children_peak_gb": (baseline.get("children_peak_bytes") or 0) / GIGA,
         "evidence": baseline.get("evidence"),
+        "network_sampling_seconds": stages.get("network_sampling", {}).get("seconds"),
+        "torch_threads": baseline.get("torch_threads"),
         "lal_file": (baseline.get("lal") or {}).get("file"),
         "single_calls": calls.get("SimInspiralFD", 0),
         "multi_phase_calls": calls.get("SimInspiralFDMultiPhase", 0)
@@ -158,6 +163,13 @@ def injection_cost(reference_seconds: float, new_seconds: float) -> dict:
         "injections_per_week_before": CORE_HOURS_PER_WEEK_AT_500_CORES / before,
         "injections_per_week_after": CORE_HOURS_PER_WEEK_AT_500_CORES / after
     }
+
+
+def injection_cost_on_baseline(speedup: float) -> dict:
+    """injection_cost on 2.1's stages, with its synthetic phase sped up by a measured factor. The full
+    job's own other stages depend on more than this work: Its network sampling took 845 to 945 s
+    with torch on 32 threads on a busy node, against 64 s on 24 in 2.1."""
+    return injection_cost(BASELINE_SCRIPT_SECONDS, BASELINE_SCRIPT_SECONDS - BASELINE_SYNTHETIC_SECONDS * (1 - 1 / speedup))
 
 
 def collect_job(run_dir: Path, destination: Path, job: str) -> dict:
@@ -285,10 +297,19 @@ def render(summary: dict) -> str:
     full = jobs.get("full", {})
     if full.get("tasks"):
         lines += render_ladder("full", full)
+    for task, record in full.get("tasks", {}).items():
+        setup = record.get("setup") or {}
+        if setup.get("network_sampling_seconds") is not None:
+            lines.append(f"  {task}: network sampling {setup['network_sampling_seconds']:.0f} s on {setup.get('torch_threads')} torch threads (2.1: 64 s on 24)")
     cost = summary.get("injection_cost")
     if cost:
         lines.append(
             f"  Per injection (both models, 2.1's job overhead): {cost['core_hours_before']:.2f} to {cost['core_hours_after']:.2f} core-hours, "
+            f"{cost['speedup']:.2f}x, {cost['injections_per_week_before']:.0f} to {cost['injections_per_week_after']:.0f} a week at 500 cores"
+        )
+    for name, cost in (summary.get("injection_cost_on_2_1") or {}).items():
+        lines.append(
+            f"  Per injection on 2.1's other stages, with {name}'s synthetic-phase speed-up: {cost['core_hours_before']:.2f} to {cost['core_hours_after']:.2f} core-hours, "
             f"{cost['speedup']:.2f}x, {cost['injections_per_week_before']:.0f} to {cost['injections_per_week_after']:.0f} a week at 500 cores"
         )
     lines.append("")
@@ -327,6 +348,14 @@ def summarise(run_dir: Path, destination: Path, job_names: List[str]) -> dict:
     summary = {"run": run_dir.name, "jobs": jobs, "suites": suites}
     if all(totals):
         summary["injection_cost"] = injection_cost(*totals)
+    speedups = {}
+    for name in ("full", *LADDERS):
+        for task, record in jobs.get(name, {}).get("tasks", {}).items():
+            speedup = (record.get("setup") or {}).get("synthetic_phase_speedup")
+            if task.endswith("combined_patched_one") and speedup:
+                speedups[name] = speedup
+    if speedups:
+        summary["injection_cost_on_2_1"] = {name: injection_cost_on_baseline(speedup) for name, speedup in speedups.items()}
     summary["problems"] = judge(jobs, suites)
     return summary
 

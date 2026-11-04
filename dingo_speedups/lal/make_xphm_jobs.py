@@ -92,14 +92,21 @@ class Scale:
     suite_must_pass: bool
     stress_memory_limit_gb: float = 0.0
     stress_tasks_per_worker: int = 0
+    stress_processes: int = 0  # 0: num_processes
 
 
 # The suite has two failures that upstream main has too, so its exit code decides nothing here;
 # collect_xphm_tests.py compares the outcomes test by test.
 # The stress test stops itself below its memory request, so that a hold cannot lose its report, and
-# replaces its workers every few chunks; the pre-flight after every chunk, to try that.
-JOB_SCALE = Scale(50_000, 5_000, 32, 1_000_000, 200_000, 240.0, (), False, 40.0, 10)
-PREFLIGHT_SCALE = Scale(500, 500, 4, 400, 100, 5.0, ("tests/gw/waveform_generator/test_wfg_m.py",), True, 0.0, 1)
+# replaces its workers every few chunks; the pre-flight after every chunk, to try that. It runs on
+# 16 cores, which needs no paired timing and finds a slot sooner than a whole node.
+JOB_SCALE = Scale(50_000, 5_000, 32, 1_000_000, 200_000, 240.0, (), False, 28.0, 10, 16)
+PREFLIGHT_SCALE = Scale(500, 500, 4, 400, 100, 5.0, ("tests/gw/waveform_generator/test_wfg_m.py",), True, 0.0, 1, 4)
+# A few wide parameter sets take hundreds of MB for one call (long inspirals with SpinTaylor angles),
+# and glibc keeps a process's high-water mark for blocks below its dynamic mmap threshold: 32 workers
+# held 19 GB after under 3 minutes (4 November), with no leak (leak_check.py). A fixed threshold
+# hands large blocks straight back.
+STRESS_ENVIRONMENT = {"MALLOC_MMAP_THRESHOLD_": "131072"}
 
 
 @dataclass(frozen=True)
@@ -114,7 +121,7 @@ RESOURCES = {
     "ladder_forward": Resources(32, 48, 16),
     "ladder_reverse": Resources(32, 48, 16),
     "full": Resources(32, 48, 24),
-    "stress": Resources(32, 48, 10),
+    "stress": Resources(16, 32, 10),
     "suite_release": Resources(8, 32, 12, threads=8),
     "suite_patched": Resources(8, 32, 12, threads=8)
 }
@@ -207,11 +214,12 @@ def manifest_tasks(job: str, inputs: Inputs, scale: Scale, preflight: bool) -> L
                 "lal": True,
                 "dingo_draws": scale.dingo_draws,
                 "wide_draws": scale.wide_draws,
-                "num_processes": scale.num_processes,
+                "num_processes": scale.stress_processes or scale.num_processes,
                 "seed": inputs.seed,
                 "max_minutes": scale.max_minutes,
                 "memory_limit_gb": scale.stress_memory_limit_gb,
-                "max_tasks_per_worker": scale.stress_tasks_per_worker
+                "max_tasks_per_worker": scale.stress_tasks_per_worker,
+                "environment": dict(STRESS_ENVIRONMENT)
             }
         ]
     if job in ("suite_release", "suite_patched"):

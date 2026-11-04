@@ -158,6 +158,7 @@ def stress_command(task: dict, lal_root: Path) -> List[str]:
 
 def task_environment(task: dict, lal_root: Optional[Path]) -> Dict[str, str]:
     environment = dict(os.environ)
+    environment.update(task.get("environment", {}))
     if task.get("lal"):
         environment["LD_LIBRARY_PATH"] = str(lal_root / "lib")
     return environment
