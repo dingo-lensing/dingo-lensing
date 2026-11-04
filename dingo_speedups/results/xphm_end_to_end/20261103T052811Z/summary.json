@@ -1,0 +1,1006 @@
+{
+  "run": "20261103T052811Z",
+  "jobs": {
+    "ladder_forward": {
+      "condor": {
+        "succeeded": true,
+        "return_value": 0,
+        "attempts": 1,
+        "host": "node2283.cluster.ldas.cit",
+        "wait_seconds": 85425.0,
+        "input_transfer_seconds": 6.0,
+        "run_seconds": 1544.0,
+        "output_transfer_seconds": 0.0,
+        "cpu_seconds": 17805.0,
+        "cores_used": 11.531735751295336,
+        "memory_usage_mb": 898.0,
+        "memory_request_mb": 49152.0,
+        "bytes_received": 913956422
+      },
+      "finished": true,
+      "tasks": {
+        "upstream_release": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 305.888,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 302.264,
+            "stage_seconds": {
+              "unpack": 0.165,
+              "imports": 11.785,
+              "event_data": 0.014,
+              "importance_sampling_setup": 0.094,
+              "synthetic_phase": 289.726,
+              "importance_sample": 0.34,
+              "save_result": 0.033
+            },
+            "synthetic_phase_seconds": 289.726,
+            "per_sample_seconds": 253.169,
+            "grid_seconds": 27.256,
+            "draw_seconds": 8.451,
+            "main_peak_gb": 32.639770624,
+            "children_peak_gb": 2.57677312,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.6248468704935,
+              "log_evidence_std": 0.008407253545258522,
+              "n_eff": 11027.557492152524,
+              "sample_efficiency": 0.2205511498430505
+            },
+            "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.0,
+            "per_sample_speedup": 1.0
+          }
+        },
+        "pr454_release": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 286.728,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 283.694,
+            "stage_seconds": {
+              "unpack": 0.167,
+              "imports": 7.729,
+              "event_data": 0.01,
+              "importance_sampling_setup": 0.089,
+              "synthetic_phase": 275.25,
+              "importance_sample": 0.331,
+              "save_result": 0.032
+            },
+            "synthetic_phase_seconds": 275.25,
+            "per_sample_seconds": 254.003,
+            "grid_seconds": 13.275,
+            "draw_seconds": 7.336,
+            "main_peak_gb": 4.688625664,
+            "children_peak_gb": 0.570441728,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.6248468704935,
+              "log_evidence_std": 0.008407253545258522,
+              "n_eff": 11027.557492152524,
+              "sample_efficiency": 0.2205511498430505
+            },
+            "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.0525921889191643,
+            "per_sample_speedup": 0.9967165742136905
+          }
+        },
+        "combined_release": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 295.33,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 292.732,
+            "stage_seconds": {
+              "unpack": 0.164,
+              "imports": 7.209,
+              "event_data": 0.005,
+              "importance_sampling_setup": 0.069,
+              "synthetic_phase": 284.836,
+              "importance_sample": 0.338,
+              "save_result": 0.032
+            },
+            "synthetic_phase_seconds": 284.836,
+            "per_sample_seconds": 269.272,
+            "grid_seconds": 10.233,
+            "draw_seconds": 4.676,
+            "main_peak_gb": 5.276889088,
+            "children_peak_gb": 0.56946688,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.6248468704935,
+              "log_evidence_std": 0.008407253545258522,
+              "n_eff": 11027.557492152524,
+              "sample_efficiency": 0.2205511498430505
+            },
+            "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.017167773736466,
+            "per_sample_speedup": 0.9401980153896432
+          }
+        },
+        "combined_patched_nine": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 295.506,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 293.058,
+            "stage_seconds": {
+              "unpack": 0.168,
+              "imports": 7.565,
+              "event_data": 0.006,
+              "importance_sampling_setup": 0.067,
+              "synthetic_phase": 284.814,
+              "importance_sample": 0.324,
+              "save_result": 0.028
+            },
+            "synthetic_phase_seconds": 284.814,
+            "per_sample_seconds": 269.426,
+            "grid_seconds": 9.973,
+            "draw_seconds": 4.699,
+            "main_peak_gb": 5.305729024,
+            "children_peak_gb": 0.570855424,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.624843410485,
+              "log_evidence_std": 0.008407223576853575,
+              "n_eff": 11027.618770644593,
+              "sample_efficiency": 0.22055237541289185
+            },
+            "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.0172463432275098,
+            "per_sample_speedup": 0.9396606118192009
+          }
+        },
+        "combined_patched_one": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 137.957,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 135.512,
+            "stage_seconds": {
+              "unpack": 0.161,
+              "imports": 7.309,
+              "event_data": 0.005,
+              "importance_sampling_setup": 0.068,
+              "synthetic_phase": 127.532,
+              "importance_sample": 0.325,
+              "save_result": 0.031
+            },
+            "synthetic_phase_seconds": 127.532,
+            "per_sample_seconds": 111.31,
+            "grid_seconds": 11.027,
+            "draw_seconds": 4.581,
+            "main_peak_gb": 5.367074816,
+            "children_peak_gb": 0.572121088,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.624843410485,
+              "log_evidence_std": 0.008407223576853634,
+              "n_eff": 11027.618770644474,
+              "sample_efficiency": 0.2205523754128895
+            },
+            "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
+            "single_calls": 0,
+            "multi_phase_calls": 49911,
+            "synthetic_phase_speedup": 2.2717906094156763,
+            "per_sample_speedup": 2.2744497349743957
+          }
+        },
+        "branch_patched_one": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 156.763,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 154.587,
+            "stage_seconds": {
+              "unpack": 0.17,
+              "imports": 7.365,
+              "event_data": 0.006,
+              "importance_sampling_setup": 0.064,
+              "synthetic_phase": 146.532,
+              "importance_sample": 0.34,
+              "save_result": 0.029
+            },
+            "synthetic_phase_seconds": 146.532,
+            "per_sample_seconds": 111.943,
+            "grid_seconds": 25.854,
+            "draw_seconds": 7.957,
+            "main_peak_gb": 32.64743424,
+            "children_peak_gb": 2.578337792,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.624843410485,
+              "log_evidence_std": 0.008407223576853634,
+              "n_eff": 11027.618770644474,
+              "sample_efficiency": 0.2205523754128895
+            },
+            "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
+            "single_calls": 0,
+            "multi_phase_calls": 49911,
+            "synthetic_phase_speedup": 1.977219992902574,
+            "per_sample_speedup": 2.261588486997847
+          }
+        },
+        "compare_upstream_release_vs_pr454_release": {
+          "kind": "compare",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 9.995,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": true,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 0.0,
+            "max_rel_column": "a_1",
+            "max_abs": 0.0,
+            "max_abs_column": "a_1",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 0.0
+          }
+        },
+        "compare_pr454_release_vs_combined_release": {
+          "kind": "compare",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 9.902,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": true,
+            "rtol": 0.0,
+            "atol": 0.0,
+            "max_rel": 0.0,
+            "max_rel_column": "a_1",
+            "max_abs": 0.0,
+            "max_abs_column": "a_1",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 0.0
+          }
+        },
+        "compare_combined_patched_nine_vs_combined_patched_one": {
+          "kind": "compare",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 9.783,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": true,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 1.8908341960078864e-09,
+            "max_rel_column": "weights",
+            "max_abs": 1.890839484985918e-09,
+            "max_abs_column": "log_likelihood",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 0.0
+          }
+        },
+        "compare_combined_patched_one_vs_branch_patched_one": {
+          "kind": "compare",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 9.637,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": true,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 0.0,
+            "max_rel_column": "a_1",
+            "max_abs": 0.0,
+            "max_abs_column": "a_1",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 0.0
+          }
+        },
+        "compare_upstream_release_vs_combined_patched_nine": {
+          "kind": "compare",
+          "verdict": "disagrees",
+          "must_pass": false,
+          "exit_code": 1,
+          "seconds": 9.47,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": false,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 0.9999999953298182,
+            "max_rel_column": "weights",
+            "max_abs": 19.182063230166023,
+            "max_abs_column": "log_likelihood",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 3.4600088838487864e-06
+          }
+        }
+      },
+      "host": "node2283",
+      "order": [
+        "upstream_release",
+        "pr454_release",
+        "combined_release",
+        "combined_patched_nine",
+        "combined_patched_one",
+        "branch_patched_one",
+        "compare_upstream_release_vs_pr454_release",
+        "compare_pr454_release_vs_combined_release",
+        "compare_combined_patched_nine_vs_combined_patched_one",
+        "compare_combined_patched_one_vs_branch_patched_one",
+        "compare_upstream_release_vs_combined_patched_nine"
+      ],
+      "error": null,
+      "cpu": "AMD EPYC 7313 16-Core Processor"
+    },
+    "ladder_reverse": {
+      "condor": {
+        "succeeded": true,
+        "return_value": 0,
+        "attempts": 1,
+        "host": "node2268.cluster.ldas.cit",
+        "wait_seconds": 85427.0,
+        "input_transfer_seconds": 5.0,
+        "run_seconds": 768.0,
+        "output_transfer_seconds": 0.0,
+        "cpu_seconds": 16584.0,
+        "cores_used": 21.59375,
+        "memory_usage_mb": 984.0,
+        "memory_request_mb": 49152.0,
+        "bytes_received": 913956422
+      },
+      "finished": true,
+      "tasks": {
+        "branch_patched_one": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 84.177,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 82.637,
+            "stage_seconds": {
+              "unpack": 0.117,
+              "imports": 8.126,
+              "event_data": 0.008,
+              "importance_sampling_setup": 0.07,
+              "synthetic_phase": 73.918,
+              "importance_sample": 0.293,
+              "save_result": 0.022
+            },
+            "synthetic_phase_seconds": 73.918,
+            "per_sample_seconds": 53.098,
+            "grid_seconds": 15.101,
+            "draw_seconds": 5.006,
+            "main_peak_gb": 32.643756032,
+            "children_peak_gb": 2.576125952,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.624843410485,
+              "log_evidence_std": 0.008407223576853634,
+              "n_eff": 11027.618770644474,
+              "sample_efficiency": 0.2205523754128895
+            },
+            "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
+            "single_calls": 0,
+            "multi_phase_calls": 49911,
+            "synthetic_phase_speedup": 1.9363348575448467,
+            "per_sample_speedup": 2.340069305811895
+          }
+        },
+        "combined_patched_one": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 72.061,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 70.78,
+            "stage_seconds": {
+              "unpack": 0.124,
+              "imports": 5.398,
+              "event_data": 0.004,
+              "importance_sampling_setup": 0.058,
+              "synthetic_phase": 64.927,
+              "importance_sample": 0.192,
+              "save_result": 0.019
+            },
+            "synthetic_phase_seconds": 64.927,
+            "per_sample_seconds": 55.246,
+            "grid_seconds": 6.304,
+            "draw_seconds": 2.885,
+            "main_peak_gb": 5.13878016,
+            "children_peak_gb": 0.5710848,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.624843410485,
+              "log_evidence_std": 0.008407223576853634,
+              "n_eff": 11027.618770644474,
+              "sample_efficiency": 0.2205523754128895
+            },
+            "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
+            "single_calls": 0,
+            "multi_phase_calls": 49911,
+            "synthetic_phase_speedup": 2.20447579589385,
+            "per_sample_speedup": 2.249085906671976
+          }
+        },
+        "combined_patched_nine": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 141.2,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 139.877,
+            "stage_seconds": {
+              "unpack": 0.109,
+              "imports": 3.953,
+              "event_data": 0.003,
+              "importance_sampling_setup": 0.035,
+              "synthetic_phase": 135.519,
+              "importance_sample": 0.191,
+              "save_result": 0.019
+            },
+            "synthetic_phase_seconds": 135.519,
+            "per_sample_seconds": 127.298,
+            "grid_seconds": 5.056,
+            "draw_seconds": 2.747,
+            "main_peak_gb": 5.326491648,
+            "children_peak_gb": 0.57141248,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.624843410485,
+              "log_evidence_std": 0.008407223576853575,
+              "n_eff": 11027.618770644593,
+              "sample_efficiency": 0.22055237541289185
+            },
+            "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.056161866601731,
+            "per_sample_speedup": 0.9760797498782384
+          }
+        },
+        "combined_release": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 141.83,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 140.63,
+            "stage_seconds": {
+              "unpack": 0.107,
+              "imports": 3.855,
+              "event_data": 0.003,
+              "importance_sampling_setup": 0.037,
+              "synthetic_phase": 136.377,
+              "importance_sample": 0.191,
+              "save_result": 0.02
+            },
+            "synthetic_phase_seconds": 136.377,
+            "per_sample_seconds": 128.131,
+            "grid_seconds": 5.073,
+            "draw_seconds": 2.749,
+            "main_peak_gb": 5.371604992,
+            "children_peak_gb": 0.570478592,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.6248468704935,
+              "log_evidence_std": 0.008407253545258522,
+              "n_eff": 11027.557492152524,
+              "sample_efficiency": 0.2205511498430505
+            },
+            "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.0495171473195626,
+            "per_sample_speedup": 0.9697341002567684
+          }
+        },
+        "pr454_release": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 141.165,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 139.873,
+            "stage_seconds": {
+              "unpack": 0.106,
+              "imports": 3.843,
+              "event_data": 0.003,
+              "importance_sampling_setup": 0.036,
+              "synthetic_phase": 135.633,
+              "importance_sample": 0.191,
+              "save_result": 0.02
+            },
+            "synthetic_phase_seconds": 135.633,
+            "per_sample_seconds": 126.465,
+            "grid_seconds": 5.939,
+            "draw_seconds": 2.821,
+            "main_peak_gb": 5.371113472,
+            "children_peak_gb": 0.570658816,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.6248468704935,
+              "log_evidence_std": 0.008407253545258522,
+              "n_eff": 11027.557492152524,
+              "sample_efficiency": 0.2205511498430505
+            },
+            "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.0552741589436199,
+            "per_sample_speedup": 0.9825089945834816
+          }
+        },
+        "upstream_release": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 148.459,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 147.459,
+            "stage_seconds": {
+              "unpack": 0.105,
+              "imports": 3.934,
+              "event_data": 0.003,
+              "importance_sampling_setup": 0.035,
+              "synthetic_phase": 143.13,
+              "importance_sample": 0.193,
+              "save_result": 0.019
+            },
+            "synthetic_phase_seconds": 143.13,
+            "per_sample_seconds": 124.253,
+            "grid_seconds": 14.403,
+            "draw_seconds": 4.06,
+            "main_peak_gb": 32.644677632,
+            "children_peak_gb": 2.578214912,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.6248468704935,
+              "log_evidence_std": 0.008407253545258522,
+              "n_eff": 11027.557492152524,
+              "sample_efficiency": 0.2205511498430505
+            },
+            "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.0,
+            "per_sample_speedup": 1.0
+          }
+        },
+        "compare_upstream_release_vs_pr454_release": {
+          "kind": "compare",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 4.872,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": true,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 0.0,
+            "max_rel_column": "a_1",
+            "max_abs": 0.0,
+            "max_abs_column": "a_1",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 0.0
+          }
+        },
+        "compare_pr454_release_vs_combined_release": {
+          "kind": "compare",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 4.717,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": true,
+            "rtol": 0.0,
+            "atol": 0.0,
+            "max_rel": 0.0,
+            "max_rel_column": "a_1",
+            "max_abs": 0.0,
+            "max_abs_column": "a_1",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 0.0
+          }
+        },
+        "compare_combined_patched_nine_vs_combined_patched_one": {
+          "kind": "compare",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 4.723,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": true,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 1.8908341960078864e-09,
+            "max_rel_column": "weights",
+            "max_abs": 1.890839484985918e-09,
+            "max_abs_column": "log_likelihood",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 0.0
+          }
+        },
+        "compare_combined_patched_one_vs_branch_patched_one": {
+          "kind": "compare",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 5.367,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": true,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 0.0,
+            "max_rel_column": "a_1",
+            "max_abs": 0.0,
+            "max_abs_column": "a_1",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 0.0
+          }
+        },
+        "compare_upstream_release_vs_combined_patched_nine": {
+          "kind": "compare",
+          "verdict": "disagrees",
+          "must_pass": false,
+          "exit_code": 1,
+          "seconds": 5.595,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": false,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 0.9999999953298182,
+            "max_rel_column": "weights",
+            "max_abs": 19.182063230166023,
+            "max_abs_column": "log_likelihood",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 3.4600088838487864e-06
+          }
+        }
+      },
+      "host": "node2268",
+      "order": [
+        "branch_patched_one",
+        "combined_patched_one",
+        "combined_patched_nine",
+        "combined_release",
+        "pr454_release",
+        "upstream_release",
+        "compare_upstream_release_vs_pr454_release",
+        "compare_pr454_release_vs_combined_release",
+        "compare_combined_patched_nine_vs_combined_patched_one",
+        "compare_combined_patched_one_vs_branch_patched_one",
+        "compare_upstream_release_vs_combined_patched_nine"
+      ],
+      "error": null,
+      "cpu": "AMD EPYC 7313 16-Core Processor"
+    },
+    "full": {
+      "condor": {
+        "succeeded": true,
+        "return_value": 0,
+        "attempts": 1,
+        "host": "node2281.cluster.ldas.cit",
+        "wait_seconds": 86616.0,
+        "input_transfer_seconds": 31.0,
+        "run_seconds": 2265.0,
+        "output_transfer_seconds": 0.0,
+        "cpu_seconds": 26635.0,
+        "cores_used": 11.759381898454746,
+        "memory_usage_mb": 2313.0,
+        "memory_request_mb": 49152.0,
+        "bytes_received": 5420054694
+      },
+      "finished": true,
+      "tasks": {
+        "full_upstream_release": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 1265.072,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 1263.263,
+            "stage_seconds": {
+              "unpack": 0.156,
+              "imports": 9.761,
+              "event_data": 0.008,
+              "model_load": 18.855,
+              "network_sampling": 945.249,
+              "save_network_samples": 0.041,
+              "importance_sampling_setup": 0.06,
+              "synthetic_phase": 288.172,
+              "importance_sample": 0.355,
+              "save_result": 0.03
+            },
+            "synthetic_phase_seconds": 288.172,
+            "per_sample_seconds": 255.753,
+            "grid_seconds": 23.273,
+            "draw_seconds": 8.428,
+            "main_peak_gb": 33.192697856,
+            "children_peak_gb": 3.105038336,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.624789064019,
+              "log_evidence_std": 0.008408815402557588,
+              "n_eff": 11024.364493573958,
+              "sample_efficiency": 0.22048728987147914
+            },
+            "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
+            "single_calls": 449199,
+            "multi_phase_calls": 0,
+            "synthetic_phase_speedup": 1.0,
+            "per_sample_speedup": 1.0
+          }
+        },
+        "full_combined_patched_one": {
+          "kind": "importance_sampling",
+          "verdict": "passed",
+          "must_pass": true,
+          "exit_code": 0,
+          "seconds": 976.841,
+          "error": null,
+          "reason": null,
+          "setup": {
+            "error": null,
+            "total_seconds": 974.813,
+            "stage_seconds": {
+              "unpack": 0.172,
+              "imports": 7.019,
+              "event_data": 0.004,
+              "model_load": 17.569,
+              "network_sampling": 844.812,
+              "save_network_samples": 0.03,
+              "importance_sampling_setup": 0.057,
+              "synthetic_phase": 104.225,
+              "importance_sample": 0.322,
+              "save_result": 0.024
+            },
+            "synthetic_phase_seconds": 104.225,
+            "per_sample_seconds": 89.977,
+            "grid_seconds": 9.953,
+            "draw_seconds": 3.61,
+            "main_peak_gb": 5.634039808,
+            "children_peak_gb": 1.10739456,
+            "evidence": {
+              "num_samples": 50000,
+              "log_evidence": -5829.6248127544495,
+              "log_evidence_std": 0.008408427272288807,
+              "n_eff": 11025.157854275209,
+              "sample_efficiency": 0.22050315708550416
+            },
+            "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
+            "single_calls": 0,
+            "multi_phase_calls": 49911,
+            "synthetic_phase_speedup": 2.7649028544015355,
+            "per_sample_speedup": 2.84242639785723
+          }
+        },
+        "compare_full_upstream_release_vs_full_combined_patched_one": {
+          "kind": "compare",
+          "verdict": "disagrees",
+          "must_pass": false,
+          "exit_code": 1,
+          "seconds": 8.783,
+          "error": null,
+          "reason": null,
+          "comparison": {
+            "agrees": false,
+            "rtol": 1e-09,
+            "atol": 1e-07,
+            "max_rel": 0.9999999999958012,
+            "max_rel_column": "weights",
+            "max_abs": 26.19624327870406,
+            "max_abs_column": "log_likelihood",
+            "nonfinite_mismatch": 0,
+            "log_evidence_difference": 2.3690430680289865e-05
+          }
+        }
+      },
+      "host": "node2281",
+      "order": [
+        "full_upstream_release",
+        "full_combined_patched_one",
+        "compare_full_upstream_release_vs_full_combined_patched_one"
+      ],
+      "error": null,
+      "cpu": "AMD EPYC 7313 16-Core Processor"
+    },
+    "stress": {
+      "condor": {
+        "succeeded": false,
+        "return_value": null,
+        "attempts": 1,
+        "host": null,
+        "wait_seconds": null,
+        "input_transfer_seconds": null,
+        "run_seconds": null,
+        "output_transfer_seconds": null,
+        "cpu_seconds": null,
+        "cores_used": null,
+        "memory_usage_mb": null,
+        "memory_request_mb": null,
+        "bytes_received": null
+      },
+      "finished": false,
+      "tasks": {}
+    },
+    "suite_release": {
+      "condor": {
+        "succeeded": true,
+        "return_value": 0,
+        "attempts": 1,
+        "host": "node2286.cluster.ldas.cit",
+        "wait_seconds": 3827.0,
+        "input_transfer_seconds": 6.0,
+        "run_seconds": 322.0,
+        "output_transfer_seconds": 0.0,
+        "cpu_seconds": 474.0,
+        "cores_used": 1.4720496894409938,
+        "memory_usage_mb": 391.0,
+        "memory_request_mb": 32768.0,
+        "bytes_received": 864007658
+      },
+      "finished": true,
+      "tasks": {
+        "suite_release": {
+          "kind": "suite",
+          "verdict": "failed",
+          "must_pass": false,
+          "exit_code": 1,
+          "seconds": 306.116,
+          "error": null,
+          "reason": null
+        }
+      },
+      "host": "node2286",
+      "order": [
+        "suite_release"
+      ],
+      "error": null
+    },
+    "suite_patched": {
+      "condor": {
+        "succeeded": true,
+        "return_value": 0,
+        "attempts": 1,
+        "host": "node2283.cluster.ldas.cit",
+        "wait_seconds": 3827.0,
+        "input_transfer_seconds": 8.0,
+        "run_seconds": 921.0,
+        "output_transfer_seconds": 0.0,
+        "cpu_seconds": 2049.0,
+        "cores_used": 2.224755700325733,
+        "memory_usage_mb": 1126.0,
+        "memory_request_mb": 32768.0,
+        "bytes_received": 907174847
+      },
+      "finished": true,
+      "tasks": {
+        "suite_patched": {
+          "kind": "suite",
+          "verdict": "failed",
+          "must_pass": false,
+          "exit_code": 1,
+          "seconds": 899.065,
+          "error": null,
+          "reason": null
+        }
+      },
+      "host": "node2283",
+      "order": [
+        "suite_patched"
+      ],
+      "error": null
+    }
+  },
+  "suites": {
+    "release": {
+      "skipped": 14,
+      "passed": 911,
+      "failed": 2
+    },
+    "patched": {
+      "skipped": 13,
+      "passed": 912,
+      "failed": 2
+    },
+    "unexpected_failures_release": [],
+    "unexpected_failures_patched": [],
+    "differing": {},
+    "patched_lal_test": {
+      "tests.gw.waveform_generator.test_wfg_m.test_lalsimulation_multi_phase_matches_repeated_calls[IMRPhenomXPHM]": "passed"
+    }
+  },
+  "injection_cost": {
+    "core_hours_before": 24.52023111111111,
+    "core_hours_after": 19.392231111111112,
+    "speedup": 1.2644357923860459,
+    "injections_per_week_before": 3425.7425886143546,
+    "injections_per_week_after": 4331.631544545216
+  },
+  "problems": [
+    "stress: Not finished"
+  ]
+}

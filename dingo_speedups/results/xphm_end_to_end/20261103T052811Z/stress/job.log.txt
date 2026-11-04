@@ -1,0 +1,46 @@
+000 (571584109.000.000) 2026-11-02 21:32:36 Job submitted from host: <10.14.0.12:9618?addrs=10.14.0.12-9618&alias=ldas-grid.ligo.caltech.edu&noUDP&sock=schedd_3004_1296>
+    WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:WARNING: This vanilla-universe job specifies a container image (SingularityImage=./dingo-deps_recipe-8f44d79_cpu.sif). Consider using 'universe = container' with 'container_image' instead. See: https://htcondor.readthedocs.io/en/latest/users-manual/env-of-job.html#container-universe-jobs
+...
+040 (571584109.000.000) 2026-11-03 18:46:10 Started transferring input files
+	Transferring to host: <10.14.4.87:9618?addrs=10.14.4.87-9618&alias=node837.cluster.ldas.cit&noUDP&sock=slot1_7_6917_66f2_32133>
+...
+040 (571584109.000.000) 2026-11-03 18:46:16 Finished transferring input files
+...
+001 (571584109.000.000) 2026-11-03 18:46:16 Job executing on host: <10.14.4.87:9618?addrs=10.14.4.87-9618&alias=node837.cluster.ldas.cit&noUDP&sock=startd_6612_dc4a>
+	SlotName: slot1_7@node837.cluster.ldas.cit
+	CondorScratchDir = "/var/lib/condor/execute/dir_3210932/scratch"
+	Cpus = 32
+	Disk = 10485760
+	GPUs = 0
+	Memory = 24576
+...
+006 (571584109.000.000) 2026-11-03 18:46:35 Image size of job updated: 531380
+	438  -  MemoryUsage of job (MB)
+	448356  -  ResidentSetSize of job (KB)
+...
+006 (571584109.000.000) 2026-11-03 18:48:57 Image size of job updated: 23328132
+	19119  -  MemoryUsage of job (MB)
+	19577104  -  ResidentSetSize of job (KB)
+...
+021 (571584109.000.000) 2026-11-03 18:48:57 Error from starter on slot1_7@node837.cluster.ldas.cit:
+	Job has gone over cgroup memory limit of 24576 megabytes. Last measured usage: 24576 megabytes.  Consider resubmitting with a higher request_memory.
+	Code 34 Subcode 102
+...
+004 (571584109.000.000) 2026-11-03 18:48:58 Job was evicted. Code 34 Subcode 102
+	(0) CPU times
+		Usr 0 01:15:22, Sys 0 00:02:55  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	906043157  -  Run Bytes Received By Job
+	Reason: Error from slot1_7@node837.cluster.ldas.cit: Job has gone over cgroup memory limit of 24576 megabytes. Last measured usage: 24576 megabytes.  Consider resubmitting with a higher request_memory.
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :   884948 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :    19119    24576     24576 
+	   TimeSlotBusy (s)     :      168                    
+...
+012 (571584109.000.000) 2026-11-03 18:48:58 Job was held.
+	Error from slot1_7@node837.cluster.ldas.cit: Job has gone over cgroup memory limit of 24576 megabytes. Last measured usage: 24576 megabytes.  Consider resubmitting with a higher request_memory.
+	Code 34 Subcode 102
+...

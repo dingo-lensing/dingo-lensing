@@ -1,0 +1,47 @@
+{
+  "job": "full",
+  "lal_tarball": "lal_e21ec9674d.tar.gz",
+  "compare_dingo": {
+    "tarball": "dingo_47e047ec2f.tar.gz",
+    "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723"
+  },
+  "tasks": [
+    {
+      "kind": "importance_sampling",
+      "name": "full_upstream_release",
+      "tarball": "dingo_471de26e10.tar.gz",
+      "commit": "471de26e10cef69bb59a0d2680cc299b4c9c2323",
+      "lal": false,
+      "route": "nine",
+      "model": "model_nonlensed.pt",
+      "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+      "num_samples": 50000,
+      "batch_size": 5000,
+      "num_processes": 32,
+      "seed": 1
+    },
+    {
+      "kind": "importance_sampling",
+      "name": "full_combined_patched_one",
+      "tarball": "dingo_47e047ec2f.tar.gz",
+      "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+      "lal": true,
+      "route": "one",
+      "model": "model_nonlensed.pt",
+      "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+      "num_samples": 50000,
+      "batch_size": 5000,
+      "num_processes": 32,
+      "seed": 1
+    },
+    {
+      "kind": "compare",
+      "name": "compare_full_upstream_release_vs_full_combined_patched_one",
+      "first": "full_upstream_release",
+      "second": "full_combined_patched_one",
+      "rtol": 1e-09,
+      "atol": 1e-07,
+      "must_pass": false
+    }
+  ]
+}

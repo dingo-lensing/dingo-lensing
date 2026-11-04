@@ -1,0 +1,18 @@
+{
+  "host": "node2286",
+  "python": "3.13.13",
+  "tasks": {
+    "suite_release": {
+      "kind": "suite",
+      "must_pass": false,
+      "exit_code": 1,
+      "seconds": 306.116,
+      "verdict": "failed"
+    }
+  },
+  "job": "suite_release",
+  "order": [
+    "suite_release"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,198 @@
+{
+  "provenance": {
+    "dingo": {
+      "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+      "describe": "v0.10.3-9-g47e047ec",
+      "version": "0.10.4.dev9+g47e047ec",
+      "tree": "/srv/scratch/work/compare_combined_patched_one_vs_branch_patched_one/dingo_47e047ec2f",
+      "imported_from": "/srv/scratch/work/compare_combined_patched_one_vs_branch_patched_one/dingo_47e047ec2f/dingo"
+    },
+    "python": {
+      "version": "3.13.13",
+      "executable": "/opt/dingo_env/bin/python",
+      "isolated": true
+    },
+    "packages": {
+      "lalsuite": "7.26.15",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3",
+      "torch": "2.13.0+cpu",
+      "bilby": "2.6.0",
+      "bilby-pipe": "1.8.0",
+      "pandas": "3.0.5",
+      "h5py": "3.16.0",
+      "pycbc": "2.11.0",
+      "pytest": "9.1.1"
+    },
+    "host": {
+      "name": "node2283",
+      "platform": "Linux-6.12.0-211.61.1.el10_2.x86_64-x86_64-with-glibc2.39",
+      "cpu": {
+        "model": "AMD EPYC 7313 16-Core Processor",
+        "flags": {
+          "avx2": true,
+          "avx512f": false,
+          "fma": true
+        }
+      },
+      "cpu_count": 64,
+      "usable_cpus": 64
+    },
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "32",
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "first": "/srv/scratch/out/combined_patched_one/importance_sampling.hdf5",
+  "second": "/srv/scratch/out/branch_patched_one/importance_sampling.hdf5",
+  "rtol": 1e-09,
+  "atol": 1e-07,
+  "num_samples": [
+    50000,
+    50000
+  ],
+  "columns": {
+    "a_1": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "a_2": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "chirp_mass": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "dec": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "geocent_time": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "log_likelihood": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 90,
+      "nonfinite_mismatch": 0
+    },
+    "log_likelihood_cache": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 90,
+      "nonfinite_mismatch": 0
+    },
+    "log_prior": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 90,
+      "nonfinite_mismatch": 0
+    },
+    "log_prob": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 90,
+      "nonfinite_mismatch": 0
+    },
+    "luminosity_distance": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "mass_ratio": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "phase": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "phi_12": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "phi_jl": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "psi": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "ra": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "theta_jn": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "tilt_1": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "tilt_2": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    },
+    "weights": {
+      "max_abs": 0.0,
+      "max_rel": 0.0,
+      "nonfinite": 0,
+      "nonfinite_mismatch": 0
+    }
+  },
+  "only_in_first": [],
+  "only_in_second": [],
+  "summary": {
+    "log_evidence": [
+      -5829.624843410485,
+      -5829.624843410485
+    ],
+    "log_evidence_std": [
+      0.008407223576853634,
+      0.008407223576853634
+    ],
+    "n_eff": [
+      11027.618770644474,
+      11027.618770644474
+    ],
+    "sample_efficiency": [
+      0.2205523754128895,
+      0.2205523754128895
+    ]
+  },
+  "identical_to_rtol": true
+}

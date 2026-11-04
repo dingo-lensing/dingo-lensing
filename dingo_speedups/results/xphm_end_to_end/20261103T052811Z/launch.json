@@ -1,0 +1,15 @@
+{
+  "upstream": "471de26e10cef69bb59a0d2680cc299b4c9c2323",
+  "pr454": "e92d71fbd83fd6e1dd9795655082ed95abdbcda5",
+  "branch": "c551d28bec006abd43db095ded1862afcb0ce24c",
+  "combined": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+  "lal_tarball": "/home/kailibryan.doney/dingo-speedups-runs/xphm/20261103T052811Z/lal_e21ec9674d.tar.gz",
+  "image": "/home/kailibryan.doney/dingo-speedups-images/dingo-deps_recipe-8f44d79_cpu.sif",
+  "image_url": "osdf:///igwn/cit/staging/kailibryan.doney/containers/dingo-deps_recipe-8f44d79_cpu.sif",
+  "sync_commit": "5109450597b8781e8312142cc05ff97b24955ac8",
+  "proposal": "/home/kailibryan.doney/dingo-speedups-runs/baseline/20261027T070059Z/out/network_samples.hdf5",
+  "model": "/home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/models/model_nonlensed.pt",
+  "event_data": "/home/kailibryan.doney/dingo_lensing_tutorial/materials/ex3_dingo_lensing_application/dingo_EXP2_nonlensed/data/label_data0_1384782888-63_generation_event_data.hdf5",
+  "priority": 50,
+  "launched_utc": "2026-11-03T05:28:31Z"
+}

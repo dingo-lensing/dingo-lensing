@@ -1,0 +1,185 @@
+{
+  "inputs": {
+    "tarball": "/srv/scratch/dingo_e92d71fbd8.tar.gz",
+    "commit": "e92d71fbd83fd6e1dd9795655082ed95abdbcda5",
+    "model": "None",
+    "proposal": "/srv/scratch/network_samples.hdf5",
+    "event_data": "/srv/scratch/label_data0_1384782888-63_generation_event_data.hdf5",
+    "num_samples": "50000",
+    "batch_size": "5000",
+    "num_processes": "32",
+    "seed": "1",
+    "lal_site": "None",
+    "route": "nine"
+  },
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "32",
+    "OPENBLAS_NUM_THREADS": null
+  },
+  "stages": {
+    "unpack": {
+      "seconds": 0.106,
+      "main_peak_bytes": 19578880,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 0,
+      "job_peak_bytes_so_far": null
+    },
+    "imports": {
+      "seconds": 3.843,
+      "main_peak_bytes": 534786048,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 529944576,
+      "job_peak_bytes_so_far": null
+    },
+    "event_data": {
+      "seconds": 0.003,
+      "main_peak_bytes": 536641536,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 529944576,
+      "job_peak_bytes_so_far": null
+    },
+    "importance_sampling_setup": {
+      "seconds": 0.036,
+      "main_peak_bytes": 547450880,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 529944576,
+      "job_peak_bytes_so_far": null
+    },
+    "synthetic_phase": {
+      "seconds": 135.633,
+      "main_peak_bytes": 5371113472,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 570658816,
+      "job_peak_bytes_so_far": null
+    },
+    "importance_sample": {
+      "seconds": 0.191,
+      "main_peak_bytes": 2683867136,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 570658816,
+      "job_peak_bytes_so_far": null
+    },
+    "save_result": {
+      "seconds": 0.02,
+      "main_peak_bytes": 2683867136,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 570658816,
+      "job_peak_bytes_so_far": null
+    }
+  },
+  "provenance": {
+    "dingo": {
+      "commit": "e92d71fbd83fd6e1dd9795655082ed95abdbcda5",
+      "describe": "v0.10.3-7-ge92d71fb",
+      "version": "0.10.4.dev7+ge92d71fb",
+      "tree": "/srv/scratch/work/pr454_release/dingo_e92d71fbd8",
+      "imported_from": "/srv/scratch/work/pr454_release/dingo_e92d71fbd8/dingo"
+    },
+    "python": {
+      "version": "3.13.13",
+      "executable": "/opt/dingo_env/bin/python",
+      "isolated": true
+    },
+    "packages": {
+      "lalsuite": "7.26.15",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3",
+      "torch": "2.13.0+cpu",
+      "bilby": "2.6.0",
+      "bilby-pipe": "1.8.0",
+      "pandas": "3.0.5",
+      "h5py": "3.16.0",
+      "pycbc": "2.11.0",
+      "pytest": "9.1.1"
+    },
+    "host": {
+      "name": "node2268",
+      "platform": "Linux-6.12.0-211.61.1.el10_2.x86_64-x86_64-with-glibc2.39",
+      "cpu": {
+        "model": "AMD EPYC 7313 16-Core Processor",
+        "flags": {
+          "avx2": true,
+          "avx512f": false,
+          "fma": true
+        }
+      },
+      "cpu_count": 64,
+      "usable_cpus": 64
+    },
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "32",
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "torch_threads": 32,
+  "lal": {
+    "version": "6.2.1",
+    "file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
+    "has_multi_phase": false,
+    "start_method": "fork",
+    "libraries": [
+      "/opt/dingo_env/lib/python3.13/site-packages/h5py.libs/libhdf5-9e18f0c6.so.320.0.0",
+      "/opt/dingo_env/lib/python3.13/site-packages/h5py.libs/libhdf5_hl-69da89c9.so.320.0.0",
+      "/opt/dingo_env/lib/python3.13/site-packages/lalsuite.libs/libfftw3-6b983104.so.3.5.5",
+      "/opt/dingo_env/lib/python3.13/site-packages/lalsuite.libs/libfftw3f-b4465a35.so.3.5.5",
+      "/opt/dingo_env/lib/python3.13/site-packages/lalsuite.libs/libgsl-e30be130.so.28.0.0",
+      "/opt/dingo_env/lib/python3.13/site-packages/lalsuite.libs/libgslcblas-460f042a.so.0.0.0",
+      "/opt/dingo_env/lib/python3.13/site-packages/lalsuite.libs/libhdf5-d02936e2.so.310.5.1",
+      "/opt/dingo_env/lib/python3.13/site-packages/lalsuite.libs/libhdf5_hl-0e40b553.so.310.0.6",
+      "/opt/dingo_env/lib/python3.13/site-packages/lalsuite.libs/liblal-4be44368.so.20.5.1",
+      "/opt/dingo_env/lib/python3.13/site-packages/lalsuite.libs/liblalsupport-aa9b0b76.so.14.4.1",
+      "/opt/dingo_env/lib/python3.13/site-packages/scikit_learn.libs/libgomp-e985bcbb.so.1.0.0",
+      "/opt/dingo_env/lib/python3.13/site-packages/torch/lib/libgomp.so.1"
+    ]
+  },
+  "synthetic_phase_parts": {
+    "per_sample_terms_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 126.465,
+      "main_peak_bytes": 707719168
+    },
+    "grid_evaluation_in_main": {
+      "found": true,
+      "calls": 1,
+      "seconds": 0.033,
+      "main_peak_bytes": 5371113472
+    },
+    "floor_in_main": {
+      "found": true,
+      "calls": 0,
+      "seconds": 0.0,
+      "main_peak_bytes": null
+    },
+    "draws": {
+      "found": true,
+      "calls": 1,
+      "seconds": 2.821,
+      "main_peak_bytes": 5371113472
+    },
+    "grid_and_floor_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 5.906,
+      "main_peak_bytes": 4697858048
+    }
+  },
+  "evidence": {
+    "num_samples": 50000,
+    "log_evidence": -5829.6248468704935,
+    "log_evidence_std": 0.008407253545258522,
+    "n_eff": 11027.557492152524,
+    "sample_efficiency": 0.2205511498430505
+  },
+  "route": {
+    "requested": "nine",
+    "calls": {
+      "SimInspiralFD": 449199
+    }
+  },
+  "total_seconds": 139.873,
+  "job_peak_bytes": null,
+  "children_peak_bytes": 570658816
+}

@@ -1,0 +1,32 @@
+/srv/scratch/work/compare_full_upstream_release_vs_full_combined_patched_one/dingo_47e047ec2f/dingo/gw/domains/base_frequency_domain.py:150: SyntaxWarning: invalid escape sequence '\p'
+  Convention: the phase $\phi(f)$ is defined via $\exp[- i \phi(f)]$.
+/srv/scratch/work/compare_full_upstream_release_vs_full_combined_patched_one/dingo_47e047ec2f/dingo/gw/transforms/gnpe_transforms.py:35: SyntaxWarning: invalid escape sequence '\h'
+  \hat g ~ p(\hat g | g).
+PyCBC.libutils: pkg-config call failed, setting NO_PKGCONFIG=1
+Loading dataset from /srv/scratch/out/full_upstream_release/importance_sampling.hdf5.
+Loading dataset from /srv/scratch/out/full_combined_patched_one/importance_sampling.hdf5.
+a_1                          max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+a_2                          max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+chirp_mass                   max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+dec                          max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+geocent_time                 max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+log_likelihood               max abs  2.620e+01   max rel  4.400e-03   non-finite 90, mismatched 0
+log_likelihood_cache         max abs  2.620e+01   max rel  4.400e-03   non-finite 90, mismatched 0
+log_prior                    max abs  0.000e+00   max rel  0.000e+00   non-finite 90, mismatched 0
+log_prob                     max abs  7.101e-01   max rel  3.617e-02   non-finite 90, mismatched 0
+luminosity_distance          max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+mass_ratio                   max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+phase                        max abs  1.249e-01   max rel  8.501e-02   non-finite 0, mismatched 0
+phi_12                       max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+phi_jl                       max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+psi                          max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+ra                           max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+theta_jn                     max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+tilt_1                       max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+tilt_2                       max abs  0.000e+00   max rel  0.000e+00   non-finite 0, mismatched 0
+weights                      max abs  7.491e-01   max rel  1.000e+00   non-finite 0, mismatched 0
+log_evidence                 -5829.624789 vs -5829.624813
+log_evidence_std             0.008409 vs 0.008408
+n_eff                        11024.364494 vs 11025.157854
+sample_efficiency            0.220487 vs 0.220503
+Identical to rtol 1e-09, atol 1e-07: False

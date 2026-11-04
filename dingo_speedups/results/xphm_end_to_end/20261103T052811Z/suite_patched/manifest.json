@@ -1,0 +1,19 @@
+{
+  "job": "suite_patched",
+  "lal_tarball": "lal_e21ec9674d.tar.gz",
+  "compare_dingo": {
+    "tarball": "dingo_47e047ec2f.tar.gz",
+    "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723"
+  },
+  "tasks": [
+    {
+      "kind": "suite",
+      "name": "suite_patched",
+      "tarball": "dingo_47e047ec2f.tar.gz",
+      "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+      "lal": true,
+      "pytest_args": [],
+      "must_pass": false
+    }
+  ]
+}

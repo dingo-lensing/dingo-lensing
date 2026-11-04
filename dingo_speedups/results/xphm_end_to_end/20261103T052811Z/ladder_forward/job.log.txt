@@ -1,0 +1,62 @@
+000 (571584106.000.000) 2026-11-02 21:32:36 Job submitted from host: <10.14.0.12:9618?addrs=10.14.0.12-9618&alias=ldas-grid.ligo.caltech.edu&noUDP&sock=schedd_3004_1296>
+    WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:WARNING: This vanilla-universe job specifies a container image (SingularityImage=./dingo-deps_recipe-8f44d79_cpu.sif). Consider using 'universe = container' with 'container_image' instead. See: https://htcondor.readthedocs.io/en/latest/users-manual/env-of-job.html#container-universe-jobs
+...
+040 (571584106.000.000) 2026-11-03 21:16:21 Started transferring input files
+	Transferring to host: <10.14.10.33:9618?addrs=10.14.10.33-9618&alias=node2283.cluster.ldas.cit&noUDP&sock=slot1_8_12237_d2cb_94567>
+...
+040 (571584106.000.000) 2026-11-03 21:16:27 Finished transferring input files
+...
+001 (571584106.000.000) 2026-11-03 21:16:27 Job executing on host: <10.14.10.33:9618?addrs=10.14.10.33-9618&alias=node2283.cluster.ldas.cit&noUDP&sock=startd_12198_6452>
+	SlotName: slot1_8@node2283.cluster.ldas.cit
+	CondorScratchDir = "/var/lib/condor/execute/dir_2161195/scratch"
+	Cpus = 32
+	Disk = 16777216
+	GPUs = 0
+	Memory = 49152
+...
+006 (571584106.000.000) 2026-11-03 21:16:50 Image size of job updated: 309808
+	303  -  MemoryUsage of job (MB)
+	309808  -  ResidentSetSize of job (KB)
+...
+006 (571584106.000.000) 2026-11-03 21:21:51 Image size of job updated: 29716940
+	303  -  MemoryUsage of job (MB)
+	309944  -  ResidentSetSize of job (KB)
+...
+006 (571584106.000.000) 2026-11-03 21:26:52 Image size of job updated: 29716940
+	877  -  MemoryUsage of job (MB)
+	897616  -  ResidentSetSize of job (KB)
+...
+006 (571584106.000.000) 2026-11-03 21:31:52 Image size of job updated: 29716940
+	880  -  MemoryUsage of job (MB)
+	900324  -  ResidentSetSize of job (KB)
+...
+006 (571584106.000.000) 2026-11-03 21:36:53 Image size of job updated: 29716940
+	898  -  MemoryUsage of job (MB)
+	918812  -  ResidentSetSize of job (KB)
+...
+006 (571584106.000.000) 2026-11-03 21:41:53 Image size of job updated: 29716940
+	898  -  MemoryUsage of job (MB)
+	918820  -  ResidentSetSize of job (KB)
+...
+040 (571584106.000.000) 2026-11-03 21:42:11 Started transferring output files
+...
+040 (571584106.000.000) 2026-11-03 21:42:11 Finished transferring output files
+...
+005 (571584106.000.000) 2026-11-03 21:42:12 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 04:54:09, Sys 0 00:02:36  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 04:54:09, Sys 0 00:02:36  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	34865126  -  Run Bytes Sent By Job
+	913956422  -  Run Bytes Received By Job
+	34865126  -  Total Bytes Sent By Job
+	913956422  -  Total Bytes Received By Job
+	Partitionable Resources :      Usage  Request Allocated 
+	   Cpus                 :      12.97       32        32 
+	   Disk (KB)            : 1143820    16777216  16777216 
+	   GPUs                 :                             0 
+	   Memory (MB)          :     898       49152     49152 
+	   TimeExecute (s)      :    1544                       
+	   TimeSlotBusy (s)     :    1550                       
+...
