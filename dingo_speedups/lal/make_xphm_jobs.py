@@ -13,6 +13,12 @@ The jobs (each runs xphm_job.py on its manifest):
 Each job has a folder in the run folder with manifest.json and job.sub. The pre-flight's manifests
 go in preflight/: The same tasks, smaller, with the data files at their absolute paths.
 
+    python -I make_xphm_jobs.py --run-dir DIR --image-url URL ... (see main)
+    python -I make_xphm_jobs.py --rewrite RUN_DIR JOB
+
+The second writes one job's manifest and submit file again, as this version has them, from the
+run's launch.json (resubmit_xphm_job.sh uses it).
+
 Set up as make_submit.py is, on what the 2.1 job proved on CIT. Standard library only.
 """
 from __future__ import annotations
@@ -84,12 +90,16 @@ class Scale:
     max_minutes: float
     suite_args: Tuple[str, ...]
     suite_must_pass: bool
+    stress_memory_limit_gb: float = 0.0
+    stress_tasks_per_worker: int = 0
 
 
 # The suite has two failures that upstream main has too, so its exit code decides nothing here;
 # collect_xphm_tests.py compares the outcomes test by test.
-JOB_SCALE = Scale(50_000, 5_000, 32, 1_000_000, 200_000, 240.0, (), False)
-PREFLIGHT_SCALE = Scale(500, 500, 4, 400, 100, 5.0, ("tests/gw/waveform_generator/test_wfg_m.py",), True)
+# The stress test stops itself below its memory request, so that a hold cannot lose its report, and
+# replaces its workers every few chunks; the pre-flight after every chunk, to try that.
+JOB_SCALE = Scale(50_000, 5_000, 32, 1_000_000, 200_000, 240.0, (), False, 40.0, 10)
+PREFLIGHT_SCALE = Scale(500, 500, 4, 400, 100, 5.0, ("tests/gw/waveform_generator/test_wfg_m.py",), True, 0.0, 1)
 
 
 @dataclass(frozen=True)
@@ -104,7 +114,7 @@ RESOURCES = {
     "ladder_forward": Resources(32, 48, 16),
     "ladder_reverse": Resources(32, 48, 16),
     "full": Resources(32, 48, 24),
-    "stress": Resources(32, 24, 10),
+    "stress": Resources(32, 48, 10),
     "suite_release": Resources(8, 32, 12, threads=8),
     "suite_patched": Resources(8, 32, 12, threads=8)
 }
@@ -199,7 +209,9 @@ def manifest_tasks(job: str, inputs: Inputs, scale: Scale, preflight: bool) -> L
                 "wide_draws": scale.wide_draws,
                 "num_processes": scale.num_processes,
                 "seed": inputs.seed,
-                "max_minutes": scale.max_minutes
+                "max_minutes": scale.max_minutes,
+                "memory_limit_gb": scale.stress_memory_limit_gb,
+                "max_tasks_per_worker": scale.stress_tasks_per_worker
             }
         ]
     if job in ("suite_release", "suite_patched"):
@@ -305,7 +317,52 @@ def write_jobs(inputs: Inputs) -> Dict[str, List[str]]:
     return {"jobs": list(JOBS), "preflight": list(PREFLIGHT_JOBS)}
 
 
+def inputs_from_run(run_dir: Path) -> Inputs:
+    """The inputs a launch wrote its jobs with, from its launch.json."""
+    launch = json.loads((run_dir / "launch.json").read_text(encoding="utf-8"))
+
+    def tarball(commit):
+        return (run_dir / f"dingo_{commit[:10]}.tar.gz").as_posix()
+
+    return Inputs(
+        run_dir=run_dir.as_posix(),
+        image_url=launch["image_url"],
+        upstream_tarball=tarball(launch["upstream"]),
+        upstream_commit=launch["upstream"],
+        pr454_tarball=tarball(launch["pr454"]),
+        pr454_commit=launch["pr454"],
+        branch_tarball=tarball(launch["branch"]),
+        branch_commit=launch["branch"],
+        combined_tarball=tarball(launch["combined"]),
+        combined_commit=launch["combined"],
+        lal_tarball=launch["lal_tarball"],
+        proposal=launch["proposal"],
+        model=launch["model"],
+        event_data=launch["event_data"],
+        priority=int(launch["priority"])
+    )
+
+
+def rewrite_job(run_dir: Path, job: str) -> None:
+    """Write one job's manifest and submit file again, as this version of the jobs has them."""
+    if job not in JOBS:
+        raise ValueError(f"Unknown job: {job}")
+    inputs = inputs_from_run(run_dir)
+    inputs.check()
+    job_manifest = manifest(job, inputs, JOB_SCALE)
+    write_text(run_dir / job / "manifest.json", json.dumps(job_manifest, indent=2) + "\n")
+    write_text(run_dir / job / "job.sub", submit_text(job, job_manifest, inputs))
+
+
 def main(argv=None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ["--rewrite"]:
+        if len(argv) != 3:
+            print("usage: make_xphm_jobs.py --rewrite RUN_DIR JOB", file=sys.stderr)
+            return 2
+        rewrite_job(Path(argv[1]).resolve(), argv[2])
+        print(f"Wrote {argv[2]}/manifest.json and {argv[2]}/job.sub in {argv[1]} again")
+        return 0
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     fields = (
         "run_dir",

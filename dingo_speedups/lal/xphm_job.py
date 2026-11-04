@@ -147,6 +147,10 @@ def stress_command(task: dict, lal_root: Path) -> List[str]:
         str(task["seed"]),
         "--max-minutes",
         str(task["max_minutes"]),
+        "--max-tasks-per-worker",
+        str(task.get("max_tasks_per_worker", 0)),
+        "--memory-limit-gb",
+        str(task.get("memory_limit_gb", 0.0)),
         "--output",
         str((OUT / task["name"] / "stress.json").resolve())
     ]

@@ -231,6 +231,8 @@ def judge(jobs: Dict[str, dict], suites: Optional[dict]) -> List[str]:
             problems.append(f"stress: {stress['failures']} failures")
         if stress.get("stalled"):
             problems.append(f"stress: Chunks lost, probably to a crash: {stress.get('chunks_missing')}")
+        if stress.get("stopped_for_memory"):
+            problems.append(f"stress: Stopped at its memory limit, with {stress.get('peak_total_resident_gb', 0):.1f} GB held")
     if suites is None:
         problems.append("suite: No junit report from both LALs")
     else:
@@ -295,6 +297,12 @@ def render(summary: dict) -> str:
         lines.append(f"stress on {jobs['stress'].get('host')}: {stress.get('seconds')} s, {stress.get('failures')} failures, {len(stress.get('chunks_missing') or [])} of {stress.get('chunks')} chunks missing")
         for kind, tally in stress.get("kinds", {}).items():
             lines.append(f"  {kind}: {tally['draws']} draws, {tally['outcomes']}, largest difference {tally['max_difference']:.2e}, speed-up of the sums {tally.get('speedup_of_sums', 0):.2f}x")
+            if "worker_peak_mb" in tally:
+                growth = tally.get("growth_kb_per_draw")
+                growth_text = f", memory growth {growth:.2f} kB per draw after a worker's first chunk" if growth is not None else ""
+                lines.append(f"    worker peak {tally['worker_peak_mb']:.0f} MB{growth_text}")
+        if "peak_total_resident_gb" in stress:
+            lines.append(f"  all processes together up to {stress['peak_total_resident_gb']:.1f} GB (shared pages counted per process)")
         lines.append("")
     suites = summary.get("suites")
     if suites:

@@ -36,6 +36,7 @@ run = load_module("baseline_run_for_xphm", SPEEDUPS / "baseline" / "baseline_run
 guard = load_module("guard_for_xphm", SPEEDUPS / "guard.py")
 compare = load_module("compare_results_for_xphm", SPEEDUPS / "baseline" / "compare_results.py") if HAVE_NUMPY else None
 stress = load_module("stress_multiphase_under_test", LAL / "stress_multiphase.py") if HAVE_NUMPY else None
+leak = load_module("leak_check_under_test", LAL / "leak_check.py") if HAVE_NUMPY else None
 if HAVE_NUMPY:
     import numpy as np
 
@@ -418,6 +419,15 @@ class TestJobs(unittest.TestCase):
         for script in jobs.SCRIPTS:
             self.assertIn(f"/runs/x/scripts/{script}", files)
 
+    def test_the_stress_test_stops_itself_below_its_memory_request(self):
+        job = self.tasks("stress", "stress")[0]
+        self.assertEqual((job["memory_limit_gb"], job["max_tasks_per_worker"]), (40.0, 10))
+        self.assertLess(job["memory_limit_gb"], jobs.RESOURCES["stress"].memory_gb)
+        inputs = inputs_at()
+        self.assertIn("request_memory = 48GB\n", jobs.submit_text("stress", jobs.manifest("stress", inputs, jobs.JOB_SCALE), inputs))
+        preflight = jobs.manifest("stress", inputs, jobs.PREFLIGHT_SCALE, preflight=True)["tasks"][0]
+        self.assertEqual((preflight["memory_limit_gb"], preflight["max_tasks_per_worker"]), (0.0, 1))
+
     def test_the_suite_gets_its_cores_as_threads(self):
         inputs = inputs_at()
         text = jobs.submit_text("suite_patched", jobs.manifest("suite_patched", inputs, jobs.JOB_SCALE), inputs)
@@ -429,9 +439,10 @@ class TestJobs(unittest.TestCase):
         self.assertLessEqual(set(jobs.PREFLIGHT_JOBS), set(jobs.JOBS))
 
     def test_the_launcher_copies_every_script_a_job_is_sent(self):
-        launcher = (LAL / "launch_xphm_tests.sh").read_text(encoding="utf-8")
-        for script in jobs.SCRIPTS:
-            self.assertIn(f"/{script}", launcher)
+        for launcher in ("launch_xphm_tests.sh", "resubmit_xphm_job.sh"):
+            text = (LAL / launcher).read_text(encoding="utf-8")
+            for script in jobs.SCRIPTS:
+                self.assertIn(f"/{script}", text, launcher)
 
     def test_every_script_a_job_is_sent_exists(self):
         for script in jobs.SCRIPTS:
@@ -460,6 +471,42 @@ class TestJobs(unittest.TestCase):
         inputs.image_url = "/data/image.sif"
         with self.assertRaisesRegex(ValueError, "osdf"):
             inputs.check()
+
+
+class TestRewrite(TempCase):
+    def make_run(self):
+        run_dir = self.base / "run"
+        launch = {
+            "upstream": COMMITS["upstream"],
+            "pr454": COMMITS["pr454"],
+            "branch": COMMITS["branch"],
+            "combined": COMMITS["combined"],
+            "lal_tarball": (run_dir / "lal_e21ec9674d.tar.gz").as_posix(),
+            "image_url": "osdf:///igwn/cit/staging/me/containers/image.sif",
+            "proposal": "/data/runs/network_samples.hdf5",
+            "model": "/data/models/model_nonlensed.pt",
+            "event_data": "/data/event/event_data.hdf5",
+            "priority": 50
+        }
+        write(run_dir / "launch.json", json.dumps(launch))
+        return run_dir
+
+    def test_writes_one_job_again_from_the_launch(self):
+        run_dir = self.make_run()
+        with mock.patch.object(jobs.Inputs, "check"):
+            jobs.rewrite_job(run_dir, "stress")
+        manifest = json.loads((run_dir / "stress" / "manifest.json").read_text(encoding="utf-8"))
+        inputs = jobs.inputs_from_run(run_dir)
+        self.assertEqual(manifest, jobs.manifest("stress", inputs, jobs.JOB_SCALE))
+        self.assertEqual(manifest["tasks"][0]["memory_limit_gb"], 40.0)
+        self.assertIn("request_memory = 48GB\n", (run_dir / "stress" / "job.sub").read_text(encoding="utf-8"))
+        self.assertEqual(inputs.combined_tarball, (run_dir / "dingo_cccccccccc.tar.gz").as_posix())
+        self.assertFalse((run_dir / "full").exists())
+
+    def test_refuses_an_unknown_job(self):
+        run_dir = self.make_run()
+        with self.assertRaisesRegex(ValueError, "Unknown job"):
+            jobs.rewrite_job(run_dir, "ladder_sideways")
 
 
 class TestTaskVerdicts(unittest.TestCase):
@@ -562,6 +609,7 @@ from pathlib import Path
 args = sys.argv[1:]
 failures = int(os.environ.get("FAKE_STRESS_FAILURES", "0"))
 report = {
+    "args": args,
     "seconds": 100.0,
     "failures": failures,
     "chunks": 10,
@@ -725,6 +773,13 @@ class TestDryRun(TempCase):
         self.assertIn("compare_combined_patched_nine_vs_combined_patched_one disagrees", "\n".join(summary["problems"]))
         self.assertTrue(collect.render(summary).startswith("End-to-end"))
 
+    def test_the_stress_test_gets_its_memory_settings(self):
+        run_dir, _ = self.run_all()
+        report = json.loads((run_dir / "stress" / "out" / "stress" / "stress.json").read_text(encoding="utf-8"))
+        arguments = report["args"]
+        self.assertEqual(arguments[arguments.index("--memory-limit-gb") + 1], "40.0")
+        self.assertEqual(arguments[arguments.index("--max-tasks-per-worker") + 1], "10")
+
     def test_a_stress_failure_fails_the_test(self):
         run_dir, codes = self.run_all({"FAKE_STRESS_FAILURES": "2"})
         self.assertEqual(codes["stress"].returncode, 3)
@@ -826,6 +881,11 @@ class TestCollectPieces(TempCase):
         stress = {"failures": 0, "stalled": True, "chunks_missing": [["wide", 3]]}
         job = {"finished": True, "tasks": {"stress": {"kind": "stress", "verdict": "disagrees", "stress": stress}}}
         self.assertIn("stress: Chunks lost, probably to a crash: [['wide', 3]]", collect.judge({"stress": job}, None))
+
+    def test_stopping_at_the_memory_limit_is_a_problem(self):
+        stress = {"failures": 0, "stalled": False, "stopped_for_memory": True, "peak_total_resident_gb": 41.2}
+        job = {"finished": True, "tasks": {"stress": {"kind": "stress", "verdict": "disagrees", "stress": stress}}}
+        self.assertIn("stress: Stopped at its memory limit, with 41.2 GB held", collect.judge({"stress": job}, None))
 
     def test_stopping_at_the_time_limit_is_not_a_problem(self):
         stress = {"failures": 0, "stalled": False, "chunks_missing": [["wide", 3]], "stopped_at_time_limit": True}
@@ -1054,6 +1114,18 @@ class TestStressOutcomes(unittest.TestCase):
         self.assertAlmostEqual(first["single_seconds"], 0.06)
         self.assertEqual(first["worst"][0]["difference"], 2e-11)
 
+    def test_memory_growth_adds_up_apart_from_first_chunks(self):
+        first, later = stress.new_tally(), stress.new_tally()
+        first.update(memory_first_growth_kb=5000, memory_first_draws=200, worker_peak_mb=300.0)
+        later.update(memory_later_growth_kb=40, memory_later_draws=200, worker_peak_mb=320.0)
+        stress.merge_tallies(first, later)
+        self.assertEqual((first["memory_first_growth_kb"], first["memory_later_growth_kb"]), (5000, 40))
+        self.assertEqual(first["memory_later_draws"], 200)
+        self.assertEqual(first["worker_peak_mb"], 320.0)
+
+    def test_resident_memory_of_a_process_that_is_not_there(self):
+        self.assertIsNone(stress.resident_kb("not-a-process"))
+
     def test_failures_keep_their_parameters_up_to_a_limit(self):
         tally = stress.new_tally()
         record = {"outcome": "over_rtol", "difference": 1e-5, "single_seconds": 0.0, "multi_seconds": 0.0, "single_error": None, "multi_error": None}
@@ -1063,6 +1135,48 @@ class TestStressOutcomes(unittest.TestCase):
         self.assertEqual(len(tally["failures"]), stress.FAILURES_KEPT)
         self.assertEqual(tally["failures"][0]["draw"], {"m1": 0.0})
         self.assertEqual(len(tally["worst"]), stress.WORST_KEPT)
+
+
+@unittest.skipUnless(HAVE_NUMPY, "needs numpy")
+class TestLeakCheck(unittest.TestCase):
+    def test_growth_per_call_by_window(self):
+        self.assertEqual(leak.growth_per_call([1000, 1400, 1600, 1800], 100), [4.0, 2.0, 2.0])
+
+    def test_only_steady_growth_is_a_leak(self):
+        self.assertTrue(leak.leaks([30.0, 2.0, 1.9], 0.5))
+        self.assertFalse(leak.leaks([30.0, 0.1, 0.0], 0.5))  # the allocator settling in
+        self.assertFalse(leak.leaks([30.0, 2.0, 0.2], 0.5))
+        self.assertFalse(leak.leaks([], 0.5))
+
+    def test_measure_reads_the_memory_around_three_windows(self):
+        readings = iter([1000, 1100, 1200, 1300])
+        calls = []
+        result = leak.measure(calls.append, [("a",), ("b",)], 4, resident=lambda: next(readings))
+        self.assertEqual(result["kb_per_call"], [25.0, 25.0, 25.0])
+        self.assertEqual(len(calls), 1 + 3 * 4)  # a warm-up of a quarter, then the windows
+
+    def test_measure_without_proc_reports_no_growth(self):
+        result = leak.measure(lambda arguments: None, [("a",)], 4, resident=lambda: None)
+        self.assertNotIn("kb_per_call", result)
+
+    def test_each_route_makes_its_own_calls(self):
+        made = []
+        LS = SimpleNamespace(
+            SimInspiralFD=lambda *args: made.append(("fd", args[10])),
+            SimInspiralFDMultiPhase=lambda *args: made.append(("fd_multi", list(args[10].data))),
+            SimIMRPhenomXPHM=lambda *args: made.append(("xphm", args[10:])),
+            SimIMRPhenomXPHMMultiPhase=lambda *args: made.append(("xphm_multi", args[11:]))
+        )
+        head = tuple(range(10))
+        tail = (0.0, 0.0, 0.0, 0.125, 20.0, 448.0, 20.0, "dictionary", 1)
+        for route in leak.ROUTES:
+            leak.call_route(FakeLal, LS, route, head, tail, [0.5, 1.5])
+        self.assertEqual(made[:2], [("fd", 0.5), ("fd", 1.5)])
+        self.assertEqual(made[2], ("fd_multi", [0.5, 1.5]))
+        self.assertEqual(made[3], ("xphm", (0.5, 20.0, 448.0, 0.125, 20.0, "dictionary")))
+        self.assertEqual(made[5], ("xphm_multi", (20.0, 448.0, 0.125, 20.0, "dictionary")))
+        with self.assertRaisesRegex(ValueError, "Unknown route"):
+            leak.call_route(FakeLal, LS, "sideways", head, tail, [0.5])
 
 
 class SerialResults:
@@ -1080,8 +1194,8 @@ class SerialPool:
 
     lose_first = False
 
-    def __init__(self, processes):
-        pass
+    def __init__(self, processes, **options):
+        self.options = options
 
     def __enter__(self):
         return self
@@ -1141,6 +1255,15 @@ class TestStressRun(TempCase):
         self.assertEqual(code, 0)
         self.assertTrue(report["stopped_at_time_limit"])
         self.assertTrue(report["ok"])
+
+    def test_the_memory_limit_stops_a_run_with_its_report(self):
+        with mock.patch.object(stress, "total_resident_gb", return_value=99.0):
+            code, report = self.run_stress("--dingo-draws", "400", "--wide-draws", "0", "--memory-limit-gb", "40")
+        self.assertEqual(code, 3)
+        self.assertTrue(report["stopped_for_memory"])
+        self.assertFalse(report["stopped_at_time_limit"])
+        self.assertEqual(report["peak_total_resident_gb"], 99.0)
+        self.assertFalse(report["ok"])
 
     def test_a_lal_without_the_function_is_refused(self):
         site = self.base / "other"
