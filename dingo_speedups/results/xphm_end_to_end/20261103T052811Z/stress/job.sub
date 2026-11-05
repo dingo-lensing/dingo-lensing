@@ -12,7 +12,7 @@ transfer_input_files = osdf:///igwn/cit/staging/kailibryan.doney/containers/ding
 transfer_output_files = out
 use_oauth_services = scitokens
 environment = "OMP_NUM_THREADS=1"
-request_cpus = 32
+request_cpus = 16
 request_memory = 48GB
 request_disk = 10GB
 priority = 50

@@ -1,4 +1,4 @@
-dingo: 35000 draws, {'within_rtol': 33114, 'exact': 1886}, largest difference 3.249e-14, worker peak 9535 MB, 3.35 kB per draw after the first chunk
-wide: 7850 draws, {'within_rtol': 5920, 'exact': 1924, 'both_raise': 4, 'unstable': 2}, largest difference 1.649e-13, worker peak 9535 MB, 1315.46 kB per draw after the first chunk
-All processes together held up to 41.0 GB (stopped there)
-FAILED: 0 failures, 8668 chunks missing; report /srv/scratch/out/stress/stress.json
+dingo: 29400 draws, {'within_rtol': 27812, 'exact': 1588}, largest difference 3.153e-14, worker peak 9537 MB, 0.27 kB per draw after the first chunk
+wide: 6450 draws, {'within_rtol': 4865, 'exact': 1581, 'both_raise': 2, 'unstable': 2}, largest difference 1.648e-13, worker peak 9537 MB, 2356.76 kB per draw after the first chunk
+All processes together held up to 42.1 GB (stopped there)
+FAILED: 0 failures, 8724 chunks missing; report /srv/scratch/out/stress/stress.json

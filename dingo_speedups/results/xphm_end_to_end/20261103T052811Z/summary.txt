@@ -33,17 +33,21 @@ full on node2281, AMD EPYC 7313 16-Core Processor
   full_upstream_release        288.2s      255.8s   23.3s    8.4s    33.2 GB       3.1 GB   -5829.624789        449199          0     1.00x
   full_combined_patched_one     104.2s       90.0s   10.0s    3.6s     5.6 GB       1.1 GB   -5829.624813             0      49911     2.76x
   compare_full_upstream_release_vs_full_combined_patched_one (for scale): agrees False, largest relative 1.00e+00 (weights), absolute 2.62e+01 (log_likelihood), log evidence 2.37e-05
+  full_upstream_release: network sampling 945 s on 32 torch threads (2.1: 64 s on 24)
+  full_combined_patched_one: network sampling 845 s on 32 torch threads (2.1: 64 s on 24)
   Per injection (both models, 2.1's job overhead): 24.52 to 19.39 core-hours, 1.26x, 3426 to 4332 a week at 500 cores
+  Per injection on 2.1's other stages, with full's synthetic-phase speed-up: 7.53 to 5.00 core-hours, 1.51x, 11161 to 16803 a week at 500 cores
+  Per injection on 2.1's other stages, with ladder_forward's synthetic-phase speed-up: 7.53 to 5.31 core-hours, 1.42x, 11161 to 15819 a week at 500 cores
+  Per injection on 2.1's other stages, with ladder_reverse's synthetic-phase speed-up: 7.53 to 5.36 core-hours, 1.40x, 11161 to 15662 a week at 500 cores
 
-stress on node2410: 118.5 s, 0 failures, 8668 of 9000 chunks missing
-  dingo: 35000 draws, {'within_rtol': 33114, 'exact': 1886}, largest difference 3.25e-14, speed-up of the sums 5.47x
-    worker peak 9535 MB, memory growth 3.35 kB per draw after a worker's first chunk
-  wide: 7850 draws, {'within_rtol': 5920, 'exact': 1924, 'both_raise': 4, 'unstable': 2}, largest difference 1.65e-13, speed-up of the sums 2.47x
-    worker peak 9535 MB, memory growth 1315.46 kB per draw after a worker's first chunk
-  all processes together up to 41.0 GB (shared pages counted per process)
+stress on node790: 414.9 s, 0 failures, 8724 of 9000 chunks missing
+  dingo: 29400 draws, {'within_rtol': 27812, 'exact': 1588}, largest difference 3.15e-14, speed-up of the sums 4.93x
+    worker peak 9537 MB, memory growth 0.27 kB per draw after a worker's first chunk
+  wide: 6450 draws, {'within_rtol': 4865, 'exact': 1581, 'both_raise': 2, 'unstable': 2}, largest difference 1.65e-13, speed-up of the sums 1.98x
+    worker peak 9537 MB, memory growth 2356.76 kB per draw after a worker's first chunk
+  all processes together up to 42.1 GB (shared pages counted per process)
 
 DINGO suite: Release {'skipped': 14, 'passed': 911, 'failed': 2}; patched {'skipped': 13, 'passed': 912, 'failed': 2}; differing 0
 
-NOT PASSED, 2 problems:
-  stress: stress disagrees: exit 3
-  stress: Stopped at its memory limit, with 41.0 GB held
+NOT PASSED, 1 problems:
+  stress: Stopped at its memory limit, with 42.1 GB held

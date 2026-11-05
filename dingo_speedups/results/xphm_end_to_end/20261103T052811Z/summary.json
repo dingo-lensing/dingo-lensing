@@ -52,6 +52,8 @@
               "n_eff": 11027.557492152524,
               "sample_efficiency": 0.2205511498430505
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -92,6 +94,8 @@
               "n_eff": 11027.557492152524,
               "sample_efficiency": 0.2205511498430505
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -132,6 +136,8 @@
               "n_eff": 11027.557492152524,
               "sample_efficiency": 0.2205511498430505
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -172,6 +178,8 @@
               "n_eff": 11027.618770644593,
               "sample_efficiency": 0.22055237541289185
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -212,6 +220,8 @@
               "n_eff": 11027.618770644474,
               "sample_efficiency": 0.2205523754128895
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
             "single_calls": 0,
             "multi_phase_calls": 49911,
@@ -252,6 +262,8 @@
               "n_eff": 11027.618770644474,
               "sample_efficiency": 0.2205523754128895
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
             "single_calls": 0,
             "multi_phase_calls": 49911,
@@ -428,6 +440,8 @@
               "n_eff": 11027.618770644474,
               "sample_efficiency": 0.2205523754128895
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
             "single_calls": 0,
             "multi_phase_calls": 49911,
@@ -468,6 +482,8 @@
               "n_eff": 11027.618770644474,
               "sample_efficiency": 0.2205523754128895
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
             "single_calls": 0,
             "multi_phase_calls": 49911,
@@ -508,6 +524,8 @@
               "n_eff": 11027.618770644593,
               "sample_efficiency": 0.22055237541289185
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -548,6 +566,8 @@
               "n_eff": 11027.557492152524,
               "sample_efficiency": 0.2205511498430505
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -588,6 +608,8 @@
               "n_eff": 11027.557492152524,
               "sample_efficiency": 0.2205511498430505
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -628,6 +650,8 @@
               "n_eff": 11027.557492152524,
               "sample_efficiency": 0.2205511498430505
             },
+            "network_sampling_seconds": null,
+            "torch_threads": 32,
             "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -807,6 +831,8 @@
               "n_eff": 11024.364493573958,
               "sample_efficiency": 0.22048728987147914
             },
+            "network_sampling_seconds": 945.249,
+            "torch_threads": 32,
             "lal_file": "/opt/dingo_env/lib/python3.13/site-packages/lalsimulation/__init__.py",
             "single_calls": 449199,
             "multi_phase_calls": 0,
@@ -850,6 +876,8 @@
               "n_eff": 11025.157854275209,
               "sample_efficiency": 0.22050315708550416
             },
+            "network_sampling_seconds": 844.812,
+            "torch_threads": 32,
             "lal_file": "/srv/scratch/work/lal/lal_e21ec9674d/python/lalsimulation/__init__.py",
             "single_calls": 0,
             "multi_phase_calls": 49911,
@@ -910,7 +938,7 @@
           "verdict": "disagrees",
           "must_pass": true,
           "exit_code": 3,
-          "seconds": 118.859,
+          "seconds": 415.515,
           "error": null,
           "reason": null,
           "stress": {
@@ -918,16 +946,16 @@
               "lal_site": "/srv/scratch/work/lal/lal_e21ec9674d/python",
               "dingo_draws": "1000000",
               "wide_draws": "200000",
-              "num_processes": "32",
+              "num_processes": "16",
               "seed": "1",
               "rtol": "1e-10",
               "max_minutes": "240.0",
               "stall_minutes": "30.0",
               "max_tasks_per_worker": "10",
-              "memory_limit_gb": "40.0",
+              "memory_limit_gb": "42.0",
               "output": "/srv/scratch/out/stress/stress.json"
             },
-            "host": "node2410",
+            "host": "node790",
             "lal": {
               "lal": "7.7.1",
               "lalsimulation": "6.2.1",
@@ -944,25 +972,25 @@
             "chunks": 9000,
             "kinds": {
               "dingo": {
-                "draws": 35000,
+                "draws": 29400,
                 "outcomes": {
-                  "within_rtol": 33114,
-                  "exact": 1886
+                  "within_rtol": 27812,
+                  "exact": 1588
                 },
                 "difference_decades": {
-                  "-15": 26624,
-                  "-16": 6479,
+                  "-16": 5400,
+                  "-15": 22401,
                   "-14": 11
                 },
-                "max_difference": 3.248851382062997e-14,
-                "single_seconds": 1763.159274868085,
-                "multi_seconds": 322.6204279306112,
+                "max_difference": 3.153000160182703e-14,
+                "single_seconds": 2894.1740423166193,
+                "multi_seconds": 586.9643408302218,
                 "worst": [
                   {
                     "outcome": "within_rtol",
-                    "difference": 3.248851382062997e-14,
-                    "single_seconds": 0.038797718938440084,
-                    "multi_seconds": 0.007584403036162257,
+                    "difference": 3.153000160182703e-14,
+                    "single_seconds": 0.07815697370097041,
+                    "multi_seconds": 0.01342344330623746,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -987,9 +1015,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 2.540113056972767e-14,
-                    "single_seconds": 0.03543062799144536,
-                    "multi_seconds": 0.0050574770430102944,
+                    "difference": 1.9822397021070555e-14,
+                    "single_seconds": 0.06348368106409907,
+                    "multi_seconds": 0.011843902990221977,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1014,117 +1042,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 2.1124186181284256e-14,
-                    "single_seconds": 0.07185713900253177,
-                    "multi_seconds": 0.010182275087572634,
-                    "single_error": null,
-                    "multi_error": null,
-                    "draw": {
-                      "m1": 113.37278875657007,
-                      "m2": 98.7558139098985,
-                      "a_1": 0.01711302771910897,
-                      "a_2": 0.04592264900683247,
-                      "tilt_1": 1.8053806633543719,
-                      "tilt_2": 1.256224336154992,
-                      "phi_12": 1.193406702253591,
-                      "phi_jl": 2.1429020742027842,
-                      "theta_jn": 1.5634703874719447,
-                      "phase": 6.032314953088721,
-                      "f_min": 20.0,
-                      "f_max": 448.0,
-                      "delta_f": 0.125,
-                      "f_ref": 20.0,
-                      "long_asc_nodes": 0.0,
-                      "num_phases": 9,
-                      "dictionary": {}
-                    }
-                  },
-                  {
-                    "outcome": "within_rtol",
-                    "difference": 1.948967155650504e-14,
-                    "single_seconds": 0.045763742993585765,
-                    "multi_seconds": 0.006209895946085453,
-                    "single_error": null,
-                    "multi_error": null,
-                    "draw": {
-                      "m1": 152.17712285650862,
-                      "m2": 109.30605885977226,
-                      "a_1": 0.050624299576057005,
-                      "a_2": 0.10753218662829152,
-                      "tilt_1": 2.1872588290081416,
-                      "tilt_2": 2.505543581267353,
-                      "phi_12": 3.9686222190355434,
-                      "phi_jl": 4.5470215530264415,
-                      "theta_jn": 1.5377748050064413,
-                      "phase": 0.30822647084792126,
-                      "f_min": 20.0,
-                      "f_max": 448.0,
-                      "delta_f": 0.125,
-                      "f_ref": 20.0,
-                      "long_asc_nodes": 0.0,
-                      "num_phases": 9,
-                      "dictionary": {}
-                    }
-                  },
-                  {
-                    "outcome": "within_rtol",
-                    "difference": 1.596218364945931e-14,
-                    "single_seconds": 0.029089463991113007,
-                    "multi_seconds": 0.004045751062221825,
-                    "single_error": null,
-                    "multi_error": null,
-                    "draw": {
-                      "m1": 204.2101504418046,
-                      "m2": 176.20197951560607,
-                      "a_1": 0.06930204786056297,
-                      "a_2": 0.00879453499075858,
-                      "tilt_1": 3.1104486668239026,
-                      "tilt_2": 1.232665691304211,
-                      "phi_12": 5.3403343187820305,
-                      "phi_jl": 0.6497031098517808,
-                      "theta_jn": 1.5545756072143444,
-                      "phase": 3.7789756644913544,
-                      "f_min": 20.0,
-                      "f_max": 448.0,
-                      "delta_f": 0.125,
-                      "f_ref": 20.0,
-                      "long_asc_nodes": 0.0,
-                      "num_phases": 9,
-                      "dictionary": {}
-                    }
-                  },
-                  {
-                    "outcome": "within_rtol",
-                    "difference": 1.524003819289389e-14,
-                    "single_seconds": 0.03463136497884989,
-                    "multi_seconds": 0.004690990084782243,
-                    "single_error": null,
-                    "multi_error": null,
-                    "draw": {
-                      "m1": 241.26542523709895,
-                      "m2": 145.30389918935236,
-                      "a_1": 0.053760336004637845,
-                      "a_2": 0.1048966683184979,
-                      "tilt_1": 1.6020287923032461,
-                      "tilt_2": 2.4080136483826746,
-                      "phi_12": 4.559770686048236,
-                      "phi_jl": 5.203956220263197,
-                      "theta_jn": 1.5165732074941538,
-                      "phase": 2.8383708190078707,
-                      "f_min": 20.0,
-                      "f_max": 448.0,
-                      "delta_f": 0.125,
-                      "f_ref": 20.0,
-                      "long_asc_nodes": 0.0,
-                      "num_phases": 9,
-                      "dictionary": {}
-                    }
-                  },
-                  {
-                    "outcome": "within_rtol",
-                    "difference": 1.4968475773259254e-14,
-                    "single_seconds": 0.0567703990964219,
-                    "multi_seconds": 0.009436262887902558,
+                    "difference": 1.765993820587011e-14,
+                    "single_seconds": 0.10825489275157452,
+                    "multi_seconds": 0.01929705496877432,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1149,9 +1069,63 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.120689655362374e-14,
-                    "single_seconds": 0.060421240981668234,
-                    "multi_seconds": 0.008317033993080258,
+                    "difference": 1.6983857014959217e-14,
+                    "single_seconds": 0.10677983099594712,
+                    "multi_seconds": 0.018535363022238016,
+                    "single_error": null,
+                    "multi_error": null,
+                    "draw": {
+                      "m1": 113.37278875657007,
+                      "m2": 98.7558139098985,
+                      "a_1": 0.01711302771910897,
+                      "a_2": 0.04592264900683247,
+                      "tilt_1": 1.8053806633543719,
+                      "tilt_2": 1.256224336154992,
+                      "phi_12": 1.193406702253591,
+                      "phi_jl": 2.1429020742027842,
+                      "theta_jn": 1.5634703874719447,
+                      "phase": 6.032314953088721,
+                      "f_min": 20.0,
+                      "f_max": 448.0,
+                      "delta_f": 0.125,
+                      "f_ref": 20.0,
+                      "long_asc_nodes": 0.0,
+                      "num_phases": 9,
+                      "dictionary": {}
+                    }
+                  },
+                  {
+                    "outcome": "within_rtol",
+                    "difference": 1.65625239419395e-14,
+                    "single_seconds": 0.091417389921844,
+                    "multi_seconds": 0.016025141812860966,
+                    "single_error": null,
+                    "multi_error": null,
+                    "draw": {
+                      "m1": 152.17712285650862,
+                      "m2": 109.30605885977226,
+                      "a_1": 0.050624299576057005,
+                      "a_2": 0.10753218662829152,
+                      "tilt_1": 2.1872588290081416,
+                      "tilt_2": 2.505543581267353,
+                      "phi_12": 3.9686222190355434,
+                      "phi_jl": 4.5470215530264415,
+                      "theta_jn": 1.5377748050064413,
+                      "phase": 0.30822647084792126,
+                      "f_min": 20.0,
+                      "f_max": 448.0,
+                      "delta_f": 0.125,
+                      "f_ref": 20.0,
+                      "long_asc_nodes": 0.0,
+                      "num_phases": 9,
+                      "dictionary": {}
+                    }
+                  },
+                  {
+                    "outcome": "within_rtol",
+                    "difference": 1.542588466521121e-14,
+                    "single_seconds": 0.12257809797301888,
+                    "multi_seconds": 0.019485992845147848,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1176,9 +1150,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.0627388260070088e-14,
-                    "single_seconds": 0.0480967239709571,
-                    "multi_seconds": 0.006451211986131966,
+                    "difference": 1.4776860339066643e-14,
+                    "single_seconds": 0.13637640373781323,
+                    "multi_seconds": 0.016458826139569283,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1203,22 +1177,76 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.0271705240677956e-14,
-                    "single_seconds": 0.051680844044312835,
-                    "multi_seconds": 0.007322082994505763,
+                    "difference": 1.3242355236364171e-14,
+                    "single_seconds": 0.06312376679852605,
+                    "multi_seconds": 0.013449115213006735,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
-                      "m1": 142.72751212202974,
-                      "m2": 118.89630524343461,
-                      "a_1": 0.2011646977536699,
-                      "a_2": 0.2733422514832408,
-                      "tilt_1": 1.5236726188744165,
-                      "tilt_2": 1.7033671866665507,
-                      "phi_12": 2.9999845152984417,
-                      "phi_jl": 5.623715237793935,
-                      "theta_jn": 1.5471318835775965,
-                      "phase": 4.347687843067278,
+                      "m1": 204.2101504418046,
+                      "m2": 176.20197951560607,
+                      "a_1": 0.06930204786056297,
+                      "a_2": 0.00879453499075858,
+                      "tilt_1": 3.1104486668239026,
+                      "tilt_2": 1.232665691304211,
+                      "phi_12": 5.3403343187820305,
+                      "phi_jl": 0.6497031098517808,
+                      "theta_jn": 1.5545756072143444,
+                      "phase": 3.7789756644913544,
+                      "f_min": 20.0,
+                      "f_max": 448.0,
+                      "delta_f": 0.125,
+                      "f_ref": 20.0,
+                      "long_asc_nodes": 0.0,
+                      "num_phases": 9,
+                      "dictionary": {}
+                    }
+                  },
+                  {
+                    "outcome": "within_rtol",
+                    "difference": 1.29953500070081e-14,
+                    "single_seconds": 0.10847031697630882,
+                    "multi_seconds": 0.024791165255010128,
+                    "single_error": null,
+                    "multi_error": null,
+                    "draw": {
+                      "m1": 241.26542523709895,
+                      "m2": 145.30389918935236,
+                      "a_1": 0.053760336004637845,
+                      "a_2": 0.1048966683184979,
+                      "tilt_1": 1.6020287923032461,
+                      "tilt_2": 2.4080136483826746,
+                      "phi_12": 4.559770686048236,
+                      "phi_jl": 5.203956220263197,
+                      "theta_jn": 1.5165732074941538,
+                      "phase": 2.8383708190078707,
+                      "f_min": 20.0,
+                      "f_max": 448.0,
+                      "delta_f": 0.125,
+                      "f_ref": 20.0,
+                      "long_asc_nodes": 0.0,
+                      "num_phases": 9,
+                      "dictionary": {}
+                    }
+                  },
+                  {
+                    "outcome": "within_rtol",
+                    "difference": 1.027023725991974e-14,
+                    "single_seconds": 0.13012651866301894,
+                    "multi_seconds": 0.021643726155161858,
+                    "single_error": null,
+                    "multi_error": null,
+                    "draw": {
+                      "m1": 89.99213013503588,
+                      "m2": 75.69602606151005,
+                      "a_1": 0.13658737172633922,
+                      "a_2": 0.10891957546810672,
+                      "tilt_1": 2.932739061499203,
+                      "tilt_2": 0.4800775204923498,
+                      "phi_12": 5.380823118693612,
+                      "phi_jl": 2.100266955526354,
+                      "theta_jn": 1.6113770756573012,
+                      "phase": 6.152708164835926,
                       "f_min": 20.0,
                       "f_max": 448.0,
                       "delta_f": 0.125,
@@ -1230,37 +1258,37 @@
                   }
                 ],
                 "failures": [],
-                "memory_first_growth_kb": 248008,
-                "memory_first_draws": 6400,
-                "memory_later_growth_kb": 95712,
-                "memory_later_draws": 28600,
-                "worker_peak_mb": 9535.4375,
-                "speedup_of_sums": 5.4651197575353265,
-                "growth_kb_per_draw": 3.3465734265734266
+                "memory_first_growth_kb": 107780,
+                "memory_first_draws": 2800,
+                "memory_later_growth_kb": 7080,
+                "memory_later_draws": 26600,
+                "worker_peak_mb": 9536.875,
+                "speedup_of_sums": 4.930749350502287,
+                "growth_kb_per_draw": 0.2661654135338346
               },
               "wide": {
-                "draws": 7850,
+                "draws": 6450,
                 "outcomes": {
-                  "within_rtol": 5920,
-                  "exact": 1924,
-                  "both_raise": 4,
+                  "within_rtol": 4865,
+                  "exact": 1581,
+                  "both_raise": 2,
                   "unstable": 2
                 },
                 "difference_decades": {
-                  "-14": 488,
-                  "-15": 3950,
-                  "-16": 1473,
-                  "-13": 9
+                  "-14": 399,
+                  "-15": 3254,
+                  "-16": 1204,
+                  "-13": 8
                 },
-                "max_difference": 1.649198019124887e-13,
-                "single_seconds": 760.4258777039358,
-                "multi_seconds": 308.00058223796077,
+                "max_difference": 1.6482074606278238e-13,
+                "single_seconds": 1404.0854122843593,
+                "multi_seconds": 710.0291276052594,
                 "worst": [
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.649198019124887e-13,
-                    "single_seconds": 0.4278956149937585,
-                    "multi_seconds": 0.054455805104225874,
+                    "difference": 1.6482074606278238e-13,
+                    "single_seconds": 0.8548387321643531,
+                    "multi_seconds": 0.14799747662618756,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1288,8 +1316,8 @@
                   {
                     "outcome": "within_rtol",
                     "difference": 1.6375578777811718e-13,
-                    "single_seconds": 0.05895736895035952,
-                    "multi_seconds": 0.011175501975230873,
+                    "single_seconds": 0.10391212999820709,
+                    "multi_seconds": 0.019144152756780386,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1325,36 +1353,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.340954834413598e-13,
-                    "single_seconds": 0.01802757300902158,
-                    "multi_seconds": 0.0024825980653986335,
-                    "single_error": null,
-                    "multi_error": null,
-                    "draw": {
-                      "m1": 39.973764833484786,
-                      "m2": 19.89927556270381,
-                      "a_1": 0.08369968244286953,
-                      "a_2": 0.034479058495745465,
-                      "tilt_1": 0.0,
-                      "tilt_2": 0.0,
-                      "phi_12": 5.128221500298203,
-                      "phi_jl": 1.7759756729071,
-                      "theta_jn": 1.571692128427994,
-                      "phase": 4.334862676965174,
-                      "f_min": 40.0,
-                      "f_max": 512.0,
-                      "delta_f": 1.0,
-                      "f_ref": 40.0,
-                      "long_asc_nodes": 0.0,
-                      "num_phases": 11,
-                      "dictionary": {}
-                    }
-                  },
-                  {
-                    "outcome": "within_rtol",
-                    "difference": 1.2813443141739683e-13,
-                    "single_seconds": 0.20142122800461948,
-                    "multi_seconds": 0.025123152998276055,
+                    "difference": 1.2821188199568516e-13,
+                    "single_seconds": 0.41639346396550536,
+                    "multi_seconds": 0.05418736534193158,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1379,9 +1380,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.1263307161277134e-13,
-                    "single_seconds": 0.033566809957847,
-                    "multi_seconds": 0.007323566009290516,
+                    "difference": 1.12521912647453e-13,
+                    "single_seconds": 0.06666614906862378,
+                    "multi_seconds": 0.015928756911307573,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1406,9 +1407,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.104789602140606e-13,
-                    "single_seconds": 0.0213123889407143,
-                    "multi_seconds": 0.0028998720226809382,
+                    "difference": 1.1052091672446036e-13,
+                    "single_seconds": 0.04426913661882281,
+                    "multi_seconds": 0.00609441427513957,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1433,9 +1434,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.0820585236055126e-13,
-                    "single_seconds": 0.055506229982711375,
-                    "multi_seconds": 0.0205430620117113,
+                    "difference": 1.08242118460312e-13,
+                    "single_seconds": 0.11918457178398967,
+                    "multi_seconds": 0.046430818270891905,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1460,9 +1461,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.0749795778624957e-13,
-                    "single_seconds": 0.15580482000950724,
-                    "multi_seconds": 0.0219039770308882,
+                    "difference": 1.0725536800500056e-13,
+                    "single_seconds": 0.32526483526453376,
+                    "multi_seconds": 0.07473585288971663,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1506,9 +1507,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 1.008285116591544e-13,
-                    "single_seconds": 0.012552493019029498,
-                    "multi_seconds": 0.0026584150036796927,
+                    "difference": 1.0100642935765476e-13,
+                    "single_seconds": 0.021734246984124184,
+                    "multi_seconds": 0.004978921264410019,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1533,9 +1534,9 @@
                   },
                   {
                     "outcome": "within_rtol",
-                    "difference": 9.568261681498997e-14,
-                    "single_seconds": 0.4803149990038946,
-                    "multi_seconds": 0.07401382201351225,
+                    "difference": 9.558270278625566e-14,
+                    "single_seconds": 1.2063934872858226,
+                    "multi_seconds": 0.21241558901965618,
                     "single_error": null,
                     "multi_error": null,
                     "draw": {
@@ -1576,20 +1577,47 @@
                         ]
                       }
                     }
+                  },
+                  {
+                    "outcome": "within_rtol",
+                    "difference": 9.412260928824712e-14,
+                    "single_seconds": 0.040221699979156256,
+                    "multi_seconds": 0.005407645832747221,
+                    "single_error": null,
+                    "multi_error": null,
+                    "draw": {
+                      "m1": 17.194163896642443,
+                      "m2": 0.5755819203531268,
+                      "a_1": 0.0,
+                      "a_2": 0.0,
+                      "tilt_1": 0.6782439118956574,
+                      "tilt_2": 0.7730758809472335,
+                      "phi_12": 5.973541020194419,
+                      "phi_jl": 0.004852295437687663,
+                      "theta_jn": 0.5955473049977091,
+                      "phase": 0.13961957579148396,
+                      "f_min": 10.0,
+                      "f_max": 448.0,
+                      "delta_f": 1.0,
+                      "f_ref": 50.0,
+                      "long_asc_nodes": 0.0,
+                      "num_phases": 9,
+                      "dictionary": {}
+                    }
                   }
                 ],
                 "failures": [],
-                "memory_first_growth_kb": 1195488,
-                "memory_first_draws": 1100,
-                "memory_later_growth_kb": 8879388,
-                "memory_later_draws": 6750,
-                "worker_peak_mb": 9535.4375,
-                "speedup_of_sums": 2.468910520163991,
-                "growth_kb_per_draw": 1315.464888888889
+                "memory_first_growth_kb": 1081848,
+                "memory_first_draws": 950,
+                "memory_later_growth_kb": 12962192,
+                "memory_later_draws": 5500,
+                "worker_peak_mb": 9536.875,
+                "speedup_of_sums": 1.9775039610275824,
+                "growth_kb_per_draw": 2356.762181818182
               }
             },
-            "peak_total_resident_gb": 40.99810791015625,
-            "seconds": 118.5,
+            "peak_total_resident_gb": 42.062374114990234,
+            "seconds": 414.9,
             "failures": 0,
             "chunks_missing": [
               [
@@ -1827,6 +1855,10 @@
               [
                 "dingo",
                 59
+              ],
+              [
+                "dingo",
+                60
               ],
               [
                 "dingo",
@@ -2407,6 +2439,10 @@
               [
                 "dingo",
                 215
+              ],
+              [
+                "dingo",
+                216
               ],
               [
                 "dingo",
@@ -3994,6 +4030,10 @@
               ],
               [
                 "dingo",
+                624
+              ],
+              [
+                "dingo",
                 625
               ],
               [
@@ -4330,6 +4370,10 @@
               ],
               [
                 "dingo",
+                712
+              ],
+              [
+                "dingo",
                 713
               ],
               [
@@ -4654,6 +4698,10 @@
               ],
               [
                 "dingo",
+                796
+              ],
+              [
+                "dingo",
                 797
               ],
               [
@@ -4739,6 +4787,10 @@
               [
                 "dingo",
                 818
+              ],
+              [
+                "dingo",
+                819
               ],
               [
                 "dingo",
@@ -4867,6 +4919,10 @@
               [
                 "dingo",
                 853
+              ],
+              [
+                "dingo",
+                854
               ],
               [
                 "dingo",
@@ -5814,6 +5870,10 @@
               ],
               [
                 "dingo",
+                1097
+              ],
+              [
+                "dingo",
                 1098
               ],
               [
@@ -6138,6 +6198,10 @@
               ],
               [
                 "dingo",
+                1179
+              ],
+              [
+                "dingo",
                 1180
               ],
               [
@@ -6159,6 +6223,10 @@
               [
                 "dingo",
                 1186
+              ],
+              [
+                "dingo",
+                1187
               ],
               [
                 "dingo",
@@ -7882,6 +7950,10 @@
               ],
               [
                 "dingo",
+                1629
+              ],
+              [
+                "dingo",
                 1630
               ],
               [
@@ -8530,6 +8602,10 @@
               ],
               [
                 "dingo",
+                1794
+              ],
+              [
+                "dingo",
                 1795
               ],
               [
@@ -8906,6 +8982,10 @@
               ],
               [
                 "dingo",
+                1891
+              ],
+              [
+                "dingo",
                 1892
               ],
               [
@@ -9231,6 +9311,10 @@
               [
                 "dingo",
                 1976
+              ],
+              [
+                "dingo",
+                1977
               ],
               [
                 "dingo",
@@ -9810,6 +9894,10 @@
               ],
               [
                 "dingo",
+                2129
+              ],
+              [
+                "dingo",
                 2130
               ],
               [
@@ -10155,6 +10243,10 @@
               [
                 "dingo",
                 2219
+              ],
+              [
+                "dingo",
+                2220
               ],
               [
                 "dingo",
@@ -11642,6 +11734,10 @@
               ],
               [
                 "dingo",
+                2600
+              ],
+              [
+                "dingo",
                 2601
               ],
               [
@@ -11815,6 +11911,10 @@
               [
                 "dingo",
                 2644
+              ],
+              [
+                "dingo",
+                2645
               ],
               [
                 "dingo",
@@ -12027,6 +12127,10 @@
               [
                 "dingo",
                 2698
+              ],
+              [
+                "dingo",
+                2699
               ],
               [
                 "dingo",
@@ -12810,6 +12914,10 @@
               ],
               [
                 "dingo",
+                2903
+              ],
+              [
+                "dingo",
                 2904
               ],
               [
@@ -13027,6 +13135,10 @@
               [
                 "dingo",
                 2960
+              ],
+              [
+                "dingo",
+                2961
               ],
               [
                 "dingo",
@@ -13970,6 +14082,10 @@
               ],
               [
                 "dingo",
+                3203
+              ],
+              [
+                "dingo",
                 3204
               ],
               [
@@ -14703,6 +14819,10 @@
               [
                 "dingo",
                 3391
+              ],
+              [
+                "dingo",
+                3392
               ],
               [
                 "dingo",
@@ -16086,6 +16206,10 @@
               ],
               [
                 "dingo",
+                3748
+              ],
+              [
+                "dingo",
                 3750
               ],
               [
@@ -16207,6 +16331,10 @@
               [
                 "dingo",
                 3781
+              ],
+              [
+                "dingo",
+                3782
               ],
               [
                 "dingo",
@@ -16643,6 +16771,10 @@
               [
                 "dingo",
                 3894
+              ],
+              [
+                "dingo",
+                3895
               ],
               [
                 "dingo",
@@ -18027,6 +18159,10 @@
               [
                 "dingo",
                 4253
+              ],
+              [
+                "dingo",
+                4254
               ],
               [
                 "dingo",
@@ -19598,6 +19734,10 @@
               ],
               [
                 "dingo",
+                4661
+              ],
+              [
+                "dingo",
                 4662
               ],
               [
@@ -21090,6 +21230,10 @@
               ],
               [
                 "wide",
+                50
+              ],
+              [
+                "wide",
                 51
               ],
               [
@@ -21135,6 +21279,10 @@
               [
                 "wide",
                 62
+              ],
+              [
+                "wide",
+                63
               ],
               [
                 "wide",
@@ -21575,6 +21723,10 @@
               [
                 "wide",
                 178
+              ],
+              [
+                "wide",
+                179
               ],
               [
                 "wide",
@@ -22510,6 +22662,10 @@
               ],
               [
                 "wide",
+                423
+              ],
+              [
+                "wide",
                 424
               ],
               [
@@ -22519,6 +22675,10 @@
               [
                 "wide",
                 426
+              ],
+              [
+                "wide",
+                427
               ],
               [
                 "wide",
@@ -23738,10 +23898,6 @@
               ],
               [
                 "wide",
-                741
-              ],
-              [
-                "wide",
                 742
               ],
               [
@@ -24510,6 +24666,10 @@
               ],
               [
                 "wide",
+                941
+              ],
+              [
+                "wide",
                 942
               ],
               [
@@ -25230,6 +25390,10 @@
               ],
               [
                 "wide",
+                1127
+              ],
+              [
+                "wide",
                 1128
               ],
               [
@@ -25431,6 +25595,10 @@
               [
                 "wide",
                 1180
+              ],
+              [
+                "wide",
+                1181
               ],
               [
                 "wide",
@@ -25982,6 +26150,10 @@
               ],
               [
                 "wide",
+                1322
+              ],
+              [
+                "wide",
                 1323
               ],
               [
@@ -25995,6 +26167,10 @@
               [
                 "wide",
                 1326
+              ],
+              [
+                "wide",
+                1327
               ],
               [
                 "wide",
@@ -26027,6 +26203,10 @@
               [
                 "wide",
                 1336
+              ],
+              [
+                "wide",
+                1337
               ],
               [
                 "wide",
@@ -26579,6 +26759,10 @@
               [
                 "wide",
                 1484
+              ],
+              [
+                "wide",
+                1485
               ],
               [
                 "wide",
@@ -27367,6 +27551,10 @@
               [
                 "wide",
                 1685
+              ],
+              [
+                "wide",
+                1686
               ],
               [
                 "wide",
@@ -29498,6 +29686,10 @@
               ],
               [
                 "wide",
+                2236
+              ],
+              [
+                "wide",
                 2237
               ],
               [
@@ -29827,6 +30019,10 @@
               [
                 "wide",
                 2321
+              ],
+              [
+                "wide",
+                2322
               ],
               [
                 "wide",
@@ -30854,6 +31050,10 @@
               ],
               [
                 "wide",
+                2588
+              ],
+              [
+                "wide",
                 2589
               ],
               [
@@ -31286,6 +31486,10 @@
               ],
               [
                 "wide",
+                2699
+              ],
+              [
+                "wide",
                 2700
               ],
               [
@@ -31547,6 +31751,10 @@
               [
                 "wide",
                 2768
+              ],
+              [
+                "wide",
+                2769
               ],
               [
                 "wide",
@@ -31846,6 +32054,10 @@
               ],
               [
                 "wide",
+                2846
+              ],
+              [
+                "wide",
                 2847
               ],
               [
@@ -32058,6 +32270,10 @@
               ],
               [
                 "wide",
+                2902
+              ],
+              [
+                "wide",
                 2903
               ],
               [
@@ -32162,6 +32378,10 @@
               ],
               [
                 "wide",
+                2930
+              ],
+              [
+                "wide",
                 2931
               ],
               [
@@ -32242,6 +32462,10 @@
               ],
               [
                 "wide",
+                2954
+              ],
+              [
+                "wide",
                 2955
               ],
               [
@@ -32275,6 +32499,10 @@
               [
                 "wide",
                 2963
+              ],
+              [
+                "wide",
+                2964
               ],
               [
                 "wide",
@@ -33010,6 +33238,10 @@
               ],
               [
                 "wide",
+                3153
+              ],
+              [
+                "wide",
                 3154
               ],
               [
@@ -33459,6 +33691,10 @@
               [
                 "wide",
                 3269
+              ],
+              [
+                "wide",
+                3270
               ],
               [
                 "wide",
@@ -34562,6 +34798,10 @@
               ],
               [
                 "wide",
+                3559
+              ],
+              [
+                "wide",
                 3560
               ],
               [
@@ -34810,6 +35050,10 @@
               ],
               [
                 "wide",
+                3623
+              ],
+              [
+                "wide",
                 3624
               ],
               [
@@ -35023,6 +35267,10 @@
               [
                 "wide",
                 3677
+              ],
+              [
+                "wide",
+                3678
               ],
               [
                 "wide",
@@ -35487,6 +35735,10 @@
               [
                 "wide",
                 3797
+              ],
+              [
+                "wide",
+                3798
               ],
               [
                 "wide",
@@ -36272,7 +36524,7 @@
           }
         }
       },
-      "host": "node2410",
+      "host": "node790",
       "order": [
         "stress"
       ],
@@ -36372,8 +36624,30 @@
     "injections_per_week_before": 3425.7425886143546,
     "injections_per_week_after": 4331.631544545216
   },
+  "injection_cost_on_2_1": {
+    "full": {
+      "core_hours_before": 7.526079999999999,
+      "core_hours_after": 4.999192179547091,
+      "speedup": 1.5054592281511041,
+      "injections_per_week_before": 11161.18882605553,
+      "injections_per_week_after": 16802.714715322287
+    },
+    "ladder_forward": {
+      "core_hours_before": 7.526079999999999,
+      "core_hours_after": 5.309964724064959,
+      "speedup": 1.4173502821763624,
+      "injections_per_week_before": 11161.18882605553,
+      "injections_per_week_after": 15819.314132033467
+    },
+    "ladder_reverse": {
+      "core_hours_before": 7.526079999999999,
+      "core_hours_after": 5.363173350225513,
+      "speedup": 1.4032885958615415,
+      "injections_per_week_before": 11161.18882605553,
+      "injections_per_week_after": 15662.368995860992
+    }
+  },
   "problems": [
-    "stress: stress disagrees: exit 3",
-    "stress: Stopped at its memory limit, with 41.0 GB held"
+    "stress: Stopped at its memory limit, with 42.1 GB held"
   ]
 }
