@@ -13,7 +13,7 @@ transfer_output_files = out
 use_oauth_services = scitokens
 environment = "OMP_NUM_THREADS=1"
 request_cpus = 32
-request_memory = 24GB
+request_memory = 48GB
 request_disk = 10GB
 priority = 50
 accounting_group = ligo.dev.o4.cbc.explore.test

@@ -35,7 +35,15 @@ full on node2281, AMD EPYC 7313 16-Core Processor
   compare_full_upstream_release_vs_full_combined_patched_one (for scale): agrees False, largest relative 1.00e+00 (weights), absolute 2.62e+01 (log_likelihood), log evidence 2.37e-05
   Per injection (both models, 2.1's job overhead): 24.52 to 19.39 core-hours, 1.26x, 3426 to 4332 a week at 500 cores
 
+stress on node2410: 118.5 s, 0 failures, 8668 of 9000 chunks missing
+  dingo: 35000 draws, {'within_rtol': 33114, 'exact': 1886}, largest difference 3.25e-14, speed-up of the sums 5.47x
+    worker peak 9535 MB, memory growth 3.35 kB per draw after a worker's first chunk
+  wide: 7850 draws, {'within_rtol': 5920, 'exact': 1924, 'both_raise': 4, 'unstable': 2}, largest difference 1.65e-13, speed-up of the sums 2.47x
+    worker peak 9535 MB, memory growth 1315.46 kB per draw after a worker's first chunk
+  all processes together up to 41.0 GB (shared pages counted per process)
+
 DINGO suite: Release {'skipped': 14, 'passed': 911, 'failed': 2}; patched {'skipped': 13, 'passed': 912, 'failed': 2}; differing 0
 
-NOT PASSED, 1 problems:
-  stress: Not finished
+NOT PASSED, 2 problems:
+  stress: stress disagrees: exit 3
+  stress: Stopped at its memory limit, with 41.0 GB held

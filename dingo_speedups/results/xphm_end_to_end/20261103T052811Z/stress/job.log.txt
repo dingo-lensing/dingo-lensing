@@ -1,46 +1,251 @@
-000 (571584109.000.000) 2026-11-02 21:32:36 Job submitted from host: <10.14.0.12:9618?addrs=10.14.0.12-9618&alias=ldas-grid.ligo.caltech.edu&noUDP&sock=schedd_3004_1296>
+000 (571588210.000.000) 2026-11-04 19:40:28 Job submitted from host: <10.14.0.12:9618?addrs=10.14.0.12-9618&alias=ldas-grid.ligo.caltech.edu&noUDP&sock=schedd_3134_3de6>
     WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:WARNING: This vanilla-universe job specifies a container image (SingularityImage=./dingo-deps_recipe-8f44d79_cpu.sif). Consider using 'universe = container' with 'container_image' instead. See: https://htcondor.readthedocs.io/en/latest/users-manual/env-of-job.html#container-universe-jobs
 ...
-040 (571584109.000.000) 2026-11-03 18:46:10 Started transferring input files
-	Transferring to host: <10.14.4.87:9618?addrs=10.14.4.87-9618&alias=node837.cluster.ldas.cit&noUDP&sock=slot1_7_6917_66f2_32133>
+021 (571588210.000.000) 2026-11-04 21:19:24 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
 ...
-040 (571584109.000.000) 2026-11-03 18:46:16 Finished transferring input files
+004 (571588210.000.000) 2026-11-04 21:19:24 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
 ...
-001 (571584109.000.000) 2026-11-03 18:46:16 Job executing on host: <10.14.4.87:9618?addrs=10.14.4.87-9618&alias=node837.cluster.ldas.cit&noUDP&sock=startd_6612_dc4a>
-	SlotName: slot1_7@node837.cluster.ldas.cit
-	CondorScratchDir = "/var/lib/condor/execute/dir_3210932/scratch"
+021 (571588210.000.000) 2026-11-04 21:20:02 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:20:02 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:20:45 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:20:45 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:21:26 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:21:26 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:22:06 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:22:06 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:22:45 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:22:45 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:23:23 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:23:23 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:24:02 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:24:02 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:24:41 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:24:42 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:25:17 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:25:18 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:25:56 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:25:56 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+021 (571588210.000.000) 2026-11-04 21:26:35 Error from starter on slot1_1@node762.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571588210.000.000) 2026-11-04 21:26:35 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_1@node762.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                32        32 
+	   Disk (KB)            :    42500 10485760  10485760 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             49152     49152 
+...
+040 (571588210.000.000) 2026-11-04 21:32:03 Started transferring input files
+	Transferring to host: <10.14.10.160:9618?addrs=10.14.10.160-9618&alias=node2410.cluster.ldas.cit&noUDP&sock=slot1_10_10113_45f4_11106>
+...
+040 (571588210.000.000) 2026-11-04 21:32:08 Finished transferring input files
+...
+001 (571588210.000.000) 2026-11-04 21:32:08 Job executing on host: <10.14.10.160:9618?addrs=10.14.10.160-9618&alias=node2410.cluster.ldas.cit&noUDP&sock=startd_8500_df19>
+	SlotName: slot1_10@node2410.cluster.ldas.cit
+	AvailableGPUs = {  }
+	CondorScratchDir = "/var/lib/condor/execute/dir_921404/scratch"
 	Cpus = 32
 	Disk = 10485760
 	GPUs = 0
-	Memory = 24576
+	Memory = 49152
 ...
-006 (571584109.000.000) 2026-11-03 18:46:35 Image size of job updated: 531380
-	438  -  MemoryUsage of job (MB)
-	448356  -  ResidentSetSize of job (KB)
+006 (571588210.000.000) 2026-11-04 21:32:32 Image size of job updated: 573684
+	447  -  MemoryUsage of job (MB)
+	457712  -  ResidentSetSize of job (KB)
 ...
-006 (571584109.000.000) 2026-11-03 18:48:57 Image size of job updated: 23328132
-	19119  -  MemoryUsage of job (MB)
-	19577104  -  ResidentSetSize of job (KB)
+006 (571588210.000.000) 2026-11-04 21:34:25 Image size of job updated: 39518404
+	447  -  MemoryUsage of job (MB)
+	457712  -  ResidentSetSize of job (KB)
 ...
-021 (571584109.000.000) 2026-11-03 18:48:57 Error from starter on slot1_7@node837.cluster.ldas.cit:
-	Job has gone over cgroup memory limit of 24576 megabytes. Last measured usage: 24576 megabytes.  Consider resubmitting with a higher request_memory.
-	Code 34 Subcode 102
+040 (571588210.000.000) 2026-11-04 21:34:25 Started transferring output files
 ...
-004 (571584109.000.000) 2026-11-03 18:48:58 Job was evicted. Code 34 Subcode 102
-	(0) CPU times
-		Usr 0 01:15:22, Sys 0 00:02:55  -  Run Remote Usage
+040 (571588210.000.000) 2026-11-04 21:34:25 Finished transferring output files
+...
+005 (571588210.000.000) 2026-11-04 21:34:26 Job terminated.
+	(1) Normal termination (return value 3)
+		Usr 0 00:58:34, Sys 0 00:03:08  -  Run Remote Usage
 		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
-	0  -  Run Bytes Sent By Job
-	906043157  -  Run Bytes Received By Job
-	Reason: Error from slot1_7@node837.cluster.ldas.cit: Job has gone over cgroup memory limit of 24576 megabytes. Last measured usage: 24576 megabytes.  Consider resubmitting with a higher request_memory.
+		Usr 0 00:58:34, Sys 0 00:03:08  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	264121  -  Run Bytes Sent By Job
+	906047267  -  Run Bytes Received By Job
+	264121  -  Total Bytes Sent By Job
+	906047267  -  Total Bytes Received By Job
 	Partitionable Resources :    Usage  Request Allocated 
 	   Cpus                 :                32        32 
-	   Disk (KB)            :   884948 10485760  10485760 
+	   Disk (KB)            :  1008448 10485760  10485760 
 	   GPUs                 :                           0 
-	   Memory (MB)          :    19119    24576     24576 
-	   TimeSlotBusy (s)     :      168                    
-...
-012 (571584109.000.000) 2026-11-03 18:48:58 Job was held.
-	Error from slot1_7@node837.cluster.ldas.cit: Job has gone over cgroup memory limit of 24576 megabytes. Last measured usage: 24576 megabytes.  Consider resubmitting with a higher request_memory.
-	Code 34 Subcode 102
+	   Memory (MB)          :      447    49152     49152 
+	   TimeExecute (s)      :      137                    
+	   TimeSlotBusy (s)     :      143                    
 ...

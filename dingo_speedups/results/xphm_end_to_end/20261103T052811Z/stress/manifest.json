@@ -14,7 +14,9 @@
       "wide_draws": 200000,
       "num_processes": 32,
       "seed": 1,
-      "max_minutes": 240.0
+      "max_minutes": 240.0,
+      "memory_limit_gb": 40.0,
+      "max_tasks_per_worker": 10
     }
   ]
 }
