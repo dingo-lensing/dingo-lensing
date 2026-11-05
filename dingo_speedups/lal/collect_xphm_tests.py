@@ -235,6 +235,8 @@ def judge(jobs: Dict[str, dict], suites: Optional[dict]) -> List[str]:
         if job.get("error"):
             problems.append(f"{name}: {job['error']}")
         for task, record in job.get("tasks", {}).items():
+            if record.get("verdict") == "disagrees" and "stress" in record:
+                continue  # its report's own problems follow
             if record.get("must_pass", True) and record.get("verdict") != "passed":
                 problems.append(f"{name}: {task} {record.get('verdict')}: {record.get('error') or record.get('reason') or 'exit ' + str(record.get('exit_code'))}")
     stress = jobs.get("stress", {}).get("tasks", {}).get("stress", {}).get("stress")

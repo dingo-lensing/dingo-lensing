@@ -421,13 +421,13 @@ class TestJobs(unittest.TestCase):
 
     def test_the_stress_test_stops_itself_below_its_memory_request(self):
         job = self.tasks("stress", "stress")[0]
-        self.assertEqual((job["memory_limit_gb"], job["max_tasks_per_worker"]), (28.0, 10))
+        self.assertEqual((job["memory_limit_gb"], job["max_tasks_per_worker"]), (42.0, 10))
         self.assertLess(job["memory_limit_gb"], jobs.RESOURCES["stress"].memory_gb)
         self.assertEqual(job["environment"], {"MALLOC_MMAP_THRESHOLD_": "131072"})
         self.assertEqual(job["num_processes"], jobs.RESOURCES["stress"].cpus)
         inputs = inputs_at()
         text = jobs.submit_text("stress", jobs.manifest("stress", inputs, jobs.JOB_SCALE), inputs)
-        self.assertIn("request_memory = 32GB\n", text)
+        self.assertIn("request_memory = 48GB\n", text)
         self.assertIn("request_cpus = 16\n", text)
         preflight = jobs.manifest("stress", inputs, jobs.PREFLIGHT_SCALE, preflight=True)["tasks"][0]
         self.assertEqual((preflight["memory_limit_gb"], preflight["max_tasks_per_worker"], preflight["num_processes"]), (0.0, 1, 4))
@@ -502,8 +502,8 @@ class TestRewrite(TempCase):
         manifest = json.loads((run_dir / "stress" / "manifest.json").read_text(encoding="utf-8"))
         inputs = jobs.inputs_from_run(run_dir)
         self.assertEqual(manifest, jobs.manifest("stress", inputs, jobs.JOB_SCALE))
-        self.assertEqual(manifest["tasks"][0]["memory_limit_gb"], 28.0)
-        self.assertIn("request_memory = 32GB\n", (run_dir / "stress" / "job.sub").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["tasks"][0]["memory_limit_gb"], 42.0)
+        self.assertIn("request_memory = 48GB\n", (run_dir / "stress" / "job.sub").read_text(encoding="utf-8"))
         self.assertEqual(inputs.combined_tarball, (run_dir / "dingo_cccccccccc.tar.gz").as_posix())
         self.assertFalse((run_dir / "full").exists())
 
@@ -790,7 +790,7 @@ class TestDryRun(TempCase):
         run_dir, _ = self.run_all()
         report = json.loads((run_dir / "stress" / "out" / "stress" / "stress.json").read_text(encoding="utf-8"))
         arguments = report["args"]
-        self.assertEqual(arguments[arguments.index("--memory-limit-gb") + 1], "28.0")
+        self.assertEqual(arguments[arguments.index("--memory-limit-gb") + 1], "42.0")
         self.assertEqual(arguments[arguments.index("--max-tasks-per-worker") + 1], "10")
         self.assertEqual(arguments[arguments.index("--num-processes") + 1], "16")
         self.assertEqual(report["malloc_mmap_threshold"], "131072")
@@ -909,7 +909,11 @@ class TestCollectPieces(TempCase):
     def test_stopping_at_the_memory_limit_is_a_problem(self):
         stress = {"failures": 0, "stalled": False, "stopped_for_memory": True, "peak_total_resident_gb": 41.2}
         job = {"finished": True, "tasks": {"stress": {"kind": "stress", "verdict": "disagrees", "stress": stress}}}
-        self.assertIn("stress: Stopped at its memory limit, with 41.2 GB held", collect.judge({"stress": job}, None))
+        self.assertEqual(collect.judge({"stress": job}, None), ["stress: Stopped at its memory limit, with 41.2 GB held", "suite: No junit report from both LALs"])
+
+    def test_a_stress_test_that_broke_is_still_a_problem(self):
+        job = {"finished": True, "tasks": {"stress": {"kind": "stress", "verdict": "failed", "exit_code": 1}}}
+        self.assertIn("stress: stress failed: exit 1", collect.judge({"stress": job}, None))
 
     def test_stopping_at_the_time_limit_is_not_a_problem(self):
         stress = {"failures": 0, "stalled": False, "chunks_missing": [["wide", 3]], "stopped_at_time_limit": True}

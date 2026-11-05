@@ -100,12 +100,13 @@ class Scale:
 # The stress test stops itself below its memory request, so that a hold cannot lose its report, and
 # replaces its workers every few chunks; the pre-flight after every chunk, to try that. It runs on
 # 16 cores, which needs no paired timing and finds a slot sooner than a whole node.
-JOB_SCALE = Scale(50_000, 5_000, 32, 1_000_000, 200_000, 240.0, (), False, 28.0, 10, 16)
+JOB_SCALE = Scale(50_000, 5_000, 32, 1_000_000, 200_000, 240.0, (), False, 42.0, 10, 16)
 PREFLIGHT_SCALE = Scale(500, 500, 4, 400, 100, 5.0, ("tests/gw/waveform_generator/test_wfg_m.py",), True, 0.0, 1, 4)
 # A few wide parameter sets take hundreds of MB for one call (long inspirals with SpinTaylor angles),
 # and glibc keeps a process's high-water mark for blocks below its dynamic mmap threshold: 32 workers
 # held 19 GB after under 3 minutes (4 November), with no leak (leak_check.py). A fixed threshold
-# hands large blocks straight back.
+# hands large blocks straight back. It cannot shrink one call's own peak: A worker reached 9.5 GB
+# (5 November, 7,850 wide draws), so the 16 workers get room for a few of those at once.
 STRESS_ENVIRONMENT = {"MALLOC_MMAP_THRESHOLD_": "131072"}
 
 
@@ -121,7 +122,7 @@ RESOURCES = {
     "ladder_forward": Resources(32, 48, 16),
     "ladder_reverse": Resources(32, 48, 16),
     "full": Resources(32, 48, 24),
-    "stress": Resources(16, 32, 10),
+    "stress": Resources(16, 48, 10),
     "suite_release": Resources(8, 32, 12, threads=8),
     "suite_patched": Resources(8, 32, 12, threads=8)
 }
