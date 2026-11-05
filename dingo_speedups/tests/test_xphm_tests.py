@@ -32,6 +32,7 @@ jobs = load_module("make_xphm_jobs_under_test", LAL / "make_xphm_jobs.py")
 driver = load_module("xphm_job_under_test", LAL / "xphm_job.py")
 collect = load_module("collect_xphm_tests_under_test", LAL / "collect_xphm_tests.py")
 show = load_module("show_job_under_test", LAL / "show_job.py")
+threads = load_module("thread_check_under_test", LAL / "thread_check.py")
 run = load_module("baseline_run_for_xphm", SPEEDUPS / "baseline" / "baseline_run.py")
 guard = load_module("guard_for_xphm", SPEEDUPS / "guard.py")
 compare = load_module("compare_results_for_xphm", SPEEDUPS / "baseline" / "compare_results.py") if HAVE_NUMPY else None
@@ -1381,6 +1382,27 @@ class TestMemoryScan(TempCase):
 
 
 @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
+class TestThreadCheck(TempCase):
+    def test_threads_are_counted_by_the_cpus_they_may_use(self):
+        for task, cpus in (("101", "0-63"), ("102", "0-63"), ("103", "5")):
+            write(self.base / task / "status", f"Name:\tpython\nCpus_allowed:\tffff\nCpus_allowed_list:\t{cpus}\n")
+        write(self.base / "104" / "other", "")
+        self.assertEqual(threads.thread_cpus(self.base), {"0-63": 2, "5": 1})
+
+    def test_lists_each_blas_and_openmp_library_once(self):
+        lines = [
+            "7f00-7f01 r--p 00000000 08:01 1    /opt/dingo_env/lib/libmkl_rt.so.2",
+            "7f01-7f02 r-xp 00001000 08:01 1    /opt/dingo_env/lib/libmkl_rt.so.2",
+            "7f02-7f03 r-xp 00000000 08:01 2    /work/lal_cc1a56ceb0/lib/libopenblas.so.0",
+            "7f03-7f04 r-xp 00000000 08:01 3    /opt/dingo_env/lib/python3.13/site-packages/torch/lib/libgomp-a34b3233.so.1",
+            "7f04-7f05 r-xp 00000000 08:01 4    /usr/lib64/libc.so.6",
+            "7f05-7f06 rw-p 00000000 00:00 0"
+        ]
+        maps = write(self.base / "maps", "\n".join(lines) + "\n")
+        expected = ["/opt/dingo_env/lib/libmkl_rt.so.2", "/opt/dingo_env/lib/python3.13/site-packages/torch/lib/libgomp-a34b3233.so.1", "/work/lal_cc1a56ceb0/lib/libopenblas.so.0"]
+        self.assertEqual(threads.mapped(maps=maps), expected)
+
+
 class TestRunSuite(TempCase):
     def run_suite(self, body: str, commit: str = "fedcba9876543210"):
         site = self.base / "site"
