@@ -6,7 +6,9 @@ Runs in the environment build_lal.sh made, on one process, on an access point, w
 
 It replays the wide chunks among the first --first-chunks of the stress job's plan (the ones its runs reached), one parameter set at a time. For each set, and each route (nine XLALSimInspiralFD calls, then one XLALSimInspiralFDMultiPhase call), it reads the resident memory before the route, straight after it, and after gc and malloc_trim, and the route's own peak (VmHWM, reset before it). Memory still held after malloc_trim is held by something live: A leak, in LAL's own code if the single calls hold it too, in the new function if only the multi-phase call does. Memory held only until malloc_trim is the allocator's.
 
-Each set's record is written as it goes, one JSON line, after a line naming the set, so a crash or the time limit loses nothing and a crash shows which set it was. The summary at the end ranks the sets and groups them by their settings.
+Each set's record is written as it goes, one JSON line, after a line naming the set, so a crash or the time limit loses nothing and a crash shows which set it was. The summary at the end ranks the sets and groups them by their settings. --render prints the summary of such a file again, also of one cut short:
+
+    python3 -I memory_scan.py --render SCAN.jsonl
 """
 from __future__ import annotations
 
@@ -150,11 +152,12 @@ def summarise(records: List[dict]) -> dict:
     for name, key in (("setting", lambda r: setting(r["draw"]["dictionary"])), ("f_min", lambda r: str(r["draw"]["f_min"])), ("errors", lambda r: "raised" if r["fd_single"]["error"] or r["fd_multi"]["error"] else "ran")):
         groups: Dict[str, dict] = {}
         for record in records:
-            group = groups.setdefault(key(record), {"sets": 0, "seconds": 0.0, **{f"{route}_held_mb": 0.0 for route in ROUTES}})
+            group = groups.setdefault(key(record), {"sets": 0, "seconds": 0.0, **{f"{route}_held_mb": 0.0 for route in ROUTES}, **{f"{route}_seconds": 0.0 for route in ROUTES}})
             group["sets"] += 1
             group["seconds"] += sum(record[route]["seconds"] for route in ROUTES)
             for route in ROUTES:
                 group[f"{route}_held_mb"] += max(held(record, route), 0.0)
+                group[f"{route}_seconds"] += record[route]["seconds"]
         summary["groups"][name] = groups
     summary["most_held"] = sorted(records, key=lambda r: -max(held(r, route) for route in ROUTES))[:TOP]
     summary["largest_peaks"] = sorted(records, key=lambda r: -max(r[route]["peak_mb"] or 0.0 for route in ROUTES))[:TOP]
@@ -173,14 +176,15 @@ def one_line(record: dict) -> str:
 
 def render(summary: dict, header: dict) -> str:
     lines = [f"LAL {header['lal']}, lalsimulation {header['lalsimulation']}, default PrecVersion {header['default_prec_version']}, MALLOC_MMAP_THRESHOLD_ {header['malloc_mmap_threshold']}"]
-    lines.append(f"{summary['sets']} wide sets in {header['seconds']:.0f} s" + (" (stopped at the time limit)" if header["stopped_at_time_limit"] else ""))
+    seconds = header.get("seconds")
+    lines.append(f"{summary['sets']} wide sets" + (f" in {seconds:.0f} s" if seconds is not None else " (cut short)") + (" (stopped at the time limit)" if header.get("stopped_at_time_limit") else ""))
     for route, totals in summary["routes"].items():
         peak = totals["largest_peak_mb"]
         lines.append(f"  {route}: held after trim {totals['held_after_trim_mb']:.1f} MB in all, {totals['sets_holding']} sets holding over {HELD_MB} MB, largest peak {peak if peak is None else round(peak)} MB, {totals['seconds']:.0f} s, {totals['errors']} raised")
     for name, groups in summary["groups"].items():
         lines.append(f"By {name}:")
         for group, values in sorted(groups.items(), key=lambda item: -item[1]["seconds"]):
-            lines.append(f"  {group:22s} {values['sets']:5d} sets {values['seconds']:8.1f} s   held after trim: single {values['fd_single_held_mb']:9.1f} MB, multi {values['fd_multi_held_mb']:9.1f} MB")
+            lines.append(f"  {group:22s} {values['sets']:5d} sets   seconds: single {values['fd_single_seconds']:7.1f}, multi {values['fd_multi_seconds']:7.1f}   held after trim: single {values['fd_single_held_mb']:9.1f} MB, multi {values['fd_multi_held_mb']:9.1f} MB")
     lines.append("Most held after trim:")
     lines.extend(one_line(record) for record in summary["most_held"])
     lines.append("Largest peaks:")
@@ -188,8 +192,24 @@ def render(summary: dict, header: dict) -> str:
     return "\n".join(lines)
 
 
+def render_file(path: Path) -> str:
+    """The summary of a scan's JSON lines, from its records, also of a scan cut short."""
+    header, records = {}, []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:  # a line cut off by a crash
+            continue
+        if "header" in row:
+            header = {**header, **row["header"]}
+        if "fd_single" in row and "draw" in row:
+            records.append(row)
+    return render(summarise(records), header)
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--render", type=Path, help="Print the summary of an earlier scan's JSON lines, and do nothing else")
     parser.add_argument("--manifest", type=Path, help="The stress job's manifest.json, for its numbers of draws and seed")
     parser.add_argument("--dingo-draws", type=int, default=1_000_000)
     parser.add_argument("--wide-draws", type=int, default=200_000)
@@ -199,8 +219,13 @@ def main(argv=None) -> int:
     parser.add_argument("--max-minutes", type=float, default=20.0)
     parser.add_argument("--memory-cap-gb", type=float, default=24.0, help="Address-space limit for this process (0: none)")
     parser.add_argument("--lal-site", type=Path, help="A folder to import lal and lalsimulation from first")
-    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
+    if args.render:
+        print(render_file(args.render))
+        return 0
+    if args.output is None:
+        parser.error("--output is required")
 
     if args.manifest:
         task = next(task for task in json.loads(args.manifest.read_text(encoding="utf-8"))["tasks"] if task.get("kind") == "stress")

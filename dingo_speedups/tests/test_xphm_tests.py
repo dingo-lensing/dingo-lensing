@@ -1345,6 +1345,24 @@ class TestMemoryScan(TempCase):
         self.assertEqual(sum(group["sets"] for group in summary["groups"]["setting"].values()), 6)
         self.assertEqual(summary["routes"]["fd_multi"]["errors"], 0)
 
+    def test_a_scan_file_renders_again_also_cut_short(self):
+        code, lines = self.run_scan("--max-draws", "4", "--first-chunks", "40")
+        self.assertEqual(code, 0)
+        path = self.base / "scan.jsonl"
+        whole = scan.render_file(path)
+        self.assertIn("4 wide sets in", whole)
+        self.assertIn("seconds: single", whole)
+        cut = self.base / "cut.jsonl"
+        cut.write_text("\n".join(path.read_text(encoding="utf-8").splitlines()[:-2]) + "\n{\"chunk\": 1, \"fd_si", encoding="utf-8")
+        self.assertIn("3 wide sets (cut short)", scan.render_file(cut))
+        with mock.patch("builtins.print") as printed:
+            self.assertEqual(scan.main(["--render", str(path)]), 0)
+        self.assertIn("4 wide sets in", printed.call_args[0][0])
+
+    def test_without_render_the_output_is_required(self):
+        with self.assertRaises(SystemExit):
+            scan.main(["--max-draws", "1"])
+
     def test_the_manifest_gives_the_plan(self):
         manifest = self.base / "manifest.json"
         manifest.write_text(json.dumps({"tasks": [{"kind": "stress", "dingo_draws": 400, "wide_draws": 100, "seed": 3}]}), encoding="utf-8")
