@@ -31,18 +31,19 @@ index 94a4a31..1d0e011 100644
  COMPLEX16FrequencySeries **hptilde,         /**< [out] Frequency-domain waveform h+ */
  COMPLEX16FrequencySeries **hctilde,         /**< [out] Frequency-domain waveform hx */
 diff --git a/lalsimulation/lib/LALSimIMRPhenomXPHM.c b/lalsimulation/lib/LALSimIMRPhenomXPHM.c
-index fa9a393..441bb71 100644
+index fa9a393..c2197a3 100644
 --- a/lalsimulation/lib/LALSimIMRPhenomXPHM.c
 +++ b/lalsimulation/lib/LALSimIMRPhenomXPHM.c
-@@ -27,6 +27,7 @@
+@@ -27,6 +27,8 @@
  #include <lal/LALDatatypes.h>
  #include <lal/LALStdlib.h>
  #include <lal/XLALError.h>
 +#include <lal/SeqFactories.h>
++#include <lal/TimeSeries.h>
  
  #include <stdbool.h>
  #include <stdio.h>
-@@ -3870,3 +3871,793 @@ INT4 XLALSimIMRPhenomXPHMMultibandingGrid(
+@@ -3870,3 +3872,832 @@ INT4 XLALSimIMRPhenomXPHMMultibandingGrid(
  
  /* @} */
  /* @} */
@@ -740,6 +741,31 @@ index fa9a393..441bb71 100644
 +  return XLAL_SUCCESS;
 +}
 +
++/*
++  Frees the solutions of the PN precession equations that IMRPhenomXGetAndSetPrecessionVariables
++  leaves in a precession struct with SpinTaylor Euler angles (precessing_tag 3). XLALSimIMRPhenomXPHM
++  frees them once it has interpolated the angles (IMRPhenomX_InterpolateAlphaBeta_SpinTaylor); a
++  struct set up here and not used to twist up the modes has to free them itself.
++*/
++static void IMRPhenomXPHMMultiPhase_DestroyPNArrays(
++  IMRPhenomXPrecessionStruct *pPrec   /**< IMRPhenomXP Precession Struct */
++)
++{
++  if (pPrec->precessing_tag != 3 || pPrec->PNarrays == NULL) return;
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->V_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->S1x_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->S1y_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->S1z_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->S2x_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->S2y_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->S2z_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->LNhatx_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->LNhaty_PN);
++  XLALDestroyREAL8TimeSeries(pPrec->PNarrays->LNhatz_PN);
++  XLALFree(pPrec->PNarrays);
++  pPrec->PNarrays = NULL;
++}
++
 +/**
 + * Returns hptilde and hctilde of XLALSimIMRPhenomXPHM at each of several reference phases,
 + * one row per phase, in an equally spaced grid. The arguments are those of
@@ -794,6 +820,16 @@ index fa9a393..441bb71 100644
 +    return IMRPhenomXPHMMultiPhase_RepeatedCalls(hptilde, hctilde, m1_SI, m2_SI, chi1x, chi1y, chi1z, chi2x, chi2y, chi2z, distance, inclination, phiRef, f_min, f_max, deltaF, fRef_In, lalParams);
 +  }
 +
++  /* Euler angles other than the MSA ones are never shared: one call per phase, without first
++     setting up a precession struct for each phase, which for SpinTaylor angles integrates the PN
++     precession equations each time. 300 is read as 223, as in IMRPhenomXGetAndSetPrecessionVariables. */
++  INT4 precVersion = XLALSimInspiralWaveformParamsLookupPhenomXPrecVersion(lalParams);
++  if (precVersion == 300) precVersion = 223;
++  if (precVersion < 220 || precVersion > 224)
++  {
++    return IMRPhenomXPHMMultiPhase_RepeatedCalls(hptilde, hctilde, m1_SI, m2_SI, chi1x, chi1y, chi1z, chi2x, chi2y, chi2z, distance, inclination, phiRef, f_min, f_max, deltaF, fRef_In, lalParams);
++  }
++
 +  const UINT4 nphase = phiRef->length;
 +  IMRPhenomXWaveformStruct **pWF = XLALCalloc(nphase, sizeof(*pWF));
 +  IMRPhenomXPrecessionStruct **pPrec = XLALCalloc(nphase, sizeof(*pPrec));
@@ -820,7 +856,11 @@ index fa9a393..441bb71 100644
 +      LALFree(pPrec[p]->pWF22AS);
 +    }
 +    if (pWF[p] != NULL) LALFree(pWF[p]);
-+    if (pPrec[p] != NULL) LALFree(pPrec[p]);
++    if (pPrec[p] != NULL)
++    {
++      IMRPhenomXPHMMultiPhase_DestroyPNArrays(pPrec[p]);
++      LALFree(pPrec[p]);
++    }
 +    if (lalParams_aux[p] != NULL) XLALDestroyDict(lalParams_aux[p]);
 +  }
 +  LALFree(pWF);
