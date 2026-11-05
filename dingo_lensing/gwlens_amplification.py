@@ -1,104 +1,106 @@
-#GWLENS integration will be done here
-##Work in progress
-
 import numpy as np
-from gwlens import solver1d
-import logging
+import importlib
 import inspect
+import math
 from typing import Dict
-
-logger = logging.getLogger(__name__)
-
+from gwlens import solver1d
 
 
-def _resolve_with_default(name,parameters, lens_model_defaults):
-    """
-    TBW docstrings...
-    """
-    value= parameters.po(name,None)
-
-    if value is None:
-        value = lens_model_defaults.get(name)
-    return value
+TSUN = 4.925490947641267e-06        
 
 
-#Initializing here
-point = solver1d.point_mass()
-sis = solver1d.sis()
-cis = solver1d.cis()
-nfw = solver1.nfw()
 
-#Collecting all implemented lenses here
-#Implementing only the 1d lenses now, but can be extended when needed...
-LENSES = {
-    "gwlens_point":("1d", point,()),
-    "gwlens_sis" : ("1d", sis,()),
-    "gwlens_cis" : ("1d", cis,("rc",)),
-    "gwlens_nfw": ("1d", nfw, ("kappa_s",))
+#initialize the lens models
+def _point():
+    return solver1d.point_mass(1.0)
+
+def _sis():
+    return solver1d.sis(1.0)
+
+def _cis(rc):
+    return solver1d.cis(1.0, rc)
+
+def _nfw(k):
+    return solver1d.nfw(k=k)
+
+_LENSES = {                                 
+    "gwlens_point": (_point, ()),
+    "gwlens_sis": (_sis, ()),
+    "gwlens_cis": (_cis, ("rc",)),
+    "gwlens_nfw": (_nfw, ("k",)),
 }
+SUPPORTED_GWLENS_MODELS = tuple(_LENSES) + ("gwlens_custom",)
 
-SUPPORTED_GWLENS_MODELS = tuple(LENSES)
 
 
-def get__model():
+class GWLENSmodels:
     """
-    A function to return F after checking the paramerters and available list lens models
-    """
-
-    return F
-
-
-class GWLENSmodel:
-
-    """
-    Main solver class which calls gwlens and performs the amplification factor calculation
     
-
-
-    Raise:
-    -------
-    Value error for a not accepted solver
+    F(f) of an axisymmetric gwlens lens for one sample.
+    
     """
 
-    def __init__(self,solver,MLz_range=None,y_range=None,f_min=20.0,f_max=1024.0,time_origin="first_image",**kwargs):
+    def __init__(self, build, shape_parameters=(), f_min=20.0, f_max=1024.0, time_origin="first_image",accuracy="pe"):
 
-        #Currently restricting to solver1d...
-        if solver not in ("1d"):
-            raise ValueError(f"solver must be valid, the input  {solver} is not valid")
+        """
+      Doctstrings...
+        """
 
-        self.solver = solver
+        if accuracy not in ("pe", "high"):
+            raise ValueError("accuracy must be 'pe' or 'high'")
         self.build = build
         self.shape = tuple(shape_parameters)
-        self.position("y")
-        names = ("MLz", ) + self.position + self.shape
-        self.PARAMETER_NAMES = {n: n for n in names}
-        self.y_ranges = [y_range]
+        self.PARAMETER_NAMES = {n: n for n in ("ML", "y") + self.shape}
         self.f_min = float(f_min)
         self.f_max = float(f_max)
+        self.solver_kw = dict(time_origin=None if time_origin in (None, "none", "None") else str(time_origin), n_workers=1, interpolate="auto", interp_tol=1e-6 if accuracy == "pe" else 1e-10)
+        if accuracy == "pe":
+            self.solver_kw.update(solver1d.PE_SETTINGS)
 
-
-
-
-
-    def resolve(self, parameters:Dict[str,float], lens_model_defaults: Dict[str,float]) -> Dict[str,float]:
-        """ 
-        TBW 
+    def resolve(self, parameters: Dict[str, float], lens_model_defaults: Dict[str, float]) -> Dict[str, float]:
+        """
+        Take the lens parameters out of the sample (falling back to lens_model_defaults).
+        
         """
         out = {}
-
-        self.shape_sampled = any(parameters.get(p) is not None for p in self.shape)
-
         for internal, standard in self.PARAMETER_NAMES.items():
-            value = _resolve_with_default(standard, parameters, lens_model_defaults)
-
+            value = parameters.pop(standard, None)
             if value is None:
-                raise ValueError("....")
-
+                value = lens_model_defaults.get(standard)
+            if value is None:
+                raise ValueError(f"GWLENS: no '{standard}' in the sample or in lens_model_defaults")
             out[internal] = float(value)
-
         return out
 
-    def compute():
+    def compute(self, frequency_array: np.ndarray, resolved: Dict[str, float]) -> np.ndarray:
+   
+        
+        w = 8 * math.pi * TSUN * resolved["ML"] * frequency_array
+        lens = self.build(*(resolved[p] for p in self.shape))
+        F = solver1d.amplification(w, abs(resolved["y"]), lens, **self.solver_kw)
+        return np.conj(F)
 
-        return
+
+def get_model(amplification_factor_function: str, **lens_model_settings):
+    """
+    TBW
+    """
+    name = amplification_factor_function
+
+    if name == "gwlens_custom":
+        s = dict(lens_model_settings)
+        path = s.pop("lens_function", None)
+        if path is None:
+            raise ValueError("gwlens_custom needs lens_model_settings.lens_function (dotted path of build(*shape))")
+        
+        module, attr = str(path).rsplit(".", 1)
+        build = getattr(importlib.import_module(module), attr)
+        shape = tuple(s.pop("shape_parameters", list(inspect.signature(build).parameters)))
+        
+        return GWLENSmodels(build, shape, **s)
     
+    if name not in _LENSES:
+        raise ValueError(f"Unsupported GWLENS model '{name}'. Available models: {', '.join(SUPPORTED_GWLENS_MODELS)}.")
+    
+    build, shape = _LENSES[name]
+    return GWLENSmodels(build, shape, **lens_model_settings)

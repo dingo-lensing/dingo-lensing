@@ -1,0 +1,38 @@
+domain: 
+   type:Frequency_Domain
+   fmin: 20.0
+   fmax: 1024.0
+   delta_f: 0.25
+  
+waveform_generator:
+    approximant: IMRPhenomD
+    f_ref: 20.0
+    dev_plot_dir: dev_plots
+    spin_conversion_pase: 0.0
+    lens_model_cidee: gwlens
+    amplification_facor_function: gwlens_sis
+    lens_model_settings:
+        ML_range: [10.0,10000]
+        y_range: [0.01,3.0]
+        f_min : 20.0
+        f_max : 1024.0
+        time_origin: first_image
+        accuracy: pe 
+    lens_model_defaults: {}
+
+intrinsic_prior:
+  mass_1: bilby.core.prior.Constraint(minimum=10.0, maximum=80.0, name='mass_1')
+  mass_2: bilby.core.prior.Constraint(minimum=10.0, maximum=80.0, name='mass_2')
+  chirp_mass: bilby.gw.prior.UniformInComponentsChirpMass(minimum=15.0, maximum=100.0, name='chirp_mass')
+  mass_ratio: bilby.gw.prior.UniformInComponentsMassRatio(minimum=0.125, maximum=1.0, name='mass_ratio')
+  phase: default
+  chi_1: bilby.gw.prior.AlignedSpin(name='chi_1', a_prior=Uniform(minimum=0, maximum=0.9))
+  chi_2: bilby.gw.prior.AlignedSpin(name='chi_2', a_prior=Uniform(minimum=0, maximum=0.9))
+  theta_jn: default
+  luminosity_distance: 100.0  # Mpc
+  geocent_time: 0.0  # s
+  ML: bilby.core.prior.LogUniform(minimum=10.0, maximum=10000.0)
+  y: bilby.core.prior.Uniform(minimum=0.1, maximum=3.0)
+ 
+dev_mode: True
+num_samples: 3
