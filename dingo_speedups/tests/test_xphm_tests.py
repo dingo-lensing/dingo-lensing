@@ -37,6 +37,7 @@ guard = load_module("guard_for_xphm", SPEEDUPS / "guard.py")
 compare = load_module("compare_results_for_xphm", SPEEDUPS / "baseline" / "compare_results.py") if HAVE_NUMPY else None
 stress = load_module("stress_multiphase_under_test", LAL / "stress_multiphase.py") if HAVE_NUMPY else None
 leak = load_module("leak_check_under_test", LAL / "leak_check.py") if HAVE_NUMPY else None
+scan = load_module("memory_scan_under_test", LAL / "memory_scan.py") if HAVE_NUMPY else None
 if HAVE_NUMPY:
     import numpy as np
 
@@ -1300,6 +1301,65 @@ class TestStressRun(TempCase):
         result = run_script(LAL / "stress_multiphase.py", ["--lal-site", str(site), "--output", str(self.base / "x.json")], site=True)
         self.assertEqual(result.returncode, 1)
         self.assertIn("LAL FAILED", result.stderr)
+
+
+@unittest.skipUnless(HAVE_NUMPY, "needs numpy")
+class TestMemoryScan(TempCase):
+    def run_scan(self, *arguments):
+        site = self.base / "site"
+        write(site / "lal" / "__init__.py", FAKE_LAL)
+        write(site / "lalsimulation" / "__init__.py", FAKE_LALSIMULATION)
+        output = self.base / "scan.jsonl"
+        path, environment = list(sys.path), dict(os.environ)
+
+        def restore():
+            sys.path[:] = path
+            os.environ.clear()
+            os.environ.update(environment)
+            sys.modules.pop("lal", None)
+            sys.modules.pop("lalsimulation", None)
+
+        self.addCleanup(restore)
+        code = scan.main(["--lal-site", str(site), "--memory-cap-gb", "0", "--output", str(output), *arguments])
+        return code, [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
+
+    def test_the_sets_are_the_stress_plan_s_wide_sets_in_its_order(self):
+        sets = scan.scan_plan(4000, 1000, 1, 30)
+        wide = [(index, draws) for kind, index, draws in stress.chunk_plan(4000, 1000, 1)[:30] if kind == "wide"]
+        self.assertEqual(len(sets), sum(draws for _, draws in wide))
+        first_index = wide[0][0]
+        expected = stress.DRAWS["wide"](np.random.default_rng([1, stress.KINDS.index("wide"), first_index]))
+        self.assertEqual(sets[0][:2], (first_index, 0))
+        self.assertEqual(sets[0][2], expected)
+
+    def test_a_scan_writes_each_set_and_a_summary(self):
+        code, lines = self.run_scan("--max-draws", "6", "--first-chunks", "40")
+        self.assertEqual(code, 0)
+        self.assertIn("header", lines[0])
+        records = [line for line in lines if "fd_single" in line]
+        self.assertEqual(len(records), 6)
+        self.assertEqual(len([line for line in lines if "starting" in line]), 6)
+        self.assertEqual(set(records[0]["fd_multi"]), {"seconds", "error", "peak_mb", "held_mb", "held_after_trim_mb"})
+        summary = lines[-1]["summary"]
+        self.assertEqual(summary["sets"], 6)
+        self.assertEqual(sum(group["sets"] for group in summary["groups"]["setting"].values()), 6)
+        self.assertEqual(summary["routes"]["fd_multi"]["errors"], 0)
+
+    def test_the_manifest_gives_the_plan(self):
+        manifest = self.base / "manifest.json"
+        manifest.write_text(json.dumps({"tasks": [{"kind": "stress", "dingo_draws": 400, "wide_draws": 100, "seed": 3}]}), encoding="utf-8")
+        code, lines = self.run_scan("--manifest", str(manifest), "--max-draws", "2")
+        self.assertEqual(code, 0)
+        self.assertEqual(lines[0]["header"]["seed"], 3)
+
+    def test_a_route_that_raises_is_recorded(self):
+        record = scan.measure_route(lambda: (_ for _ in ()).throw(RuntimeError("Input domain error")))
+        self.assertEqual(record["error"], "Input domain error")
+
+    def test_the_settings_group(self):
+        self.assertEqual(scan.setting({}), "default")
+        self.assertEqual(scan.setting({"prec_version": 320}), "prec_version 320")
+        self.assertEqual(scan.setting({"modes": [[2, 2]]}), "modes")
 
 
 @unittest.skipUnless(HAVE_NUMPY, "needs numpy")
