@@ -1,0 +1,34 @@
+{
+  "host": "node808",
+  "python": "3.13.13",
+  "tasks": {
+    "full_upstream_release": {
+      "kind": "importance_sampling",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 340.367,
+      "verdict": "passed"
+    },
+    "full_combined_patched_one": {
+      "kind": "importance_sampling",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 193.936,
+      "verdict": "passed"
+    },
+    "compare_full_upstream_release_vs_full_combined_patched_one": {
+      "kind": "compare",
+      "must_pass": false,
+      "exit_code": 1,
+      "seconds": 8.953,
+      "verdict": "disagrees"
+    }
+  },
+  "job": "full",
+  "order": [
+    "full_upstream_release",
+    "full_combined_patched_one",
+    "compare_full_upstream_release_vs_full_combined_patched_one"
+  ],
+  "exit_code": 0
+}

@@ -1,0 +1,50 @@
+000 (571592711.000.000) 2026-11-05 00:51:29 Job submitted from host: <10.14.0.12:9618?addrs=10.14.0.12-9618&alias=ldas-grid.ligo.caltech.edu&noUDP&sock=schedd_3134_3de6>
+    WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:WARNING: This vanilla-universe job specifies a container image (SingularityImage=./dingo-deps_recipe-8f44d79_cpu.sif). Consider using 'universe = container' with 'container_image' instead. See: https://htcondor.readthedocs.io/en/latest/users-manual/env-of-job.html#container-universe-jobs
+...
+040 (571592711.000.000) 2026-11-05 22:07:33 Started transferring input files
+	Transferring to host: <10.14.4.58:9618?addrs=10.14.4.58-9618&alias=node808.cluster.ldas.cit&noUDP&sock=slot1_2_2661_aa45_42653>
+...
+040 (571592711.000.000) 2026-11-05 22:08:01 Finished transferring input files
+...
+001 (571592711.000.000) 2026-11-05 22:08:01 Job executing on host: <10.14.4.58:9618?addrs=10.14.4.58-9618&alias=node808.cluster.ldas.cit&noUDP&sock=startd_2014_03d4>
+	SlotName: slot1_2@node808.cluster.ldas.cit
+	CondorScratchDir = "/var/lib/condor/execute/dir_2347243/scratch"
+	Cpus = 32
+	Disk = 25165824
+	GPUs = 0
+	Memory = 49152
+...
+006 (571592711.000.000) 2026-11-05 22:08:20 Image size of job updated: 340860
+	333  -  MemoryUsage of job (MB)
+	340860  -  ResidentSetSize of job (KB)
+...
+006 (571592711.000.000) 2026-11-05 22:13:20 Image size of job updated: 14009288
+	13681  -  MemoryUsage of job (MB)
+	14009288  -  ResidentSetSize of job (KB)
+...
+006 (571592711.000.000) 2026-11-05 22:17:17 Image size of job updated: 24600332
+	13685  -  MemoryUsage of job (MB)
+	14013384  -  ResidentSetSize of job (KB)
+...
+040 (571592711.000.000) 2026-11-05 22:17:18 Started transferring output files
+...
+040 (571592711.000.000) 2026-11-05 22:17:19 Finished transferring output files
+...
+005 (571592711.000.000) 2026-11-05 22:17:20 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 03:17:23, Sys 0 00:05:21  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 03:17:23, Sys 0 00:05:21  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	11636303  -  Run Bytes Sent By Job
+	5420058873  -  Run Bytes Received By Job
+	11636303  -  Total Bytes Sent By Job
+	5420058873  -  Total Bytes Received By Job
+	Partitionable Resources :      Usage  Request Allocated 
+	   Cpus                 :      23.73       32        32 
+	   Disk (KB)            : 5461588    25165824  25165824 
+	   GPUs                 :                             0 
+	   Memory (MB)          :   13685       49152     49152 
+	   TimeExecute (s)      :     556                       
+	   TimeSlotBusy (s)     :     589                       
+...

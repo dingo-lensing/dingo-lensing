@@ -1,0 +1,80 @@
+000 (571592713.000.000) 2026-11-05 00:51:29 Job submitted from host: <10.14.0.12:9618?addrs=10.14.0.12-9618&alias=ldas-grid.ligo.caltech.edu&noUDP&sock=schedd_3134_3de6>
+    WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:WARNING: This vanilla-universe job specifies a container image (SingularityImage=./dingo-deps_recipe-8f44d79_cpu.sif). Consider using 'universe = container' with 'container_image' instead. See: https://htcondor.readthedocs.io/en/latest/users-manual/env-of-job.html#container-universe-jobs
+...
+021 (571592713.000.000) 2026-11-05 00:52:39 Error from starter on slot1_8@node2126.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571592713.000.000) 2026-11-05 00:52:39 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_8@node2126.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 8         8 
+	   Disk (KB)            :     1250 12582912  12582912 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             32768     32768 
+...
+021 (571592713.000.000) 2026-11-05 00:53:29 Error from starter on slot1_8@node2126.cluster.ldas.cit:
+	Failed to create LV for scratch dir
+	Code 1024 Subcode 0
+...
+004 (571592713.000.000) 2026-11-05 00:53:29 Job was evicted. Code 1024 Subcode 0
+	(0) CPU times
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+	0  -  Run Bytes Sent By Job
+	0  -  Run Bytes Received By Job
+	Reason: Error from slot1_8@node2126.cluster.ldas.cit: Failed to create LV for scratch dir
+	Partitionable Resources :    Usage  Request Allocated 
+	   Cpus                 :                 8         8 
+	   Disk (KB)            :     1250 12582912  12582912 
+	   GPUs                 :                           0 
+	   Memory (MB)          :             32768     32768 
+...
+040 (571592713.000.000) 2026-11-05 00:54:22 Started transferring input files
+	Transferring to host: <10.14.9.147:9618?addrs=10.14.9.147-9618&alias=node2147.cluster.ldas.cit&noUDP&sock=slot1_3_38265_e76d_3262>
+...
+040 (571592713.000.000) 2026-11-05 00:54:28 Finished transferring input files
+...
+001 (571592713.000.000) 2026-11-05 00:54:28 Job executing on host: <10.14.9.147:9618?addrs=10.14.9.147-9618&alias=node2147.cluster.ldas.cit&noUDP&sock=startd_38227_1ef2>
+	SlotName: slot1_3@node2147.cluster.ldas.cit
+	CondorScratchDir = "/var/lib/condor/execute/dir_4147373/scratch"
+	Cpus = 8
+	Disk = 12582912
+	GPUs = 0
+	Memory = 32768
+...
+006 (571592713.000.000) 2026-11-05 00:54:49 Image size of job updated: 305692
+	299  -  MemoryUsage of job (MB)
+	305692  -  ResidentSetSize of job (KB)
+...
+006 (571592713.000.000) 2026-11-05 00:59:49 Image size of job updated: 1882996
+	1766  -  MemoryUsage of job (MB)
+	1807876  -  ResidentSetSize of job (KB)
+...
+040 (571592713.000.000) 2026-11-05 01:00:31 Started transferring output files
+...
+040 (571592713.000.000) 2026-11-05 01:00:31 Finished transferring output files
+...
+005 (571592713.000.000) 2026-11-05 01:00:31 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 00:08:39, Sys 0 00:00:22  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 00:08:39, Sys 0 00:00:22  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	166078  -  Run Bytes Sent By Job
+	864011755  -  Run Bytes Received By Job
+	166078  -  Total Bytes Sent By Job
+	864011755  -  Total Bytes Received By Job
+	Partitionable Resources :     Usage  Request Allocated 
+	   Cpus                 :      1.11        8         8 
+	   Disk (KB)            : 860948    12582912  12582912 
+	   GPUs                 :                            0 
+	   Memory (MB)          :   1766       32768     32768 
+	   TimeExecute (s)      :    362                       
+	   TimeSlotBusy (s)     :    370                       
+...

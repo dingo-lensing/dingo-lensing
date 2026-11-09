@@ -1,0 +1,25 @@
+{
+  "job": "stress",
+  "lal_tarball": "lal_cc1a56ceb0.tar.gz",
+  "compare_dingo": {
+    "tarball": "dingo_47e047ec2f.tar.gz",
+    "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723"
+  },
+  "tasks": [
+    {
+      "kind": "stress",
+      "name": "stress",
+      "lal": true,
+      "dingo_draws": 1000000,
+      "wide_draws": 200000,
+      "num_processes": 16,
+      "seed": 1,
+      "max_minutes": 240.0,
+      "memory_limit_gb": 42.0,
+      "max_tasks_per_worker": 10,
+      "environment": {
+        "MALLOC_MMAP_THRESHOLD_": "131072"
+      }
+    }
+  ]
+}

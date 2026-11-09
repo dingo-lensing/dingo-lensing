@@ -1,0 +1,18 @@
+{
+  "host": "node2083",
+  "python": "3.13.13",
+  "tasks": {
+    "suite_patched": {
+      "kind": "suite",
+      "must_pass": false,
+      "exit_code": 1,
+      "seconds": 873.417,
+      "verdict": "failed"
+    }
+  },
+  "job": "suite_patched",
+  "order": [
+    "suite_patched"
+  ],
+  "exit_code": 0
+}

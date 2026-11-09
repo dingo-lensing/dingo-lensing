@@ -1,0 +1,18 @@
+{
+  "host": "node2144",
+  "python": "3.13.13",
+  "tasks": {
+    "stress": {
+      "kind": "stress",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 10411.069,
+      "verdict": "passed"
+    }
+  },
+  "job": "stress",
+  "order": [
+    "stress"
+  ],
+  "exit_code": 0
+}

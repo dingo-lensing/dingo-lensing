@@ -1,0 +1,98 @@
+{
+  "host": "node2274",
+  "python": "3.13.13",
+  "tasks": {
+    "upstream_release": {
+      "kind": "importance_sampling",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 228.388,
+      "verdict": "passed"
+    },
+    "pr454_release": {
+      "kind": "importance_sampling",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 199.817,
+      "verdict": "passed"
+    },
+    "combined_release": {
+      "kind": "importance_sampling",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 183.842,
+      "verdict": "passed"
+    },
+    "combined_patched_nine": {
+      "kind": "importance_sampling",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 198.224,
+      "verdict": "passed"
+    },
+    "combined_patched_one": {
+      "kind": "importance_sampling",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 98.285,
+      "verdict": "passed"
+    },
+    "branch_patched_one": {
+      "kind": "importance_sampling",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 120.501,
+      "verdict": "passed"
+    },
+    "compare_upstream_release_vs_pr454_release": {
+      "kind": "compare",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 9.685,
+      "verdict": "passed"
+    },
+    "compare_pr454_release_vs_combined_release": {
+      "kind": "compare",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 9.534,
+      "verdict": "passed"
+    },
+    "compare_combined_patched_nine_vs_combined_patched_one": {
+      "kind": "compare",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 9.202,
+      "verdict": "passed"
+    },
+    "compare_combined_patched_one_vs_branch_patched_one": {
+      "kind": "compare",
+      "must_pass": true,
+      "exit_code": 0,
+      "seconds": 8.676,
+      "verdict": "passed"
+    },
+    "compare_upstream_release_vs_combined_patched_nine": {
+      "kind": "compare",
+      "must_pass": false,
+      "exit_code": 1,
+      "seconds": 9.524,
+      "verdict": "disagrees"
+    }
+  },
+  "job": "ladder_forward",
+  "order": [
+    "upstream_release",
+    "pr454_release",
+    "combined_release",
+    "combined_patched_nine",
+    "combined_patched_one",
+    "branch_patched_one",
+    "compare_upstream_release_vs_pr454_release",
+    "compare_pr454_release_vs_combined_release",
+    "compare_combined_patched_nine_vs_combined_patched_one",
+    "compare_combined_patched_one_vs_branch_patched_one",
+    "compare_upstream_release_vs_combined_patched_nine"
+  ],
+  "exit_code": 0
+}

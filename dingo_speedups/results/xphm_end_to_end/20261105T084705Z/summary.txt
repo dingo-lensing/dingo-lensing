@@ -1,0 +1,52 @@
+End-to-end test of the multi-phase XPHM route, run 20261105T084705Z
+
+ladder_forward on node2274, AMD EPYC 7313 16-Core Processor
+  setup                     synthetic  per-sample    grid   draws  main peak  worker peak   log evidence  single calls  one calls  speed-up
+  upstream_release             214.9s      154.9s   52.3s    7.0s    32.6 GB       2.6 GB   -5829.624847        449199          0     1.00x
+  pr454_release                189.4s      174.6s   10.1s    4.0s     4.7 GB       0.6 GB   -5829.624847        449199          0     1.13x
+  combined_release             173.9s      160.3s    9.4s    3.7s     5.2 GB       0.6 GB   -5829.624847        449199          0     1.24x
+  combined_patched_nine        187.8s      173.5s    9.1s    4.6s     4.7 GB       0.6 GB   -5829.624843        449199          0     1.14x
+  combined_patched_one          87.7s       74.0s    9.3s    3.9s     4.9 GB       0.6 GB   -5829.624843             0      49911     2.45x
+  branch_patched_one           111.2s       75.5s   28.3s    6.7s    32.6 GB       2.6 GB   -5829.624843             0      49911     1.93x
+  compare_upstream_release_vs_pr454_release (must agree): agrees True, largest relative 0.00e+00 (a_1), absolute 0.00e+00 (a_1), log evidence 0.00e+00
+  compare_pr454_release_vs_combined_release (must agree): agrees True, largest relative 0.00e+00 (a_1), absolute 0.00e+00 (a_1), log evidence 0.00e+00
+  compare_combined_patched_nine_vs_combined_patched_one (must agree): agrees True, largest relative 1.89e-09 (weights), absolute 1.89e-09 (log_likelihood), log evidence 0.00e+00
+  compare_combined_patched_one_vs_branch_patched_one (must agree): agrees True, largest relative 0.00e+00 (a_1), absolute 0.00e+00 (a_1), log evidence 0.00e+00
+  compare_upstream_release_vs_combined_patched_nine (for scale): agrees False, largest relative 1.00e+00 (weights), absolute 1.92e+01 (log_likelihood), log evidence 3.46e-06
+
+ladder_reverse on node773, Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+  setup                     synthetic  per-sample    grid   draws  main peak  worker peak   log evidence  single calls  one calls  speed-up
+  branch_patched_one           126.0s       84.1s   36.6s    4.7s    32.6 GB       2.6 GB   -5829.624843             0      49911     1.85x
+  combined_patched_one          99.1s       83.1s    7.7s    7.7s     5.4 GB       0.6 GB   -5829.624843             0      49911     2.36x
+  combined_patched_nine        195.2s      179.8s    7.5s    7.4s     5.2 GB       0.6 GB   -5829.624843        449199          0     1.20x
+  combined_release             211.9s      196.0s    7.8s    7.5s     5.3 GB       0.6 GB   -5829.624847        449199          0     1.10x
+  pr454_release                198.8s      181.5s    9.1s    7.7s     5.4 GB       0.6 GB   -5829.624847        449199          0     1.17x
+  upstream_release             233.4s      191.8s   36.5s    4.5s    32.6 GB       2.6 GB   -5829.624847        449199          0     1.00x
+  compare_upstream_release_vs_pr454_release (must agree): agrees True, largest relative 0.00e+00 (a_1), absolute 0.00e+00 (a_1), log evidence 0.00e+00
+  compare_pr454_release_vs_combined_release (must agree): agrees True, largest relative 0.00e+00 (a_1), absolute 0.00e+00 (a_1), log evidence 0.00e+00
+  compare_combined_patched_nine_vs_combined_patched_one (must agree): agrees True, largest relative 1.89e-09 (weights), absolute 1.89e-09 (log_likelihood), log evidence 0.00e+00
+  compare_combined_patched_one_vs_branch_patched_one (must agree): agrees True, largest relative 0.00e+00 (a_1), absolute 0.00e+00 (a_1), log evidence 0.00e+00
+  compare_upstream_release_vs_combined_patched_nine (for scale): agrees False, largest relative 1.00e+00 (weights), absolute 1.92e+01 (log_likelihood), log evidence 3.46e-06
+
+full on node808, Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+  setup                     synthetic  per-sample    grid   draws  main peak  worker peak   log evidence  single calls  one calls  speed-up
+  full_upstream_release        246.6s      202.2s   37.2s    6.7s    33.3 GB       3.2 GB   -5829.624847        449199          0     1.00x
+  full_combined_patched_one     105.0s       88.4s    8.5s    7.6s     5.3 GB       1.2 GB   -5829.624843             0      49911     2.35x
+  compare_full_upstream_release_vs_full_combined_patched_one (for scale): agrees False, largest relative 1.00e+00 (weights), absolute 1.92e+01 (log_likelihood), log evidence 3.46e-06
+  full_upstream_release: network sampling 70 s on 24 torch threads (2.1: 64 s on 24)
+  full_combined_patched_one: network sampling 68 s on 24 torch threads (2.1: 64 s on 24)
+  Per injection (both models, 2.1's job overhead): 8.07 to 5.48 core-hours, 1.47x, 10411 to 15341 a week at 500 cores
+  Per injection on 2.1's other stages, with full's synthetic-phase speed-up: 7.53 to 5.25 core-hours, 1.43x, 11161 to 15992 a week at 500 cores
+  Per injection on 2.1's other stages, with ladder_forward's synthetic-phase speed-up: 7.53 to 5.18 core-hours, 1.45x, 11161 to 16206 a week at 500 cores
+  Per injection on 2.1's other stages, with ladder_reverse's synthetic-phase speed-up: 7.53 to 5.25 core-hours, 1.43x, 11161 to 16007 a week at 500 cores
+
+stress on node2144: 10410.5 s, 0 failures, 0 of 9000 chunks missing
+  dingo: 1000000 draws, {'within_rtol': 947420, 'exact': 52580}, largest difference 1.75e-13, speed-up of the sums 4.59x
+    worker peak 12503 MB, memory growth 0.32 kB per draw after a worker's first chunk
+  wide: 200000 draws, {'within_rtol': 150544, 'exact': 49323, 'both_raise': 97, 'unstable': 36}, largest difference 1.79e-12, speed-up of the sums 1.92x
+    worker peak 13719 MB, memory growth 5.70 kB per draw after a worker's first chunk
+  all processes together up to 28.4 GB (shared pages counted per process)
+
+DINGO suite: Release {'skipped': 14, 'passed': 911, 'failed': 2}; patched {'skipped': 13, 'passed': 912, 'failed': 2}; differing 0
+
+PASS

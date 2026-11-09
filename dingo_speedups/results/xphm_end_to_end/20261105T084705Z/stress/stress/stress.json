@@ -1,0 +1,704 @@
+{
+ "inputs": {
+  "lal_site": "/srv/scratch/work/lal/lal_cc1a56ceb0/python",
+  "dingo_draws": "1000000",
+  "wide_draws": "200000",
+  "num_processes": "16",
+  "seed": "1",
+  "rtol": "1e-10",
+  "max_minutes": "240.0",
+  "stall_minutes": "30.0",
+  "max_tasks_per_worker": "10",
+  "memory_limit_gb": "42.0",
+  "output": "/srv/scratch/out/stress/stress.json"
+ },
+ "host": "node2144",
+ "lal": {
+  "lal": "7.7.1",
+  "lalsimulation": "6.2.1",
+  "file": "/srv/scratch/work/lal/lal_cc1a56ceb0/python/lalsimulation/__init__.py",
+  "libraries": [
+   "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/libfftw3.so",
+   "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/libfftw3f.so",
+   "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/libgsl.so",
+   "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/liblal.so",
+   "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/liblalsupport.so"
+  ]
+ },
+ "numpy": "2.3.5",
+ "chunks": 9000,
+ "kinds": {
+  "dingo": {
+   "draws": 1000000,
+   "outcomes": {
+    "within_rtol": 947420,
+    "exact": 52580
+   },
+   "difference_decades": {
+    "-15": 758961,
+    "-16": 188164,
+    "-14": 294,
+    "-13": 1
+   },
+   "max_difference": 1.7450099994602075e-13,
+   "single_seconds": 74071.38619771332,
+   "multi_seconds": 16121.511634524097,
+   "worst": [
+    {
+     "outcome": "within_rtol",
+     "difference": 1.7450099994602075e-13,
+     "single_seconds": 0.04351716197561473,
+     "multi_seconds": 0.00884552497882396,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 212.57599626151884,
+      "m2": 168.14200387995697,
+      "a_1": 0.0027961505119382547,
+      "a_2": 0.009593499037341167,
+      "tilt_1": 1.4715829863735221,
+      "tilt_2": 2.993682562728839,
+      "phi_12": 1.4617511571353692,
+      "phi_jl": 0.3657269262645177,
+      "theta_jn": 1.5691592614831766,
+      "phase": 2.353165814311736,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 8.196207584810853e-14,
+     "single_seconds": 0.054265063954517245,
+     "multi_seconds": 0.010014406056143343,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 196.8240651867427,
+      "m2": 186.929623579487,
+      "a_1": 0.060458322021894766,
+      "a_2": 0.04137909945468322,
+      "tilt_1": 2.393891466639331,
+      "tilt_2": 1.8389623221849551,
+      "phi_12": 3.100555011595008,
+      "phi_jl": 2.5044996103741735,
+      "theta_jn": 1.574049849466439,
+      "phase": 2.2110204574448233,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 7.112645724201644e-14,
+     "single_seconds": 0.07470266195014119,
+     "multi_seconds": 0.01430148200597614,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 93.9728962463284,
+      "m2": 85.9111229211685,
+      "a_1": 0.006878029853395381,
+      "a_2": 0.0020248712956735704,
+      "tilt_1": 1.983014494788806,
+      "tilt_2": 0.9281624287018978,
+      "phi_12": 3.5873586175299215,
+      "phi_jl": 2.2492452229982485,
+      "theta_jn": 1.5762565261456887,
+      "phase": 0.8259088949036275,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 6.962694877311862e-14,
+     "single_seconds": 0.13936381693929434,
+     "multi_seconds": 0.019784357980825007,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 79.49401915854406,
+      "m2": 40.755723194713234,
+      "a_1": 0.005317491303364043,
+      "a_2": 0.03308131122548514,
+      "tilt_1": 1.0684457848831435,
+      "tilt_2": 3.0261814127370483,
+      "phi_12": 2.7147820555798834,
+      "phi_jl": 2.9672259443771947,
+      "theta_jn": 1.568488711323704,
+      "phase": 1.8306779582426533,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 5.622629118797219e-14,
+     "single_seconds": 0.14163831307087094,
+     "multi_seconds": 0.026017690892331302,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 44.87850500285192,
+      "m2": 32.699797154962674,
+      "a_1": 0.16465913962732806,
+      "a_2": 0.19657201768965965,
+      "tilt_1": 0.11332672946234676,
+      "tilt_2": 0.20185009911343396,
+      "phi_12": 2.7608232288549006,
+      "phi_jl": 0.7260845862040325,
+      "theta_jn": 1.5733151637854916,
+      "phase": 3.970552896164757,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.680631766219826e-14,
+     "single_seconds": 0.1320130550302565,
+     "multi_seconds": 0.018306270940229297,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 332.6074742410299,
+      "m2": 132.97865594139662,
+      "a_1": 0.013907259854132221,
+      "a_2": 0.01966429684122919,
+      "tilt_1": 3.0262642744282506,
+      "tilt_2": 2.6828813199474215,
+      "phi_12": 0.5476866353031522,
+      "phi_jl": 2.2238713485614774,
+      "theta_jn": 1.5682271701855948,
+      "phase": 0.9702070038993578,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.2448890789665824e-14,
+     "single_seconds": 0.12350534298457205,
+     "multi_seconds": 0.024636302958242595,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 39.98818434515983,
+      "m2": 36.68020378048555,
+      "a_1": 0.016565252844862974,
+      "a_2": 0.514303027098259,
+      "tilt_1": 2.390276593030057,
+      "tilt_2": 0.028046567563517928,
+      "phi_12": 2.139508408567397,
+      "phi_jl": 4.92935308190087,
+      "theta_jn": 1.5636759354385983,
+      "phase": 3.3893771935362693,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.024891102508753e-14,
+     "single_seconds": 0.1442970740608871,
+     "multi_seconds": 0.02771540393587202,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 24.077973324771097,
+      "m2": 22.628337926162935,
+      "a_1": 7.744859944380677e-05,
+      "a_2": 0.007691949822619971,
+      "tilt_1": 1.6700379385355832,
+      "tilt_2": 1.6200147043053517,
+      "phi_12": 4.924771851695582,
+      "phi_jl": 5.17986150008215,
+      "theta_jn": 1.5643137841160817,
+      "phase": 3.4890176750627186,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 3.873591352229854e-14,
+     "single_seconds": 0.08652680506929755,
+     "multi_seconds": 0.016015441971831024,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 79.98318861877915,
+      "m2": 77.08592824223315,
+      "a_1": 0.0027353676097194367,
+      "a_2": 0.013177431869628184,
+      "tilt_1": 2.5508122459433245,
+      "tilt_2": 2.0592805030629684,
+      "phi_12": 5.253831181964425,
+      "phi_jl": 3.2407147412948127,
+      "theta_jn": 1.5752894294160662,
+      "phase": 0.9082674607242234,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 3.499572748068381e-14,
+     "single_seconds": 0.13378889695741236,
+     "multi_seconds": 0.022565637016668916,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 63.94519029328799,
+      "m2": 30.13878194778082,
+      "a_1": 0.012037611056669364,
+      "a_2": 0.02054329623120812,
+      "tilt_1": 1.6514569169065045,
+      "tilt_2": 1.236981840809871,
+      "phi_12": 5.458718761121751,
+      "phi_jl": 4.586634088748923,
+      "theta_jn": 1.5661412083732151,
+      "phase": 2.946871761384851,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    }
+   ],
+   "failures": [],
+   "memory_first_growth_kb": 4078792,
+   "memory_first_draws": 103200,
+   "memory_later_growth_kb": 291216,
+   "memory_later_draws": 896800,
+   "worker_peak_mb": 12502.68359375,
+   "speedup_of_sums": 4.594568293403083,
+   "growth_kb_per_draw": 0.3247279214986619
+  },
+  "wide": {
+   "draws": 200000,
+   "outcomes": {
+    "within_rtol": 150544,
+    "exact": 49323,
+    "both_raise": 97,
+    "unstable": 36
+   },
+   "difference_decades": {
+    "-16": 35899,
+    "-15": 102683,
+    "-14": 11738,
+    "-13": 223,
+    "-12": 1
+   },
+   "max_difference": 1.794824443339787e-12,
+   "single_seconds": 40312.05657565652,
+   "multi_seconds": 20942.08694062056,
+   "worst": [
+    {
+     "outcome": "within_rtol",
+     "difference": 1.794824443339787e-12,
+     "single_seconds": 0.03684924100525677,
+     "multi_seconds": 0.008100813021883368,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 169.37590678904203,
+      "m2": 64.83965721237551,
+      "a_1": 0.0,
+      "a_2": 0.0,
+      "tilt_1": 2.6899756455732793,
+      "tilt_2": 1.5809277198503862,
+      "phi_12": 4.815264547873919,
+      "phi_jl": 5.765661508704721,
+      "theta_jn": 1.570880927300767,
+      "phase": 1.108147007358193,
+      "f_min": 20.0,
+      "f_max": 448.0,
+      "delta_f": 0.25,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 9.50556122166501e-13,
+     "single_seconds": 0.041815346106886864,
+     "multi_seconds": 0.006278037908487022,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 6.759069571854043,
+      "m2": 0.1488715728218529,
+      "a_1": 0.3146371802853171,
+      "a_2": 0.6061341125674063,
+      "tilt_1": 1e-06,
+      "tilt_2": 1e-06,
+      "phi_12": 4.3720607232315185,
+      "phi_jl": 3.9646574816648217,
+      "theta_jn": 1.1445910008961848,
+      "phase": 5.414560433375207,
+      "f_min": 10.0,
+      "f_max": 512.0,
+      "delta_f": 1.0,
+      "f_ref": 50.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 6.137433246851353e-13,
+     "single_seconds": 0.38226295600179583,
+     "multi_seconds": 0.08693594299256802,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 7.109098636674548,
+      "m2": 0.18331731280100924,
+      "a_1": 0.0,
+      "a_2": 0.0,
+      "tilt_1": 1.5112797609189768,
+      "tilt_2": 1.6094189125445935,
+      "phi_12": 5.4517531451229075,
+      "phi_jl": 0.014578846776912993,
+      "theta_jn": 1.3370513568838063,
+      "phase": 0.04705976856652715,
+      "f_min": 10.0,
+      "f_max": 2048.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {
+       "modes": [
+        [
+         3,
+         3
+        ],
+        [
+         4,
+         4
+        ]
+       ]
+      }
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.90371242187763e-13,
+     "single_seconds": 0.13461901398841292,
+     "multi_seconds": 0.022853136993944645,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 11.411343116081495,
+      "m2": 0.41601042117449905,
+      "a_1": 0.44281946789432336,
+      "a_2": 0.6760167103499007,
+      "tilt_1": 1e-06,
+      "tilt_2": 1e-06,
+      "phi_12": 5.0515635102434215,
+      "phi_jl": 0.4012053365118681,
+      "theta_jn": 1.4677572399937016,
+      "phase": 4.874205023909224,
+      "f_min": 10.0,
+      "f_max": 448.0,
+      "delta_f": 0.125,
+      "f_ref": 20.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {
+       "modes": [
+        [
+         2,
+         1
+        ],
+        [
+         3,
+         3
+        ],
+        [
+         4,
+         4
+        ]
+       ]
+      }
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.564319913290913e-13,
+     "single_seconds": 0.3056767670204863,
+     "multi_seconds": 0.07762994198128581,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 6.259863159273277,
+      "m2": 0.5293479968107948,
+      "a_1": 0.0017682754334539762,
+      "a_2": 0.811661530433134,
+      "tilt_1": 1.751001925408688,
+      "tilt_2": 0.4200241196921111,
+      "phi_12": 2.8551783249641742,
+      "phi_jl": 1.6583218837964246,
+      "theta_jn": 1.2206898912366662,
+      "phase": 5.725973308270995,
+      "f_min": 10.0,
+      "f_max": 1024.0,
+      "delta_f": 0.125,
+      "f_ref": 50.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 5,
+      "dictionary": {
+       "modes": [
+        [
+         2,
+         1
+        ],
+        [
+         3,
+         3
+        ],
+        [
+         3,
+         2
+        ],
+        [
+         4,
+         4
+        ]
+       ]
+      }
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.3885886793998623e-13,
+     "single_seconds": 0.0815434439573437,
+     "multi_seconds": 0.025682053063064814,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 75.33213666744862,
+      "m2": 30.90208383410881,
+      "a_1": 0.2078830220782587,
+      "a_2": 0.8726739791503881,
+      "tilt_1": 1e-06,
+      "tilt_2": 1e-06,
+      "phi_12": 3.1622832065219915,
+      "phi_jl": 5.296900508959706,
+      "theta_jn": 1.5704605568479115,
+      "phase": 3.2108525226602858,
+      "f_min": 10.0,
+      "f_max": 2048.0,
+      "delta_f": 0.125,
+      "f_ref": 10.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 5,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.286465453567972e-13,
+     "single_seconds": 0.13066990103106946,
+     "multi_seconds": 0.029431706061586738,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 12.455562301012362,
+      "m2": 0.3107639711185078,
+      "a_1": 0.0,
+      "a_2": 0.0,
+      "tilt_1": 1.9853704181078988,
+      "tilt_2": 1.714505859229598,
+      "phi_12": 1.8793938149569285,
+      "phi_jl": 1.77392165236681,
+      "theta_jn": 0.72329159793435,
+      "phase": 3.368041197078571,
+      "f_min": 10.0,
+      "f_max": 2048.0,
+      "delta_f": 0.25,
+      "f_ref": 50.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {
+       "modes": [
+        [
+         2,
+         1
+        ],
+        [
+         3,
+         3
+        ]
+       ]
+      }
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.147385221873134e-13,
+     "single_seconds": 0.01737862394656986,
+     "multi_seconds": 0.0049084380734711885,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 220.12569157036836,
+      "m2": 148.72023810806172,
+      "a_1": 0.0,
+      "a_2": 0.0,
+      "tilt_1": 2.4444666584591204,
+      "tilt_2": 0.8527036103411527,
+      "phi_12": 0.9365254326672773,
+      "phi_jl": 1.177877657209316,
+      "theta_jn": 1.570443695155112,
+      "phase": 1.142942223382692,
+      "f_min": 10.0,
+      "f_max": 512.0,
+      "delta_f": 1.0,
+      "f_ref": 10.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {}
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 4.0791607202335527e-13,
+     "single_seconds": 0.013197661959566176,
+     "multi_seconds": 0.002249025972560048,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 6.652127584244204,
+      "m2": 0.41958107559707214,
+      "a_1": 0.736535179271662,
+      "a_2": 0.43781537204514204,
+      "tilt_1": 1e-06,
+      "tilt_2": 1e-06,
+      "phi_12": 5.280859386313443,
+      "phi_jl": 4.326556743703008,
+      "theta_jn": 1.7680818690389193,
+      "phase": 6.032051335108926,
+      "f_min": 10.0,
+      "f_max": 448.0,
+      "delta_f": 1.0,
+      "f_ref": 0.0,
+      "long_asc_nodes": 4.214487297549527,
+      "num_phases": 9,
+      "dictionary": {
+       "modes": [
+        [
+         3,
+         2
+        ],
+        [
+         4,
+         4
+        ]
+       ]
+      }
+     }
+    },
+    {
+     "outcome": "within_rtol",
+     "difference": 3.9859367212497775e-13,
+     "single_seconds": 0.03245824598707259,
+     "multi_seconds": 0.004411412985064089,
+     "single_error": null,
+     "multi_error": null,
+     "draw": {
+      "m1": 93.70524425025197,
+      "m2": 2.3827336453161685,
+      "a_1": 0.0,
+      "a_2": 0.0,
+      "tilt_1": 0.3913847509543425,
+      "tilt_2": 1.6601592101805134,
+      "phi_12": 1.8569310757290935,
+      "phi_jl": 3.9175666201470003,
+      "theta_jn": 1.5706055302540722,
+      "phase": 0.8552705351424025,
+      "f_min": 10.0,
+      "f_max": 512.0,
+      "delta_f": 1.0,
+      "f_ref": 0.0,
+      "long_asc_nodes": 0.0,
+      "num_phases": 9,
+      "dictionary": {
+       "prec_version": 300
+      }
+     }
+    }
+   ],
+   "failures": [],
+   "memory_first_growth_kb": 3409748,
+   "memory_first_draws": 19550,
+   "memory_later_growth_kb": 1027688,
+   "memory_later_draws": 180450,
+   "worker_peak_mb": 13719.390625,
+   "speedup_of_sums": 1.9249302464438143,
+   "growth_kb_per_draw": 5.695139927957883
+  }
+ },
+ "peak_total_resident_gb": 28.391231536865234,
+ "seconds": 10410.5,
+ "failures": 0,
+ "chunks_missing": [],
+ "stopped_at_time_limit": false,
+ "stalled": false,
+ "stopped_for_memory": false,
+ "ok": true
+}

@@ -1,0 +1,139 @@
+{
+  "job": "ladder_reverse",
+  "lal_tarball": "lal_cc1a56ceb0.tar.gz",
+  "compare_dingo": {
+    "tarball": "dingo_47e047ec2f.tar.gz",
+    "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723"
+  },
+  "tasks": [
+    {
+      "kind": "importance_sampling",
+      "name": "branch_patched_one",
+      "tarball": "dingo_c551d28bec.tar.gz",
+      "commit": "c551d28bec006abd43db095ded1862afcb0ce24c",
+      "lal": true,
+      "route": "one",
+      "proposal": "network_samples.hdf5",
+      "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+      "num_samples": 50000,
+      "batch_size": 5000,
+      "num_processes": 32,
+      "seed": 1
+    },
+    {
+      "kind": "importance_sampling",
+      "name": "combined_patched_one",
+      "tarball": "dingo_47e047ec2f.tar.gz",
+      "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+      "lal": true,
+      "route": "one",
+      "proposal": "network_samples.hdf5",
+      "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+      "num_samples": 50000,
+      "batch_size": 5000,
+      "num_processes": 32,
+      "seed": 1
+    },
+    {
+      "kind": "importance_sampling",
+      "name": "combined_patched_nine",
+      "tarball": "dingo_47e047ec2f.tar.gz",
+      "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+      "lal": true,
+      "route": "nine",
+      "proposal": "network_samples.hdf5",
+      "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+      "num_samples": 50000,
+      "batch_size": 5000,
+      "num_processes": 32,
+      "seed": 1
+    },
+    {
+      "kind": "importance_sampling",
+      "name": "combined_release",
+      "tarball": "dingo_47e047ec2f.tar.gz",
+      "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+      "lal": false,
+      "route": "nine",
+      "proposal": "network_samples.hdf5",
+      "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+      "num_samples": 50000,
+      "batch_size": 5000,
+      "num_processes": 32,
+      "seed": 1
+    },
+    {
+      "kind": "importance_sampling",
+      "name": "pr454_release",
+      "tarball": "dingo_e92d71fbd8.tar.gz",
+      "commit": "e92d71fbd83fd6e1dd9795655082ed95abdbcda5",
+      "lal": false,
+      "route": "nine",
+      "proposal": "network_samples.hdf5",
+      "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+      "num_samples": 50000,
+      "batch_size": 5000,
+      "num_processes": 32,
+      "seed": 1
+    },
+    {
+      "kind": "importance_sampling",
+      "name": "upstream_release",
+      "tarball": "dingo_471de26e10.tar.gz",
+      "commit": "471de26e10cef69bb59a0d2680cc299b4c9c2323",
+      "lal": false,
+      "route": "nine",
+      "proposal": "network_samples.hdf5",
+      "event_data": "label_data0_1384782888-63_generation_event_data.hdf5",
+      "num_samples": 50000,
+      "batch_size": 5000,
+      "num_processes": 32,
+      "seed": 1
+    },
+    {
+      "kind": "compare",
+      "name": "compare_upstream_release_vs_pr454_release",
+      "first": "upstream_release",
+      "second": "pr454_release",
+      "rtol": 1e-09,
+      "atol": 1e-07,
+      "must_pass": true
+    },
+    {
+      "kind": "compare",
+      "name": "compare_pr454_release_vs_combined_release",
+      "first": "pr454_release",
+      "second": "combined_release",
+      "rtol": 0.0,
+      "atol": 0.0,
+      "must_pass": true
+    },
+    {
+      "kind": "compare",
+      "name": "compare_combined_patched_nine_vs_combined_patched_one",
+      "first": "combined_patched_nine",
+      "second": "combined_patched_one",
+      "rtol": 1e-09,
+      "atol": 1e-07,
+      "must_pass": true
+    },
+    {
+      "kind": "compare",
+      "name": "compare_combined_patched_one_vs_branch_patched_one",
+      "first": "combined_patched_one",
+      "second": "branch_patched_one",
+      "rtol": 1e-09,
+      "atol": 1e-07,
+      "must_pass": true
+    },
+    {
+      "kind": "compare",
+      "name": "compare_upstream_release_vs_combined_patched_nine",
+      "first": "upstream_release",
+      "second": "combined_patched_nine",
+      "rtol": 1e-09,
+      "atol": 1e-07,
+      "must_pass": false
+    }
+  ]
+}

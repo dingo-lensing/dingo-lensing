@@ -1,0 +1,58 @@
+000 (571592709.000.000) 2026-11-05 00:51:29 Job submitted from host: <10.14.0.12:9618?addrs=10.14.0.12-9618&alias=ldas-grid.ligo.caltech.edu&noUDP&sock=schedd_3134_3de6>
+    WARNING: Committed job submission into the queue with the following warning(s): QMGMT:0:WARNING: This vanilla-universe job specifies a container image (SingularityImage=./dingo-deps_recipe-8f44d79_cpu.sif). Consider using 'universe = container' with 'container_image' instead. See: https://htcondor.readthedocs.io/en/latest/users-manual/env-of-job.html#container-universe-jobs
+...
+040 (571592709.000.000) 2026-11-05 22:07:30 Started transferring input files
+	Transferring to host: <10.14.10.24:9618?addrs=10.14.10.24-9618&alias=node2274.cluster.ldas.cit&noUDP&sock=slot1_1_8051_6860_126381>
+...
+040 (571592709.000.000) 2026-11-05 22:07:36 Finished transferring input files
+...
+001 (571592709.000.000) 2026-11-05 22:07:36 Job executing on host: <10.14.10.24:9618?addrs=10.14.10.24-9618&alias=node2274.cluster.ldas.cit&noUDP&sock=startd_6378_5b21>
+	SlotName: slot1_1@node2274.cluster.ldas.cit
+	CondorScratchDir = "/var/lib/condor/execute/dir_2993624/scratch"
+	Cpus = 32
+	Disk = 16777216
+	GPUs = 0
+	Memory = 49152
+...
+006 (571592709.000.000) 2026-11-05 22:07:56 Image size of job updated: 337136
+	330  -  MemoryUsage of job (MB)
+	337136  -  ResidentSetSize of job (KB)
+...
+006 (571592709.000.000) 2026-11-05 22:12:57 Image size of job updated: 27482844
+	994  -  MemoryUsage of job (MB)
+	1017112  -  ResidentSetSize of job (KB)
+...
+006 (571592709.000.000) 2026-11-05 22:17:57 Image size of job updated: 27482844
+	4663  -  MemoryUsage of job (MB)
+	4773904  -  ResidentSetSize of job (KB)
+...
+006 (571592709.000.000) 2026-11-05 22:22:57 Image size of job updated: 27482844
+	4679  -  MemoryUsage of job (MB)
+	4790288  -  ResidentSetSize of job (KB)
+...
+006 (571592709.000.000) 2026-11-05 22:25:46 Image size of job updated: 30579300
+	4679  -  MemoryUsage of job (MB)
+	4790288  -  ResidentSetSize of job (KB)
+...
+040 (571592709.000.000) 2026-11-05 22:25:46 Started transferring output files
+...
+040 (571592709.000.000) 2026-11-05 22:25:46 Finished transferring output files
+...
+005 (571592709.000.000) 2026-11-05 22:25:46 Job terminated.
+	(1) Normal termination (return value 0)
+		Usr 0 04:43:48, Sys 0 00:02:58  -  Run Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Run Local Usage
+		Usr 0 04:43:48, Sys 0 00:02:58  -  Total Remote Usage
+		Usr 0 00:00:00, Sys 0 00:00:00  -  Total Local Usage
+	34865113  -  Run Bytes Sent By Job
+	913960601  -  Run Bytes Received By Job
+	34865113  -  Total Bytes Sent By Job
+	913960601  -  Total Bytes Received By Job
+	Partitionable Resources :      Usage  Request Allocated 
+	   Cpus                 :       5.77       32        32 
+	   Disk (KB)            : 1143816    16777216  16777216 
+	   GPUs                 :                             0 
+	   Memory (MB)          :    4679       49152     49152 
+	   TimeExecute (s)      :    1090                       
+	   TimeSlotBusy (s)     :    1097                       
+...

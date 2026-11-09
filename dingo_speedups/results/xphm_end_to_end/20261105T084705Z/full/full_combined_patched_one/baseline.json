@@ -1,0 +1,204 @@
+{
+  "inputs": {
+    "tarball": "/srv/scratch/dingo_47e047ec2f.tar.gz",
+    "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+    "model": "/srv/scratch/model_nonlensed.pt",
+    "proposal": "None",
+    "event_data": "/srv/scratch/label_data0_1384782888-63_generation_event_data.hdf5",
+    "num_samples": "50000",
+    "batch_size": "5000",
+    "num_processes": "32",
+    "seed": "1",
+    "lal_site": "/srv/scratch/work/lal/lal_cc1a56ceb0/python",
+    "route": "one"
+  },
+  "environment": {
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "32",
+    "OPENBLAS_NUM_THREADS": null
+  },
+  "stages": {
+    "unpack": {
+      "seconds": 0.164,
+      "main_peak_bytes": 19849216,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 0,
+      "job_peak_bytes_so_far": null
+    },
+    "imports": {
+      "seconds": 6.891,
+      "main_peak_bytes": 536580096,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 532647936,
+      "job_peak_bytes_so_far": null
+    },
+    "event_data": {
+      "seconds": 0.005,
+      "main_peak_bytes": 538406912,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 532647936,
+      "job_peak_bytes_so_far": null
+    },
+    "model_load": {
+      "seconds": 10.791,
+      "main_peak_bytes": 6595584000,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 532647936,
+      "job_peak_bytes_so_far": null
+    },
+    "network_sampling": {
+      "seconds": 68.009,
+      "main_peak_bytes": 2619842560,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 532647936,
+      "job_peak_bytes_so_far": null
+    },
+    "save_network_samples": {
+      "seconds": 0.031,
+      "main_peak_bytes": 2620321792,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 532647936,
+      "job_peak_bytes_so_far": null
+    },
+    "importance_sampling_setup": {
+      "seconds": 0.065,
+      "main_peak_bytes": 1256181760,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 532647936,
+      "job_peak_bytes_so_far": null
+    },
+    "synthetic_phase": {
+      "seconds": 104.994,
+      "main_peak_bytes": 5331234816,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 1190088704,
+      "job_peak_bytes_so_far": null
+    },
+    "importance_sample": {
+      "seconds": 0.377,
+      "main_peak_bytes": 1401262080,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 1190088704,
+      "job_peak_bytes_so_far": null
+    },
+    "save_result": {
+      "seconds": 0.038,
+      "main_peak_bytes": 1400229888,
+      "main_peak_is_for_this_step": true,
+      "children_peak_bytes_so_far": 1190088704,
+      "job_peak_bytes_so_far": null
+    }
+  },
+  "provenance": {
+    "dingo": {
+      "commit": "47e047ec2fd85f5973a4b8965d1a03ed6be63723",
+      "describe": "v0.10.3-9-g47e047ec",
+      "version": "0.10.4.dev9+g47e047ec",
+      "tree": "/srv/scratch/work/full_combined_patched_one/dingo_47e047ec2f",
+      "imported_from": "/srv/scratch/work/full_combined_patched_one/dingo_47e047ec2f/dingo"
+    },
+    "python": {
+      "version": "3.13.13",
+      "executable": "/opt/dingo_env/bin/python",
+      "isolated": true
+    },
+    "packages": {
+      "lalsuite": "7.26.15",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3",
+      "torch": "2.13.0+cpu",
+      "bilby": "2.6.0",
+      "bilby-pipe": "1.8.0",
+      "pandas": "3.0.5",
+      "h5py": "3.16.0",
+      "pycbc": "2.11.0",
+      "pytest": "9.1.1"
+    },
+    "host": {
+      "name": "node808",
+      "platform": "Linux-6.12.0-211.61.1.el10_2.x86_64-x86_64-with-glibc2.39",
+      "cpu": {
+        "model": "Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz",
+        "flags": {
+          "avx2": true,
+          "avx512f": false,
+          "fma": true
+        }
+      },
+      "cpu_count": 48,
+      "usable_cpus": 48
+    },
+    "threads": {
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "32",
+      "OPENBLAS_NUM_THREADS": null
+    }
+  },
+  "torch_threads": 24,
+  "lal": {
+    "version": "6.2.1",
+    "file": "/srv/scratch/work/lal/lal_cc1a56ceb0/python/lalsimulation/__init__.py",
+    "has_multi_phase": true,
+    "start_method": "fork",
+    "libraries": [
+      "/opt/dingo_env/lib/python3.13/site-packages/h5py.libs/libhdf5-9e18f0c6.so.320.0.0",
+      "/opt/dingo_env/lib/python3.13/site-packages/h5py.libs/libhdf5_hl-69da89c9.so.320.0.0",
+      "/opt/dingo_env/lib/python3.13/site-packages/scikit_learn.libs/libgomp-e985bcbb.so.1.0.0",
+      "/opt/dingo_env/lib/python3.13/site-packages/torch/lib/libgomp.so.1",
+      "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/libfftw3.so",
+      "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/libfftw3f.so",
+      "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/libgsl.so",
+      "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/liblal.so",
+      "/srv/scratch/work/lal/lal_cc1a56ceb0/lib/liblalsupport.so"
+    ]
+  },
+  "synthetic_phase_parts": {
+    "per_sample_terms_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 88.389,
+      "main_peak_bytes": 1343377408
+    },
+    "grid_evaluation_in_main": {
+      "found": true,
+      "calls": 1,
+      "seconds": 0.09,
+      "main_peak_bytes": 5331234816
+    },
+    "floor_in_main": {
+      "found": true,
+      "calls": 0,
+      "seconds": 0.0,
+      "main_peak_bytes": null
+    },
+    "draws": {
+      "found": true,
+      "calls": 1,
+      "seconds": 7.593,
+      "main_peak_bytes": 5331234816
+    },
+    "grid_and_floor_in_workers": {
+      "found": true,
+      "calls": 1,
+      "seconds": 8.419,
+      "main_peak_bytes": 5331234816
+    }
+  },
+  "evidence": {
+    "num_samples": 50000,
+    "log_evidence": -5829.624843410485,
+    "log_evidence_std": 0.008407223576853634,
+    "n_eff": 11027.618770644474,
+    "sample_efficiency": 0.2205523754128895
+  },
+  "route": {
+    "requested": "one",
+    "calls": {
+      "SimInspiralFD": 0,
+      "SimInspiralFDMultiPhase": 49911
+    }
+  },
+  "total_seconds": 192.006,
+  "job_peak_bytes": null,
+  "children_peak_bytes": 1190088704
+}

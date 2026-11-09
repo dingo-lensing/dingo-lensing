@@ -1,0 +1,23 @@
+universe = vanilla
+executable = /opt/dingo_env/bin/python
+arguments = "-I xphm_job.py manifest.json"
+transfer_executable = False
+MY.SingularityImage = "./dingo-deps_recipe-8f44d79_cpu.sif"
+requirements = (HAS_SINGULARITY=?=True)
+MY.flock_local = True
+MY.DESIRED_Sites = "nogrid"
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+transfer_input_files = osdf:///igwn/cit/staging/kailibryan.doney/containers/dingo-deps_recipe-8f44d79_cpu.sif, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/scripts/xphm_job.py, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/scripts/baseline_run.py, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/scripts/guard.py, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/scripts/compare_results.py, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/scripts/stress_multiphase.py, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/scripts/check_multiphase.py, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/scripts/check_dingo_multiphase.py, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/scripts/run_suite.py, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/stress/manifest.json, /home/kailibryan.doney/dingo-speedups-runs/xphm/20261105T084705Z/lal_cc1a56ceb0.tar.gz
+transfer_output_files = out
+use_oauth_services = scitokens
+environment = "OMP_NUM_THREADS=1"
+request_cpus = 16
+request_memory = 48GB
+request_disk = 10GB
+priority = 200
+accounting_group = ligo.dev.o4.cbc.explore.test
+log = job.log
+output = job.out
+error = job.err
+queue
